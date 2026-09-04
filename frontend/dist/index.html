@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QX AUTO TRADE | Complete Automated Trading Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="/assets/index-B0HjfDHQ.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Dnn0tatC.css">
+    <link rel="stylesheet" href="/assets/admin-fit.css">
+    <script>
+      // Redirect logged-in users to new dashboard
+      (function() {
+        var path = window.location.pathname;
+        if (path.startsWith('/dashboard') || path.startsWith('/admin')) return;
+        if (localStorage.getItem('qx_user')) {
+          window.location.replace('/dashboard');
+          return;
+        }
+        var orig = localStorage.setItem;
+        localStorage.setItem = function(key, val) {
+          orig.apply(this, arguments);
+          if (key === 'qx_user' && val && !window.location.pathname.startsWith('/admin')) {
+            setTimeout(function() { window.location.replace('/dashboard'); }, 50);
+          }
+          if (key === 'qx_admin' && val) {
+            setTimeout(function() { window.location.replace('/admin/dashboard'); }, 50);
+          }
+        };
+      })();
+    </script>
+    <script>
+      // Smooth scroll for anchor links
+      (function() {
+        document.addEventListener('click', function(e) {
+          var link = e.target.closest('a[href^="#"]');
+          if (link) {
+            e.preventDefault();
+            var id = link.getAttribute('href').slice(1);
+            if (id) {
+              var el = document.getElementById(id);
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }
+          }
+        });
+        // Handle initial hash
+        if (window.location.hash) {
+          setTimeout(function() {
+            var el = document.getElementById(window.location.hash.slice(1));
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 500);
+        }
+      })();
+    </script>
+  </head>
+  <body class="bg-dark-900 text-slate-100 font-sans antialiased selection:bg-brand-cyan/30 selection:text-brand-cyan min-h-screen">
+    <div id="root"></div>
+  </body>
+</html>

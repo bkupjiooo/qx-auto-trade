@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Environment secrets
+.env
+.env.*
+*.env
+
+# Backend archives
+*.zip
+
+# Frontend source node_modules
+frontend-src/node_modules/
+
+# Frontend build output (we deploy prebuilt frontend/dist, keep it)
+# (frontend/dist is intentionally committed)
+
+# Frontend backup dist
+frontend/dist_backup/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

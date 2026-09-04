@@ -1,0 +1,73 @@
+/* Admin Panel - Fit to Screen Overrides */
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+#root > div {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Admin sidebar - full height */
+aside {
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Admin main content */
+main {
+  overflow-y: auto;
+  height: calc(100vh - 64px);
+}
+
+/* Compact tables */
+table {
+  font-size: 0.8125rem;
+}
+
+table th {
+  font-size: 0.6875rem !important;
+  padding: 0.375rem 0.5rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+table td {
+  padding: 0.375rem 0.5rem !important;
+  vertical-align: middle;
+}
+
+/* Reduce section gaps */
+.space-y-4 > * + * { margin-top: 0.75rem !important; }
+.space-y-5 > * + * { margin-top: 0.75rem !important; }
+.space-y-6 > * + * { margin-top: 0.75rem !important; }
+
+/* Smaller headings */
+h1 { font-size: 1.125rem !important; margin-bottom: 0.25rem !important; }
+h2 { font-size: 0.9375rem !important; }
+h3 { font-size: 0.875rem !important; }
+
+/* Grid gaps - tighter */
+.gap-4 { gap: 0.5rem !important; }
+.gap-5 { gap: 0.5rem !important; }
+.gap-6 { gap: 0.5rem !important; }
+
+/* Modal - fit screen */
+[class*="Modal"] > div, [class*="modal"] > div {
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+}
+
+/* Do NOT hide icons - ensure SVG icons are visible */
+svg, [class*="icon"] {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Do NOT override button content - only adjust size */
+button svg {
+  width: 1em !important;
+  height: 1em !important;
+}
