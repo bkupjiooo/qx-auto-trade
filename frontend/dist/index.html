@@ -11,6 +11,35 @@
     <script type="module" crossorigin src="/assets/index-B0HjfDHQ.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-Dnn0tatC.css">
     <script>
+      // APK Download helper
+      window.downloadApk = function() {
+        var a = document.createElement('a');
+        a.href = '/downloads/Autotrade.apk';
+        a.setAttribute('download', 'Autotrade.apk');
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+          if (document.body.contains(a)) document.body.removeChild(a);
+        }, 150);
+      };
+
+      // Global click handler to guarantee APK download on all CTA triggers
+      document.addEventListener('click', function(e) {
+        var el = e.target.closest('button, a');
+        if (!el) return;
+        var txt = (el.innerText || el.textContent || '').trim().toLowerCase();
+        if (
+          txt.includes('start free trial') ||
+          txt.includes('start auto trade') ||
+          txt.includes('start now') ||
+          txt.includes('start trial') ||
+          txt.includes('download app now')
+        ) {
+          window.downloadApk();
+        }
+      }, true);
+    </script>
+    <script>
       // Redirect logged-in users to new dashboard
       (function() {
         var path = window.location.pathname;

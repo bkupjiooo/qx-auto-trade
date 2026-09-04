@@ -51604,6 +51604,13 @@
   ],
   "auditLogs": [
     {
+      "id": "audit-1788523358162",
+      "action": "MASTER_ADMIN_LOGIN",
+      "actorEmail": "admin@qxautotrade.com",
+      "details": "Master Admin authenticated into /admin portal.",
+      "timestamp": "2026-09-04T12:02:38.162Z"
+    },
+    {
       "id": "audit-1787497128988",
       "action": "BROKER_DISCONNECTED",
       "actorEmail": "user-1787424851409",
@@ -78012,63 +78019,7 @@
       "timestamp": "2026-07-29T18:04:24.671Z"
     }
   ],
-  "announcements": [
-    {
-      "id": "ann-1787489695906",
-      "title": "TEST ANNOUNCEMENT",
-      "content": "Admin changed this!",
-      "type": "INFO",
-      "target": {
-        "homePage": true,
-        "userPage": true
-      },
-      "isActive": true,
-      "createdAt": "2026-08-23T12:54:55.906Z"
-    },
-    {
-      "id": "ann-1786372400947",
-      "title": "EMERGENCY SYSTEM ALERT",
-      "content": "hiii",
-      "type": "WARNING",
-      "target": {
-        "homePage": true,
-        "userPage": true
-      },
-      "isActive": true,
-      "createdAt": "2026-08-10T14:33:20.947Z"
-    },
-    {
-      "id": "ann-1786372326936",
-      "title": "EMERGENCY SYSTEM ALERT",
-      "content": "hiiii",
-      "type": "WARNING",
-      "target": {
-        "homePage": true,
-        "userPage": true
-      },
-      "isActive": true,
-      "createdAt": "2026-08-10T14:32:06.936Z"
-    },
-    {
-      "id": "ann-1786369048230",
-      "title": "EMERGENCY SYSTEM ALERT",
-      "content": "This is an emergency notification regarding system maintenance.",
-      "type": "WARNING",
-      "target": {
-        "homePage": true,
-        "userPage": true
-      },
-      "isActive": true,
-      "createdAt": "2026-08-10T13:37:28.230Z"
-    },
-    {
-      "id": "ann-1",
-      "title": "Platform Upgrade v2.4 Live",
-      "content": "Added automatic MTG safety auto-stop level 5 enforcement and faster execution for Pocket Option & Quotex.",
-      "type": "INFO",
-      "createdAt": "2026-07-28T19:04:24.671Z"
-    }
-  ],
+  "announcements": [],
   "systemConfig": {
     "maintenanceMode": false,
     "globalEmergencyStop": false,
