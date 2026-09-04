@@ -51604,6 +51604,20 @@
   ],
   "auditLogs": [
     {
+      "id": "audit-1788537943331",
+      "action": "ADMIN_UPDATE_SITE_CONFIG",
+      "actorEmail": "admin@qxautotrade.com",
+      "details": "Updated site configuration, links, and referral settings",
+      "timestamp": "2026-09-04T16:05:43.331Z"
+    },
+    {
+      "id": "audit-1788537886329",
+      "action": "MASTER_ADMIN_LOGIN",
+      "actorEmail": "admin@qxautotrade.com",
+      "details": "Master Admin authenticated into /admin portal.",
+      "timestamp": "2026-09-04T16:04:46.329Z"
+    },
+    {
       "id": "audit-1788523358162",
       "action": "MASTER_ADMIN_LOGIN",
       "actorEmail": "admin@qxautotrade.com",
@@ -78054,11 +78068,11 @@
     "youtubeLink": "https://youtube.com/c/quotexautotrade",
     "referralLink": "https://quotex.com/ref/official",
     "referralDepositAmount": 250,
-    "footerText": "TEST FOOTER 2026",
+    "footerText": "TESTaFOOTER 2026",
     "paymentUsdt": "NEW_USDT_ADDRESS_123",
     "paymentUpi": "quotexautotrade@upi",
     "paymentBank": "Bank: QUOTEX Trade Ltd | A/C: 9988776655 | IFSC: QXIN0001234",
-    "updatedAt": "2026-08-23T12:54:55.830Z",
+    "updatedAt": "2026-09-04T16:05:43.296Z",
     "telegramSupport": "",
     "supportEmail": "",
     "liveChatUrl": "",
