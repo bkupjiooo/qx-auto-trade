@@ -102,6 +102,21 @@
       "referralUid": null,
       "depositVerified": false,
       "createdAt": "2026-08-23T11:41:26.368Z"
+    },
+    {
+      "id": "user-1788612470060",
+      "name": "Om",
+      "email": "omchoubey123@gmail.com",
+      "passwordHash": "$2a$10$gkVlNdnRpr3RrDJr0mgYMuiqTZ9Z.pezYhiwWOzVkVSFbWxxsL28e",
+      "role": "USER",
+      "isActive": true,
+      "trialStartedAt": "2026-09-05T12:47:50.060Z",
+      "subscriptionPlan": "Free Trial",
+      "subExpiresAt": "2026-09-05T13:47:50.060Z",
+      "isLifetimeApproved": false,
+      "referralUid": null,
+      "depositVerified": false,
+      "createdAt": "2026-09-05T12:47:50.060Z"
     }
   ],
   "brokerConnections": [
@@ -320,6 +335,19 @@
       "minBalanceProtection": 50
     },
     "user-1787485286368": {
+      "mode": "MTG",
+      "amountType": "FIXED",
+      "fixedAmount": 10,
+      "percentageAmount": 2,
+      "mtgMultiplier": 2.1,
+      "maxMtgLevel": 5,
+      "dailyProfitTarget": 100,
+      "dailyStopLoss": 150,
+      "maxTradesPerSession": 15,
+      "maxConsecutiveLosses": 3,
+      "minBalanceProtection": 50
+    },
+    "user-1788612470060": {
       "mode": "MTG",
       "amountType": "FIXED",
       "fixedAmount": 10,
@@ -51603,6 +51631,20 @@
     }
   ],
   "auditLogs": [
+    {
+      "id": "audit-1788612478331",
+      "action": "USER_LOGIN",
+      "actorEmail": "omchoubey123@gmail.com",
+      "details": "Logged in successfully",
+      "timestamp": "2026-09-05T12:47:58.331Z"
+    },
+    {
+      "id": "audit-1788612470060",
+      "action": "EMAIL_OTP_VERIFIED_REGISTER",
+      "actorEmail": "omchoubey123@gmail.com",
+      "details": "Email OTP verified successfully. 1-Hour Free Trial account activated.",
+      "timestamp": "2026-09-05T12:47:50.060Z"
+    },
     {
       "id": "audit-1788588747220",
       "action": "USER_LOGIN",
