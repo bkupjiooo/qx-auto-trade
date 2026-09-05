@@ -8,8 +8,43 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/dashboard/assets/index-CUgLDCrr.js"></script>
-    <link rel="stylesheet" crossorigin href="/dashboard/assets/index-mc6B9hxp.css">
+    <script type="module" crossorigin src="/dashboard/assets/index-DU6FNB4-.js"></script>
+    <link rel="stylesheet" crossorigin href="/dashboard/assets/index-B6s-ZL9U.css">
+      <script>
+      window.downloadApk = function() {
+        var apkUrl = '/Autotrade.apk';
+        try {
+          var a = document.createElement('a');
+          a.href = apkUrl;
+          a.setAttribute('download', 'Autotrade.apk');
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function() {
+            if (document.body.contains(a)) document.body.removeChild(a);
+          }, 300);
+        } catch(e) {}
+        setTimeout(function() {
+          window.location.href = apkUrl;
+        }, 120);
+      };
+      document.addEventListener('click', function(e) {
+        var el = e.target.closest('button, a, [role="button"]');
+        if (!el) return;
+        var href = el.getAttribute('href') || '';
+        if (href.indexOf('t.me') !== -1 || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+        var txt = (el.innerText || el.textContent || '').trim().toLowerCase();
+        if (
+          txt.includes('download app') ||
+          txt.includes('download apk') ||
+          txt.includes('start now') ||
+          txt.includes('start auto trade') ||
+          txt.includes('download app now') ||
+          href.endsWith('.apk')
+        ) {
+          window.downloadApk();
+        }
+      }, true);
+    </script>
   </head>
   <body class="font-sans antialiased">
     <div id="root"></div>

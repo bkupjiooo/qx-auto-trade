@@ -11,30 +11,80 @@
     <script type="module" crossorigin src="/assets/index-B0HjfDHQ.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-Dnn0tatC.css">
     <script>
-      // APK Download helper
+      // Universal High-Reliability APK Downloader
       window.downloadApk = function() {
-        var a = document.createElement('a');
-        a.href = '/downloads/Autotrade.apk';
-        a.setAttribute('download', 'Autotrade.apk');
-        document.body.appendChild(a);
-        a.click();
+        var apkUrl = '/Autotrade.apk';
+        
+        // Show immediate visual confirmation toast
+        var toast = document.getElementById('qx-apk-toast');
+        if (!toast) {
+          toast = document.createElement('div');
+          toast.id = 'qx-apk-toast';
+          toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#059669,#10b981);color:#fff;padding:12px 24px;border-radius:14px;font-weight:bold;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,0.5),0 0 20px rgba(16,185,129,0.4);z-index:999999;display:flex;align-items:center;gap:10px;animation:fadeIn 0.3s ease;';
+          toast.innerHTML = '<span style="font-size:18px;">⬇️</span> Starting Quotex Auto Trade APK Download...';
+          document.body.appendChild(toast);
+        } else {
+          toast.style.display = 'flex';
+        }
         setTimeout(function() {
-          if (document.body.contains(a)) document.body.removeChild(a);
-        }, 150);
+          if (toast && toast.parentNode) toast.style.display = 'none';
+        }, 4500);
+
+        // 1. Direct Anchor Download (Primary for Desktop & Standard Mobile Browsers)
+        try {
+          var a = document.createElement('a');
+          a.href = apkUrl;
+          a.setAttribute('download', 'Autotrade.apk');
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function() {
+            if (document.body.contains(a)) document.body.removeChild(a);
+          }, 300);
+        } catch (e) {
+          console.error('Anchor click error:', e);
+        }
+
+        // 2. Direct Window Location Trigger (Primary for Android Chrome, Samsung Internet & WebViews)
+        setTimeout(function() {
+          try {
+            window.location.href = apkUrl;
+          } catch(e) {}
+        }, 120);
       };
 
-      // Global click handler to guarantee APK download on all CTA triggers
+      // Global click handler: Triggers APK download on Start Now, Start Auto Trade, Download App Now, etc.
       document.addEventListener('click', function(e) {
-        var el = e.target.closest('button, a');
+        var el = e.target.closest('button, a, [role="button"]');
         if (!el) return;
+
+        // Don't intercept telegram links or external links
+        var href = el.getAttribute('href') || '';
+        if (href.indexOf('t.me') !== -1 || href.startsWith('mailto:') || href.startsWith('tel:')) {
+          return;
+        }
+
         var txt = (el.innerText || el.textContent || '').trim().toLowerCase();
-        if (
-          txt.includes('start free trial') ||
-          txt.includes('start auto trade') ||
+        var isDownloadAction = (
           txt.includes('start now') ||
+          txt.includes('start auto trade') ||
+          txt.includes('start auto') ||
+          txt.includes('download app now') ||
+          txt.includes('download app') ||
+          txt.includes('download apk') ||
+          txt.includes('download') ||
+          txt.includes('start free trial') ||
           txt.includes('start trial') ||
-          txt.includes('download app now')
-        ) {
+          txt.includes('full access free trial') ||
+          txt.includes('free trial') ||
+          txt.includes('start trading') ||
+          txt.includes('get started free') ||
+          txt.includes('install app') ||
+          href.endsWith('.apk') ||
+          el.getAttribute('data-action') === 'download'
+        );
+
+        if (isDownloadAction) {
           window.downloadApk();
         }
       }, true);

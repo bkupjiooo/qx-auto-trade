@@ -21,6 +21,7 @@ import {
   Headphones,
   ChevronRight,
   ExternalLink,
+  Download,
 } from 'lucide-react';
 
 const features = [
@@ -208,6 +209,14 @@ export default function Landing() {
                   >
                     Sign Up Free
                   </Link>
+                  <a
+                    href="/Autotrade.apk"
+                    download="Autotrade.apk"
+                    className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-dark-900 font-bold text-sm transition-all shadow-glow flex items-center gap-1.5"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download App
+                  </a>
                 </>
               )}
             </div>
@@ -303,11 +312,19 @@ export default function Landing() {
               </Link>
             ) : (
               <>
+                <a
+                  href="/Autotrade.apk"
+                  download="Autotrade.apk"
+                  className="px-8 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-95 text-white font-extrabold text-lg transition-all shadow-glow flex items-center gap-2"
+                >
+                  <Download className="w-5 h-5" />
+                  Download App Now
+                </a>
                 <Link
                   to="/signup"
                   className="px-8 py-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-dark-900 font-bold text-lg transition-all shadow-glow hover:shadow-[0_0_30px_rgba(0,212,255,0.5)] flex items-center gap-2"
                 >
-                  Get Started Free <ArrowRight className="w-5 h-5" />
+                  Start Auto Trade <ArrowRight className="w-5 h-5" />
                 </Link>
                 <button
                   onClick={() => scrollTo('#pricing')}
