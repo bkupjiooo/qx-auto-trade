@@ -446,7 +446,7 @@ router.get('/site-config', (req, res) => {
 
 router.post('/site-config', (req, res) => {
   try {
-    const newConfig = req.body || {};
+    const newConfig = req.body?.siteConfig || req.body || {};
     const existingConfig = db.get('siteConfig') || {};
 
     const upi = newConfig.paymentUpi || newConfig.upiAddress || existingConfig.paymentUpi || existingConfig.upiAddress || '';
