@@ -35,7 +35,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ONLINE',
     service: 'QX Auto Trade Backend & Execution Engine',
-    version: '2.4.0',
+    version: '2.4.1',
     timestamp: new Date().toISOString()
   });
 });
