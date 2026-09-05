@@ -499,4 +499,42 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
+
+router.get('/test-smtp', async (req, res) => {
+  const nodemailer = require('nodemailer');
+  const results = {};
+  
+  // Test 465 (SSL)
+  try {
+    const t465 = nodemailer.createTransport({
+      host: 'smtp.hostinger.com',
+      port: 465,
+      secure: true,
+      auth: { user: 'noreply@quotexautotrade.com', pass: 'Noreplyqx@2026' },
+      connectionTimeout: 7000
+    });
+    await t465.verify();
+    results.port465 = 'SUCCESS';
+  } catch (e) {
+    results.port465 = 'ERROR: ' + e.message;
+  }
+
+  // Test 587 (TLS)
+  try {
+    const t587 = nodemailer.createTransport({
+      host: 'smtp.hostinger.com',
+      port: 587,
+      secure: false,
+      auth: { user: 'noreply@quotexautotrade.com', pass: 'Noreplyqx@2026' },
+      connectionTimeout: 7000
+    });
+    await t587.verify();
+    results.port587 = 'SUCCESS';
+  } catch (e) {
+    results.port587 = 'ERROR: ' + e.message;
+  }
+
+  return res.json(results);
+});
+
 module.exports = router;
