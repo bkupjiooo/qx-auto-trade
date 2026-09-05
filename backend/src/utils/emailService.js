@@ -11,26 +11,41 @@ const SMTP_PASS = process.env.SMTP_PASS || 'Noreplyqx@2026';
 const SMTP_FROM_NAME = process.env.SMTP_FROM_NAME || 'QX AUTO TRADE';
 const SMTP_FROM_EMAIL = process.env.SMTP_FROM_EMAIL || 'noreply@quotexautotrade.com';
 
-// Initialize Nodemailer SMTP Transporter
-const transporter = nodemailer.createTransport({
+// Initialize Dual Transporters: Port 587 (Primary STARTTLS) and Port 465 (Fallback SSL)
+const transporter587 = nodemailer.createTransport({
   host: SMTP_HOST,
-  port: SMTP_PORT,
-  secure: SMTP_SECURE, // true for port 465, false for 587
+  port: 587,
+  secure: false,
   auth: {
     user: SMTP_USER,
     pass: SMTP_PASS
   },
   tls: {
     rejectUnauthorized: false
-  }
+  },
+  connectionTimeout: 10000
+});
+
+const transporter465 = nodemailer.createTransport({
+  host: SMTP_HOST,
+  port: 465,
+  secure: true,
+  auth: {
+    user: SMTP_USER,
+    pass: SMTP_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
+  },
+  connectionTimeout: 10000
 });
 
 // Verify SMTP connection on startup
-transporter.verify((error, success) => {
+transporter587.verify((error, success) => {
   if (error) {
-    console.warn(`[SMTP WARN] Hostinger SMTP connection check: ${error.message}. (Set valid SMTP_PASS in .env if not yet provided).`);
+    console.warn(`[SMTP 587 WARN]: ${error.message}`);
   } else {
-    console.log(`[SMTP SUCCESS] Hostinger SMTP server (${SMTP_HOST}:${SMTP_PORT}) ready for ${SMTP_USER}`);
+    console.log(`[SMTP SUCCESS] Hostinger SMTP ready on port 587 for ${SMTP_USER}`);
   }
 });
 
@@ -86,18 +101,27 @@ async function sendOtpEmail(toEmail, otpCode, recipientName = 'Trader') {
     </html>
   `;
 
+  const mailOptions = {
+    from: fromHeader,
+    to: toEmail,
+    subject: subject,
+    html: htmlContent
+  };
+
   try {
-    const info = await transporter.sendMail({
-      from: fromHeader,
-      to: toEmail,
-      subject: subject,
-      html: htmlContent
-    });
-    console.log(`[SMTP SENT] OTP Email sent to ${toEmail} | Message ID: ${info.messageId}`);
+    const info = await transporter587.sendMail(mailOptions);
+    console.log(`[SMTP 587 SUCCESS] OTP Email sent to ${toEmail} | ID: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
-  } catch (err) {
-    console.error(`[SMTP ERROR] Failed to send OTP Email to ${toEmail}:`, err.message);
-    return { success: false, error: err.message };
+  } catch (err587) {
+    console.warn(`[SMTP 587 Failed, falling back to 465]: ${err587.message}`);
+    try {
+      const info465 = await transporter465.sendMail(mailOptions);
+      console.log(`[SMTP 465 SUCCESS] OTP Email sent to ${toEmail} | ID: ${info465.messageId}`);
+      return { success: true, messageId: info465.messageId };
+    } catch (err465) {
+      console.error(`[SMTP ALL PORTS FAILED] for ${toEmail}:`, err465.message);
+      return { success: false, error: err465.message };
+    }
   }
 }
 
@@ -187,18 +211,26 @@ async function sendWelcomeEmail(toEmail, recipientName = 'Trader', planName = 'F
     </html>
   `;
 
+  const mailOptions = {
+    from: fromHeader,
+    to: toEmail,
+    subject: subject,
+    html: htmlContent
+  };
+
   try {
-    const info = await transporter.sendMail({
-      from: fromHeader,
-      to: toEmail,
-      subject: subject,
-      html: htmlContent
-    });
-    console.log(`[SMTP SENT] Welcome Email sent to ${toEmail} | Message ID: ${info.messageId}`);
+    const info = await transporter587.sendMail(mailOptions);
+    console.log(`[SMTP 587 SUCCESS] Welcome Email sent to ${toEmail} | ID: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
-  } catch (err) {
-    console.error(`[SMTP ERROR] Failed to send Welcome Email to ${toEmail}:`, err.message);
-    return { success: false, error: err.message };
+  } catch (err587) {
+    try {
+      const info465 = await transporter465.sendMail(mailOptions);
+      console.log(`[SMTP 465 SUCCESS] Welcome Email sent to ${toEmail} | ID: ${info465.messageId}`);
+      return { success: true, messageId: info465.messageId };
+    } catch (err465) {
+      console.error(`[SMTP ALL PORTS FAILED] Welcome email for ${toEmail}:`, err465.message);
+      return { success: false, error: err465.message };
+    }
   }
 }
 
