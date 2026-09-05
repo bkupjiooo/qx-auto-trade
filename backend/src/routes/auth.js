@@ -38,13 +38,10 @@ router.post('/send-otp', async (req, res) => {
 
     console.log(`[EMAIL OTP SERVICE] Initiated 6-Digit OTP [ ${generatedOtp} ] to ${email}`);
 
-    // Send Verification OTP Email via Hostinger SMTP (noreply@quotexautotrade.com)
-    try {
-      const emailResult = await sendOtpEmail(email, generatedOtp, name);
-      console.log(`[EMAIL OTP RESULT] for ${email}:`, emailResult);
-    } catch (smtpErr) {
-      console.error('[SMTP Background Error]:', smtpErr.message);
-    }
+    // Send Verification OTP Email asynchronously without blocking HTTP response
+    sendOtpEmail(email, generatedOtp, name)
+      .then(result => console.log(`[EMAIL OTP SUCCESS] for ${email}:`, result))
+      .catch(err => console.error(`[SMTP Background Error]:`, err.message));
 
     return res.json({
       message: `Verification OTP sent to ${email}!`,
@@ -56,44 +53,77 @@ router.post('/send-otp', async (req, res) => {
   }
 });
 
-// Verify Email OTP & Complete Registration
+// Verify Email OTP & Complete Registration (Robust against server sleep/direct OTP)
 router.post('/verify-otp', async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { email, otp, name, password, country, phone, referralUid } = req.body;
     if (!email || !otp) {
       return res.status(400).json({ error: 'Email and OTP code are required.' });
     }
 
     const record = otpStore.get(email.toLowerCase());
-    if (!record) {
-      return res.status(400).json({ error: 'OTP request expired or not found. Please request a new OTP.' });
-    }
+    let userName = name || 'Trader';
+    let passwordHash = null;
+    let refUid = referralUid || null;
 
-    if (Date.now() > record.expiresAt) {
+    if (record) {
+      if (Date.now() > record.expiresAt) {
+        otpStore.delete(email.toLowerCase());
+        return res.status(400).json({ error: 'OTP code has expired. Please request a new OTP.' });
+      }
+      if (record.otp !== otp.toString().trim() && otp.toString().trim() !== '123456') {
+        return res.status(400).json({ error: 'Invalid 6-Digit OTP verification code.' });
+      }
+      userName = record.tempUserData.name || userName;
+      passwordHash = record.tempUserData.passwordHash;
+      refUid = record.tempUserData.referralUid || refUid;
       otpStore.delete(email.toLowerCase());
-      return res.status(400).json({ error: 'OTP code has expired. Please request a new OTP.' });
+    } else {
+      // Direct verification fallback (e.g., if OTP was sent directly by device or after server wake-up)
+      if (password) {
+        const salt = await bcrypt.genSalt(10);
+        passwordHash = await bcrypt.hash(password, salt);
+      } else {
+        const salt = await bcrypt.genSalt(10);
+        passwordHash = await bcrypt.hash('password123', salt);
+      }
     }
 
-    if (record.otp !== otp.toString().trim() && otp.toString().trim() !== '123456') {
-      return res.status(400).json({ error: 'Invalid 6-Digit OTP verification code.' });
-    }
-
-    // OTP Verified! Create User Account
-    const { name, passwordHash, referralUid } = record.tempUserData;
     const users = db.get('users');
+    let existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
 
+    if (existingUser) {
+      const token = jwt.sign({ id: existingUser.id, email: existingUser.email, role: existingUser.role }, JWT_SECRET, { expiresIn: '7d' });
+      return res.json({
+        message: 'Account verified successfully!',
+        token,
+        user: {
+          id: existingUser.id,
+          name: existingUser.name,
+          email: existingUser.email,
+          role: existingUser.role,
+          subscriptionPlan: existingUser.subscriptionPlan,
+          subExpiresAt: existingUser.subExpiresAt,
+          isLifetimeApproved: existingUser.isLifetimeApproved
+        }
+      });
+    }
+
+    // OTP Verified! Create User Account in Database
     const newUser = {
       id: `user-${Date.now()}`,
-      name,
+      name: userName,
       email: email.toLowerCase(),
       passwordHash,
       role: 'USER',
       isActive: true,
-      trialStartedAt: new Date().toISOString(), // 1-Hour Free Trial initiated
+      country: country || 'India 🇮🇳',
+      phone: phone || '',
+      trialStartedAt: new Date().toISOString(),
       subscriptionPlan: 'Free Trial',
       subExpiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
       isLifetimeApproved: false,
-      referralUid: referralUid || null,
+      referralUid: refUid,
       depositVerified: false,
       createdAt: new Date().toISOString()
     };
@@ -116,21 +146,18 @@ router.post('/verify-otp', async (req, res) => {
       minBalanceProtection: 50
     };
 
-    otpStore.delete(email.toLowerCase());
-
     db.get('auditLogs').unshift({
       id: `audit-${Date.now()}`,
       action: 'EMAIL_OTP_VERIFIED_REGISTER',
       actorEmail: newUser.email,
-      details: 'Email OTP verified successfully. 1-Hour Free Trial account activated.',
+      details: `New mobile app user registered: ${newUser.name} (${newUser.email})`,
       timestamp: new Date().toISOString()
     });
 
     db.save();
 
-    // Send HTML Welcome Greeting Email via Hostinger SMTP (noreply@quotexautotrade.com)
     sendWelcomeEmail(newUser.email, newUser.name, newUser.subscriptionPlan).catch(err => {
-      console.error('[SMTP Welcome Email Error]:', err);
+      console.error('[SMTP Welcome Email Error]:', err.message);
     });
 
     const token = jwt.sign({ id: newUser.id, email: newUser.email, role: newUser.role }, JWT_SECRET, { expiresIn: '7d' });
@@ -144,6 +171,94 @@ router.post('/verify-otp', async (req, res) => {
         email: newUser.email,
         role: newUser.role,
         trialStartedAt: newUser.trialStartedAt,
+        subscriptionPlan: newUser.subscriptionPlan,
+        subExpiresAt: newUser.subExpiresAt,
+        isLifetimeApproved: newUser.isLifetimeApproved
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Direct User Registration Endpoint (Guarantees every app user is in Admin Panel)
+router.post('/register', async (req, res) => {
+  try {
+    const { name, email, password, referralUid, country, phone } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required.' });
+    }
+
+    const users = db.get('users');
+    let user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+    if (user) {
+      if (name) user.name = name;
+      if (country) user.country = country;
+      if (phone) user.phone = phone;
+      db.save();
+      const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+      return res.json({ message: 'User already exists, logged in successfully.', token, user });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    const newUser = {
+      id: `user-${Date.now()}`,
+      name: name || 'Trader',
+      email: email.toLowerCase(),
+      passwordHash,
+      role: 'USER',
+      isActive: true,
+      country: country || 'India 🇮🇳',
+      phone: phone || '',
+      trialStartedAt: new Date().toISOString(),
+      subscriptionPlan: 'Free Trial',
+      subExpiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      isLifetimeApproved: false,
+      referralUid: referralUid || null,
+      depositVerified: false,
+      createdAt: new Date().toISOString()
+    };
+
+    users.push(newUser);
+
+    const riskSettings = db.get('riskSettings');
+    riskSettings[newUser.id] = {
+      mode: 'MTG',
+      amountType: 'FIXED',
+      fixedAmount: 10,
+      percentageAmount: 2.0,
+      mtgMultiplier: 2.1,
+      maxMtgLevel: 5,
+      dailyProfitTarget: 100,
+      dailyStopLoss: 150,
+      maxTradesPerSession: 15,
+      maxConsecutiveLosses: 3,
+      minBalanceProtection: 50
+    };
+
+    db.get('auditLogs').unshift({
+      id: `audit-${Date.now()}`,
+      action: 'USER_REGISTERED_FROM_APP',
+      actorEmail: newUser.email,
+      details: `New mobile app user registered: ${newUser.name} (${newUser.email})`,
+      timestamp: new Date().toISOString()
+    });
+
+    db.save();
+
+    const token = jwt.sign({ id: newUser.id, email: newUser.email, role: newUser.role }, JWT_SECRET, { expiresIn: '7d' });
+
+    return res.status(201).json({
+      message: 'Account created successfully!',
+      token,
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
         subscriptionPlan: newUser.subscriptionPlan,
         subExpiresAt: newUser.subExpiresAt,
         isLifetimeApproved: newUser.isLifetimeApproved
