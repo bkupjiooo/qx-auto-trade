@@ -292,5 +292,113 @@ router.post('/logout-other-sessions', (req, res) => {
   }
 });
 
+
+// Referral & Commission Stats Endpoint
+router.get('/referral-stats/:userId', (req, res) => {
+  try {
+    const { userId } = req.params;
+    const users = db.get('users') || [];
+    const user = users.find(u => u.id === userId || (u.email && u.email.toLowerCase() === userId.toLowerCase()));
+    
+    // User referral code
+    const rawCode = user?.referralUid || (user?.id || userId);
+    const refCode = `QX-${rawCode.replace(/[^0-9A-Za-z]/g, '').slice(-6).toUpperCase()}`;
+    const referralLink = `https://quotexautotrade.com/register?ref=${refCode}`;
+
+    // Find all users who registered using this user's refCode or ID
+    const referredUsers = users.filter(u => 
+      u.referralUid && (
+        u.referralUid.toUpperCase() === refCode.toUpperCase() || 
+        u.referralUid === userId || 
+        (user?.email && u.referralUid.toLowerCase() === user.email.toLowerCase())
+      )
+    );
+
+    const totalReferrals = referredUsers.length;
+    // $25 per referred trader commission
+    let totalEarned = totalReferrals * 25.0;
+    
+    // Withdrawals
+    const allWithdrawals = db.get('commissionWithdrawals') || [];
+    const withdrawals = allWithdrawals.filter(w => 
+      w.userId === userId || (user?.email && w.userEmail && w.userEmail.toLowerCase() === user.email.toLowerCase())
+    );
+    
+    const totalWithdrawn = withdrawals
+      .filter(w => w.status === 'APPROVED' || w.status === 'PENDING')
+      .reduce((sum, w) => sum + (parseFloat(w.amount) || 0), 0);
+
+    const availableBalance = Math.max(0, totalEarned - totalWithdrawn);
+
+    return res.json({
+      referralCode: refCode,
+      referralLink,
+      totalReferrals,
+      totalEarned,
+      availableBalance,
+      commissionRate: '20%',
+      referredUsers: referredUsers.map(u => ({
+        id: u.id,
+        name: u.name,
+        email: u.email ? u.email.slice(0, 3) + '***@' + u.email.split('@')[1] : 'user***',
+        joinedAt: u.createdAt,
+        status: u.isActive ? 'Active' : 'Pending',
+        commissionEarned: 25.0
+      })),
+      withdrawals
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Submit Commission Withdrawal Request
+router.post('/withdraw-commission', (req, res) => {
+  try {
+    const { userId, userEmail, userName, amount, payoutMethod, payoutAddress } = req.body;
+    const numAmount = parseFloat(amount);
+
+    if (!userId || isNaN(numAmount) || numAmount < 10) {
+      return res.status(400).json({ error: 'Minimum withdrawal amount is $10.00' });
+    }
+    if (!payoutMethod || !payoutAddress) {
+      return res.status(400).json({ error: 'Payout method and payout address/details are required.' });
+    }
+
+    const withdrawals = db.get('commissionWithdrawals');
+    const newWithdrawal = {
+      id: `comm-with-${Date.now()}`,
+      userId,
+      userEmail: userEmail || 'user@qxautotrade.com',
+      userName: userName || 'Trader',
+      amount: numAmount,
+      payoutMethod,
+      payoutAddress,
+      status: 'PENDING',
+      createdAt: new Date().toISOString()
+    };
+
+    withdrawals.unshift(newWithdrawal);
+
+    db.get('auditLogs').unshift({
+      id: `audit-${Date.now()}`,
+      action: 'COMMISSION_WITHDRAWAL_REQUEST',
+      actorEmail: userEmail || 'trader',
+      details: `Submitted commission withdrawal of $${numAmount} via ${payoutMethod} (${payoutAddress})`,
+      timestamp: new Date().toISOString()
+    });
+
+    db.save();
+
+    return res.status(201).json({
+      message: `Commission withdrawal request for $${numAmount.toFixed(2)} submitted to Master Admin for payout!`,
+      withdrawal: newWithdrawal
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
+
 

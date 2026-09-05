@@ -891,4 +891,38 @@ router.post('/plans/delete', (req, res) => {
   }
 });
 
+
+// Commission Withdrawals List & Approval
+router.get('/commission-withdrawals', (req, res) => {
+  const withdrawals = db.get('commissionWithdrawals') || [];
+  return res.json({ withdrawals });
+});
+
+router.post('/approve-commission-withdrawal', (req, res) => {
+  try {
+    const { withdrawalId, status, adminNotes } = req.body;
+    const withdrawals = db.get('commissionWithdrawals') || [];
+    const item = withdrawals.find(w => w.id === withdrawalId);
+    if (!item) return res.status(404).json({ error: 'Withdrawal request not found.' });
+
+    item.status = status || 'APPROVED';
+    item.notes = adminNotes || (item.status === 'APPROVED' ? 'Payout sent via ' + item.payoutMethod : 'Rejected by Admin');
+    item.processedAt = new Date().toISOString();
+
+    db.get('auditLogs').unshift({
+      id: `audit-${Date.now()}`,
+      action: 'APPROVE_COMMISSION_WITHDRAWAL',
+      actorEmail: 'Master Admin',
+      details: `Commission withdrawal ${withdrawalId} marked as ${item.status}`,
+      timestamp: new Date().toISOString()
+    });
+
+    db.save();
+    return res.json({ message: `Withdrawal request marked as ${item.status}`, withdrawal: item });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
+
