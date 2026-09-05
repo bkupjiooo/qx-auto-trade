@@ -40,27 +40,6 @@
       }, true);
     </script>
     <script>
-      // Redirect logged-in users to new dashboard
-      (function() {
-        var path = window.location.pathname;
-        if (path.startsWith('/dashboard') || path.startsWith('/admin')) return;
-        if (localStorage.getItem('qx_user')) {
-          window.location.replace('/dashboard');
-          return;
-        }
-        var orig = localStorage.setItem;
-        localStorage.setItem = function(key, val) {
-          orig.apply(this, arguments);
-          if (key === 'qx_user' && val && !window.location.pathname.startsWith('/admin')) {
-            setTimeout(function() { window.location.replace('/dashboard'); }, 50);
-          }
-          if (key === 'qx_admin' && val) {
-            setTimeout(function() { window.location.replace('/admin/dashboard'); }, 50);
-          }
-        };
-      })();
-    </script>
-    <script>
       // Smooth scroll for anchor links
       (function() {
         document.addEventListener('click', function(e) {
