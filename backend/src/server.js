@@ -59,17 +59,24 @@ const adminRoutes2 = ['/admin/login', '/admin/dashboard', '/admin/users', '/admi
 app.use('/dashboard', express.static(dashboardDist));
 
 // Explicit APK Download Route
-app.get(['/downloads/Autotrade.apk', '/Autotrade.apk', '/downloads/qx-auto-trade.apk'], (req, res) => {
+app.get([
+  '/Quotexautotrade.apk',
+  '/downloads/Quotexautotrade.apk',
+  '/downloads/Autotrade.apk',
+  '/Autotrade.apk',
+  '/downloads/qx-auto-trade.apk'
+], (req, res) => {
   const candidates = [
+    path.join(frontendDist, 'Quotexautotrade.apk'),
+    path.join(__dirname, '../../Quotexautotrade.apk'),
     path.join(frontendDist, 'downloads/Autotrade.apk'),
     path.join(frontendDist, 'Autotrade.apk'),
-    path.join(__dirname, '../../frontend/dist/downloads/Autotrade.apk'),
-    path.join(__dirname, '../../frontend/dist/Autotrade.apk'),
-    'C:\\Users\\omchoubey\\Desktop\\qmtrix\\app\\build\\outputs\\apk\\debug\\app-debug.apk'
+    path.join(__dirname, '../../frontend/dist/Quotexautotrade.apk'),
+    'C:\\Users\\omchoubey\\Desktop\\qmtrix\\Quotexautotrade.apk'
   ];
   for (const p of candidates) {
     if (fs.existsSync(p)) {
-      return res.download(p, 'Autotrade.apk');
+      return res.download(p, 'Quotexautotrade.apk');
     }
   }
   res.status(404).send('APK file not found');
