@@ -51604,6 +51604,13 @@
   ],
   "auditLogs": [
     {
+      "id": "audit-1788588747220",
+      "action": "USER_LOGIN",
+      "actorEmail": "admin@qxautotrade.com",
+      "details": "Logged in successfully",
+      "timestamp": "2026-09-05T06:12:27.220Z"
+    },
+    {
       "id": "audit-1788537943331",
       "action": "ADMIN_UPDATE_SITE_CONFIG",
       "actorEmail": "admin@qxautotrade.com",

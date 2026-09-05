@@ -167,6 +167,8 @@ export default function AdminSubscriptions() {
                     <td className="px-4 py-2.5">
                       <p className={`font-medium text-xs ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{sub.userName || '—'}</p>
                       <p className={`text-[11px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{sub.userEmail || ''}</p>
+                      {sub.paymentTxId && <p className="text-[10px] text-blue-400 font-mono mt-0.5 font-semibold">UTR: {sub.paymentTxId}</p>}
+                      {sub.paymentMethod && <span className="inline-block text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded mt-0.5">{sub.paymentMethod}</span>}
                     </td>
                     <td className={`px-4 py-2.5 font-medium text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{sub.planName || '—'}</td>
                     <td className={`px-4 py-2.5 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>${sub.price || '—'}</td>

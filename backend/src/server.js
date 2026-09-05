@@ -58,6 +58,23 @@ const adminRoutes2 = ['/admin/login', '/admin/dashboard', '/admin/users', '/admi
 // Serve dashboard static assets
 app.use('/dashboard', express.static(dashboardDist));
 
+// Explicit APK Download Route
+app.get(['/downloads/Autotrade.apk', '/Autotrade.apk', '/downloads/qx-auto-trade.apk'], (req, res) => {
+  const candidates = [
+    path.join(frontendDist, 'downloads/Autotrade.apk'),
+    path.join(frontendDist, 'Autotrade.apk'),
+    path.join(__dirname, '../../frontend/dist/downloads/Autotrade.apk'),
+    path.join(__dirname, '../../frontend/dist/Autotrade.apk'),
+    'C:\\Users\\omchoubey\\Desktop\\qmtrix\\app\\build\\outputs\\apk\\debug\\app-debug.apk'
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      return res.download(p, 'Autotrade.apk');
+    }
+  }
+  res.status(404).send('APK file not found');
+});
+
 // Dashboard SPA routes
 dashboardRoutes.forEach((route) => {
   app.get(route, (req, res) => {

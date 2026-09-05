@@ -39,7 +39,7 @@ export default function AdminSiteConfig() {
     try {
       await api.updateSiteConfig(config)
       setSaved({ ...config })
-      showToast('Site configuration saved successfully')
+      showToast('Site configuration saved successfully! (Synced with App & Landing)')
     } catch {
       showToast('Failed to save configuration', 'error')
     } finally { setSaving(false) }
@@ -47,21 +47,35 @@ export default function AdminSiteConfig() {
 
   const isDirty = JSON.stringify(config) !== JSON.stringify(saved)
 
-  const fields = [
+  const generalFields = [
     { key: 'siteName', label: 'Site Name', type: 'text' },
     { key: 'siteTagline', label: 'Tagline', type: 'text' },
     { key: 'supportEmail', label: 'Support Email', type: 'email' },
     { key: 'logoUrl', label: 'Logo URL', type: 'url' },
     { key: 'faviconUrl', label: 'Favicon URL', type: 'url' },
-    { key: 'telegramLink', label: 'Telegram Link', type: 'url' },
+    { key: 'referralLink', label: 'Quotex Broker Referral Link', type: 'url' },
+    { key: 'referralDepositAmount', label: 'Min Referral Deposit ($)', type: 'number' },
+  ]
+
+  const socialFields = [
+    { key: 'telegramLink', label: 'Telegram Channel Link', type: 'url' },
+    { key: 'telegramSupport', label: 'Telegram Support Link / Username', type: 'text' },
     { key: 'whatsappLink', label: 'WhatsApp Link', type: 'url' },
     { key: 'twitterLink', label: 'Twitter / X Link', type: 'url' },
     { key: 'instagramLink', label: 'Instagram Link', type: 'url' },
     { key: 'youtubeLink', label: 'YouTube Link', type: 'url' },
+  ]
+
+  const paymentFields = [
+    { key: 'paymentUpi', label: 'UPI ID (For Indian Users & QR)', type: 'text' },
+    { key: 'paymentUsdt', label: 'USDT Address (TRC20 / ERC20)', type: 'text' },
+    { key: 'paymentBank', label: 'Bank Details (Name, A/C, IFSC)', type: 'text' },
     { key: 'btcAddress', label: 'BTC Payment Address', type: 'text' },
-    { key: 'usdtAddress', label: 'USDT Payment Address', type: 'text' },
     { key: 'ethAddress', label: 'ETH Payment Address', type: 'text' },
-    { key: 'footerText', label: 'Footer Text', type: 'text' },
+  ]
+
+  const otherFields = [
+    { key: 'footerText', label: 'Footer Copyright / Text', type: 'text' },
   ]
 
   if (loading) {
@@ -83,32 +97,32 @@ export default function AdminSiteConfig() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className={`text-lg font-bold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>Site Configuration</h1>
-          <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Manage site-wide settings and links</p>
+          <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Manage site-wide settings, payment details (UPI, USDT), links, and branding across App &amp; Web</p>
         </div>
         {isDirty && <span className={`text-xs font-semibold px-2 py-1 rounded ${isDark ? 'text-amber-400 bg-amber-500/10' : 'text-amber-600 bg-amber-50'}`}>Unsaved changes</span>}
       </div>
 
       <form onSubmit={handleSave} className={`rounded-xl border p-5 space-y-4 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-        <Section title="General">
-          {fields.slice(0, 5).map((f) => (
+        <Section title="General &amp; Branding">
+          {generalFields.map((f) => (
             <Field key={f.key} field={f} value={config[f.key] || ''} onChange={(v) => handleChange(f.key, v)} />
           ))}
         </Section>
 
-        <Section title="Social Links">
-          {fields.slice(5, 10).map((f) => (
+        <Section title="Payment Details (Shown in App &amp; Web Subscriptions)">
+          {paymentFields.map((f) => (
             <Field key={f.key} field={f} value={config[f.key] || ''} onChange={(v) => handleChange(f.key, v)} />
           ))}
         </Section>
 
-        <Section title="Payment Addresses">
-          {fields.slice(10, 13).map((f) => (
+        <Section title="Social &amp; Support Links">
+          {socialFields.map((f) => (
             <Field key={f.key} field={f} value={config[f.key] || ''} onChange={(v) => handleChange(f.key, v)} />
           ))}
         </Section>
 
         <Section title="Other">
-          {fields.slice(13).map((f) => (
+          {otherFields.map((f) => (
             <Field key={f.key} field={f} value={config[f.key] || ''} onChange={(v) => handleChange(f.key, v)} />
           ))}
         </Section>

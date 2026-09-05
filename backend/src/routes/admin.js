@@ -449,9 +449,22 @@ router.post('/site-config', (req, res) => {
     const newConfig = req.body || {};
     const existingConfig = db.get('siteConfig') || {};
 
+    const upi = newConfig.paymentUpi || newConfig.upiAddress || existingConfig.paymentUpi || existingConfig.upiAddress || '';
+    const usdt = newConfig.paymentUsdt || newConfig.usdtAddress || existingConfig.paymentUsdt || existingConfig.usdtAddress || '';
+    const logo = newConfig.logoUrl || newConfig.siteLogo || existingConfig.logoUrl || existingConfig.siteLogo || '';
+    const fav = newConfig.faviconUrl || newConfig.favicon || existingConfig.faviconUrl || existingConfig.favicon || '';
+
     const updatedConfig = {
       ...existingConfig,
       ...newConfig,
+      paymentUpi: upi,
+      upiAddress: upi,
+      paymentUsdt: usdt,
+      usdtAddress: usdt,
+      logoUrl: logo,
+      siteLogo: logo,
+      faviconUrl: fav,
+      favicon: fav,
       updatedAt: new Date().toISOString()
     };
 

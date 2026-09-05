@@ -7,7 +7,7 @@ router.get('/', (req, res) => {
   const { broker, includeInactive } = req.query;
   let strategies = db.get('strategies');
   if (broker) {
-    strategies = strategies.filter(s => s.broker.toLowerCase() === broker.toLowerCase());
+    strategies = strategies.filter(s => (s.broker || '').toLowerCase() === broker.toLowerCase());
   }
   if (includeInactive !== 'true') {
     strategies = strategies.filter(s => s.isActive !== false);

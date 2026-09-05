@@ -9,6 +9,9 @@ node_modules/
 # Backend archives
 *.zip
 
+# Android app source folder (large, not part of web deploy)
+/android/
+
 # Frontend source node_modules
 frontend-src/node_modules/
 
