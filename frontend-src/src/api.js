@@ -20,6 +20,8 @@ export const api = {
   verifyOtp: (data) => request('/auth/verify-otp', { method: 'POST', body: JSON.stringify(data) }),
   login: (data) => request('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
   adminLogin: (data) => request('/auth/admin-login', { method: 'POST', body: JSON.stringify(data) }),
+  forgotPassword: (data) => request('/auth/forgot-password', { method: 'POST', body: JSON.stringify(data) }),
+  resetPassword: (data) => request('/auth/reset-password', { method: 'POST', body: JSON.stringify(data) }),
   lifetimeRequest: (data) => request('/auth/lifetime-request', { method: 'POST', body: JSON.stringify(data) }),
 
   getSupportedBrokers: () => request('/broker/supported'),
