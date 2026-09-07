@@ -8,7 +8,7 @@ const defaultData = {
     {
       id: 'admin-1',
       name: 'Master Admin',
-      email: 'admin@qucaptain.com',
+      email: 'admin@qxautotrade.com',
       passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1', // password: admin123
       role: 'MASTER_ADMIN',
       isActive: true,
@@ -23,7 +23,7 @@ const defaultData = {
     {
       id: 'user-demo-1',
       name: 'Trader Alex',
-      email: 'alex@qucaptain.com',
+      email: 'alex@qxautotrade.com',
       passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1', // password: password123
       role: 'USER',
       isActive: true,
@@ -172,66 +172,59 @@ const defaultData = {
   ],
   referralRequests: [],
   planSubscriptions: [],
+  errorLogs: [],
+  auditLogs: [],
+  announcements: [],
   subscriptionPlans: [
     {
       id: 'plan-basic',
       name: 'Basic Plan',
-      price: '$40',
+      price: '$49',
+      numericPrice: 49,
       period: '/month',
-      depositAmount: 40,
-      features: ['Automated 1-Click Bot', 'Quotex OTC & Real Pairs', 'Standard Risk Management', 'Email Support'],
+      features: ['All trading strategies', '1 broker connection', 'Email support', '2 currency pairs', 'Daily reports'],
       icon: 'Zap',
       isActive: true,
-      createdAt: new Date().toISOString()
+      popular: false,
+      cta: 'Get Started'
     },
     {
       id: 'plan-pro',
       name: 'Pro Plan',
-      price: '$100',
-      period: '/month',
-      depositAmount: 100,
-      features: ['All Basic Features', 'Advanced Martingale & Compounding', 'Real-time Signal Alerts', 'Priority Telegram Support'],
+      price: '$129',
+      numericPrice: 129,
+      period: '/3 months',
+      features: ['5 trading bots', 'Advanced strategies', 'Priority support', '10 currency pairs', 'Real-time analytics', 'Custom indicators'],
       icon: 'Star',
       isActive: true,
-      createdAt: new Date().toISOString()
+      popular: true,
+      cta: 'Start Pro'
     },
     {
       id: 'plan-quantum',
       name: 'Quantum Plan',
-      price: '$250',
-      period: '/3 months',
-      depositAmount: 250,
-      features: ['All Pro Features', 'High-Frequency Scalper Mode', 'Zero-Delay Webhook Execution', 'Dedicated VIP Manager'],
-      icon: 'Cpu',
-      isActive: true,
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'plan-titan',
-      name: 'Titan Plan',
-      price: '$500',
+      price: '$239',
+      numericPrice: 239,
       period: '/6 months',
-      depositAmount: 500,
-      features: ['All Quantum Features', 'Multi-Asset Simultaneous Trading', 'Custom Algorithm Settings', '1-on-1 Strategy Setup'],
-      icon: 'Shield',
+      features: ['Everything in Pro', '10 broker connections', 'Custom strategies', 'API access', 'Dedicated support'],
+      icon: 'Zap',
       isActive: true,
-      createdAt: new Date().toISOString()
+      popular: false,
+      cta: 'Choose Quantum'
     },
     {
-      id: 'plan-apex',
-      name: 'Apex VIP Plan',
-      price: '$1000',
-      period: '/lifetime',
-      depositAmount: 1000,
-      features: ['Lifetime Access & Updates', 'Institutional Execution Algorithm', 'Private VIP Mastermind Group', '24/7 Direct Phone & Desk Support'],
+      id: 'plan-premium',
+      name: 'Premium Plan (Lifetime)',
+      price: '$450',
+      numericPrice: 450,
+      period: '/12 months',
+      features: ['Unlimited bots', 'All strategies', 'Dedicated 24/7 support', 'All currency pairs', 'Advanced analytics', 'VIP community access'],
       icon: 'Crown',
       isActive: true,
-      createdAt: new Date().toISOString()
+      popular: false,
+      cta: 'Go Premium'
     }
   ],
-  errorLogs: [],
-  auditLogs: [],
-  announcements: [],
   siteConfig: {
     telegramLink: 'https://t.me/quotexautotrade_official',
     telegramSupport: 'https://t.me/quotexautotrade_official',
@@ -241,6 +234,10 @@ const defaultData = {
     youtubeEmbedCode: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     referralLink: 'https://quotex.com/ref/official',
     referralDepositAmount: 150,
+    priceBasic: 49,
+    pricePro: 129,
+    priceQuantum: 239,
+    pricePremium: 450,
     footerText: 'QUOTEX AUTO TRADE © 2026. All rights reserved.',
     paymentUsdt: 'TQUOTEXautoTradeAddress1234567890USDT',
     paymentUpi: 'quotexautotrade@upi',
@@ -278,9 +275,13 @@ class Database {
         if (!this.data.systemConfig) this.data.systemConfig = defaultData.systemConfig;
         if (!this.data.siteConfig) this.data.siteConfig = defaultData.siteConfig;
         if (!this.data.planSubscriptions) this.data.planSubscriptions = [];
-        if (!this.data.subscriptionPlans || !this.data.subscriptionPlans.length) {
+        if (!this.data.subscriptionPlans || this.data.subscriptionPlans.length === 0) {
           this.data.subscriptionPlans = defaultData.subscriptionPlans;
         }
+        if (this.data.siteConfig.priceBasic === undefined) this.data.siteConfig.priceBasic = 49;
+        if (this.data.siteConfig.pricePro === undefined) this.data.siteConfig.pricePro = 129;
+        if (this.data.siteConfig.priceQuantum === undefined) this.data.siteConfig.priceQuantum = 239;
+        if (this.data.siteConfig.pricePremium === undefined) this.data.siteConfig.pricePremium = 450;
       } else {
         this.save();
       }

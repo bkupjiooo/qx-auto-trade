@@ -1,4 +1,4 @@
-﻿const { WebSocketServer } = require('ws');
+const { WebSocketServer } = require('ws');
 const tradingEngine = require('../engine/TradingEngine');
 
 function setupWebSocketServer(server) {
@@ -10,7 +10,7 @@ function setupWebSocketServer(server) {
 
     ws.send(JSON.stringify({
       type: 'CONNECTED',
-      message: 'Connected to QuCaptain Real-Time WebSocket Server'
+      message: 'Connected to QX Auto Trade Real-Time WebSocket Server'
     }));
 
     ws.on('message', (data) => {

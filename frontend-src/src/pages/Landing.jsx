@@ -51,6 +51,7 @@ const features = [
     title: 'Secure Connection',
     desc: 'Encrypted API connections to your broker. We never hold your funds.',
   },
+  {
     icon: Clock,
     title: '24/7 Trading',
     desc: 'Round-the-clock automated trading across multiple currency pairs and assets.',
@@ -68,7 +69,7 @@ const sampleTrades = [
 const defaultPlans = [
   {
     name: 'Basic',
-    price: '$40',
+    price: '$49',
     period: '/month',
     features: ['1 Trading Bot', 'Basic Strategies', 'Email Support', '2 Currency Pairs', 'Daily Reports'],
     cta: 'Get Started',
@@ -76,18 +77,18 @@ const defaultPlans = [
   },
   {
     name: 'Pro',
-    price: '$100',
-    period: '/month',
+    price: '$129',
+    period: '/3 months',
     features: ['5 Trading Bots', 'Advanced Strategies', 'Priority Support', '10 Currency Pairs', 'Real-time Analytics', 'Custom Indicators'],
     cta: 'Start Pro',
     popular: true,
   },
   {
-    name: 'Quantum',
-    price: '$250',
-    period: '/3 months',
+    name: 'Premium',
+    price: '$450',
+    period: '/12 months',
     features: ['Unlimited Bots', 'All Strategies', 'Dedicated Support', 'All Currency Pairs', 'Advanced Analytics', 'Custom Indicators', 'API Access'],
-    cta: 'Go Quantum',
+    cta: 'Go Premium',
     popular: false,
   },
 ];
@@ -118,6 +119,49 @@ const testimonials = [
 
 const brokers = [
   { name: 'Quotex', color: 'from-green-400 to-emerald-500' },
+  { name: 'PocketOption', color: 'from-blue-400 to-indigo-500' },
+  { name: 'OlympTrade', color: 'from-green-500 to-teal-500' },
+  { name: 'GuruTrade7', color: 'from-purple-400 to-pink-500' },
+];
+
+export default function Landing() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [plans, setPlans] = useState(defaultPlans);
+  const { user, logout } = useAuth();
+  const location = useLocation();
+
+  useEffect(() => {
+    let mounted = true;
+    api.getPublicPlans().then((data) => {
+      if (!mounted) return;
+      const apiPlans = data.plans || [];
+      if (apiPlans.length > 0) {
+        setPlans(apiPlans.map(p => ({
+          ...p,
+          cta: p.cta || (p.popular ? 'Start Pro' : 'Get Started')
+        })));
+      }
+    }).catch(() => {});
+    return () => { mounted = false; };
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (location.hash) {
+      const el = document.querySelector(location.hash);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [location]);
+
+  const navLinks = [
+    { label: 'Features', href: '#features' },
+    { label: 'Live Trades', href: '#live-trades' },
     { label: 'Pricing', href: '#pricing' },
     { label: 'Testimonials', href: '#testimonials' },
   ];
@@ -552,26 +596,26 @@ const brokers = [
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
               <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                Supported Broker
+                Supported Brokers
               </span>
             </h2>
-            <p className="text-gray-400">Directly integrated with Quotex for automated high-speed execution.</p>
+            <p className="text-gray-400">Connect seamlessly with top binary options platforms.</p>
           </div>
 
-          <div className="flex justify-center">
-            <div
-              className="glass-card rounded-2xl p-8 flex flex-col items-center gap-4 hover:shadow-glow transition-all duration-300 max-w-sm w-full"
-            >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {brokers.map((b, i) => (
               <div
-                className="w-16 h-16 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg"
+                key={i}
+                className="glass-card rounded-2xl p-6 flex flex-col items-center gap-4 hover:shadow-glow transition-all duration-300 group hover:-translate-y-1"
               >
-                <TrendingUp className="w-8 h-8 text-white" />
+                <div
+                  className={`w-14 h-14 rounded-xl bg-gradient-to-br ${b.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}
+                >
+                  <TrendingUp className="w-7 h-7 text-white" />
+                </div>
+                <span className="text-sm font-semibold text-white">{b.name}</span>
               </div>
-              <span className="text-xl font-bold text-white">Quotex</span>
-              <span className="text-xs text-emerald-400 font-medium px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                Official Live Terminal Integrated
-              </span>
-            </div>
+            ))}
           </div>
         </div>
       </section>

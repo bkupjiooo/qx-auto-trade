@@ -75,6 +75,13 @@ export default function AdminSiteConfig() {
     { key: 'ethAddress', label: 'ETH Payment Address', type: 'text' },
   ]
 
+  const pricingFields = [
+    { key: 'priceBasic', label: 'Basic Plan Price ($)', type: 'number' },
+    { key: 'pricePro', label: 'Pro Plan Price ($)', type: 'number' },
+    { key: 'priceQuantum', label: 'Quantum Plan Price ($)', type: 'number' },
+    { key: 'pricePremium', label: 'Premium Lifetime Plan Price ($)', type: 'number' },
+  ]
+
   const otherFields = [
     { key: 'footerText', label: 'Footer Copyright / Text', type: 'text' },
   ]
@@ -98,25 +105,35 @@ export default function AdminSiteConfig() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className={`text-lg font-bold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>Site Configuration</h1>
-          <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Manage site-wide settings, payment details (UPI, USDT), links, and branding across App &amp; Web</p>
+          <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Update branding, social links, broker referral info, and pricing (synced with App & Landing)</p>
         </div>
-        {isDirty && <span className={`text-xs font-semibold px-2 py-1 rounded ${isDark ? 'text-amber-400 bg-amber-500/10' : 'text-amber-600 bg-amber-50'}`}>Unsaved changes</span>}
+        <button onClick={handleSave} disabled={saving || !isDirty}
+          className={`inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg transition-colors shadow-sm ${isDark ? 'disabled:bg-gray-600' : 'disabled:bg-gray-300'}`}>
+          {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+          {saving ? 'Saving...' : 'Save Changes'}
+        </button>
       </div>
 
-      <form onSubmit={handleSave} className={`rounded-xl border p-5 space-y-4 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-        <Section title="General &amp; Branding">
+      <form onSubmit={handleSave} className={`rounded-xl border p-4 sm:p-6 space-y-6 ${isDark ? 'bg-gray-800 border-gray-700/50' : 'bg-white border-gray-200 shadow-sm'}`}>
+        <Section title="General Information">
           {generalFields.map((f) => (
             <Field key={f.key} field={f} value={config[f.key] || ''} onChange={(v) => handleChange(f.key, v)} />
           ))}
         </Section>
 
-        <Section title="Payment Details (Shown in App &amp; Web Subscriptions)">
+        <Section title="Subscription Plan Pricing (Live synced with Mobile App & Landing Page)">
+          {pricingFields.map((f) => (
+            <Field key={f.key} field={f} value={config[f.key] !== undefined ? config[f.key] : ''} onChange={(v) => handleChange(f.key, v)} />
+          ))}
+        </Section>
+
+        <Section title="Payment Settings (USDT, UPI, Bank)">
           {paymentFields.map((f) => (
             <Field key={f.key} field={f} value={config[f.key] || ''} onChange={(v) => handleChange(f.key, v)} />
           ))}
         </Section>
 
-        <Section title="Social &amp; Support Links">
+        <Section title="Social & Community Links">
           {socialFields.map((f) => (
             <Field key={f.key} field={f} value={config[f.key] || ''} onChange={(v) => handleChange(f.key, v)} />
           ))}

@@ -18,7 +18,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 
-const defaultPlans = [
+const plans = [
   {
     id: 'free_trial',
     name: 'Free Trial',
@@ -119,7 +119,6 @@ export default function Subscriptions() {
   const [subExpiresAt, setSubExpiresAt] = useState(null)
   const [history, setHistory] = useState([])
   const [loading, setLoading] = useState(true)
-  const [availablePlans, setAvailablePlans] = useState(defaultPlans)
 
   const [siteConfig, setSiteConfig] = useState(null)
   const [selectedPlan, setSelectedPlan] = useState(null)
@@ -134,40 +133,14 @@ export default function Subscriptions() {
   const fetchData = useCallback(async () => {
     if (!userId) return
     try {
-      const [subData, cfgData, plansData] = await Promise.all([
+      const [subData, cfgData] = await Promise.all([
         api.getUserSubscriptions(userId),
         api.getUserSiteConfig().catch(() => null),
-        api.getPlans().catch(() => null),
       ])
       setActivePlan(subData.activePlan || user?.subscriptionPlan || 'Free Trial')
       setSubExpiresAt(subData.subExpiresAt || user?.subExpiresAt || null)
       setHistory(subData.history || [])
       if (cfgData?.siteConfig) setSiteConfig(cfgData.siteConfig)
-      if (plansData?.plans && plansData.plans.length > 0) {
-        const active = plansData.plans.filter((p) => p.isActive !== false)
-        if (active.length > 0) {
-          const gradients = [
-            'from-blue-500 to-blue-600',
-            'from-blue-500 to-indigo-500',
-            'from-purple-500 to-violet-500',
-            'from-amber-500 to-orange-500',
-            'from-emerald-500 to-teal-500',
-          ]
-          setAvailablePlans(
-            active.map((p, idx) => ({
-              id: p.id,
-              name: p.name,
-              price: p.price?.toString().startsWith('$') ? p.price : `$${p.price}`,
-              period: p.period || '/month',
-              features: Array.isArray(p.features)
-                ? p.features
-                : (typeof p.features === 'string' ? p.features.split(',').map((s) => s.trim()) : []),
-              icon: p.name?.toLowerCase().includes('apex') || p.name?.toLowerCase().includes('quantum') ? Crown : Zap,
-              gradient: gradients[idx % gradients.length],
-            }))
-          )
-        }
-      }
     } catch {} finally { setLoading(false) }
   }, [userId, user?.subscriptionPlan, user?.subExpiresAt])
 
@@ -281,7 +254,7 @@ export default function Subscriptions() {
 
       {/* Plan Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {availablePlans.map((plan) => {
+        {plans.map((plan) => {
           const current = isCurrentPlan(plan)
           return (
             <div key={plan.id} className={`rounded-2xl border p-6 flex flex-col transition-all ${
@@ -427,7 +400,7 @@ export default function Subscriptions() {
                 </div>
                 <div className="min-w-0">
                   <h3 className={`text-sm font-bold truncate ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{selectedPlan.name} Plan</h3>
-                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{selectedPlan.price}<span>{selectedPlan.period}</span></p>
+                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{getPlanPrice(selectedPlan, siteConfig)}<span>{selectedPlan.period}</span></p>
                 </div>
               </div>
               <button

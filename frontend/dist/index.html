@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QuCaptain | Complete Automated Trading Platform</title>
+    <title>QX AUTO TRADE | Complete Automated Trading Platform</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -13,39 +13,52 @@
     <script>
       // Universal High-Reliability APK Downloader
       window.downloadApk = function() {
-        var apkUrl = '/QuCaptain.apk';
+        var apkUrl = '/Autotrade.apk';
         
+        // Show immediate visual confirmation toast
         var toast = document.getElementById('qx-apk-toast');
         if (!toast) {
           toast = document.createElement('div');
           toast.id = 'qx-apk-toast';
           toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#059669,#10b981);color:#fff;padding:12px 24px;border-radius:14px;font-weight:bold;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,0.5),0 0 20px rgba(16,185,129,0.4);z-index:999999;display:flex;align-items:center;gap:10px;animation:fadeIn 0.3s ease;';
-          toast.innerHTML = '<span style="font-size:18px;">⬇️</span> Starting QuCaptain APK Download...';
+          toast.innerHTML = '<span style="font-size:18px;">⬇️</span> Starting Quotex Auto Trade APK Download...';
           document.body.appendChild(toast);
         } else {
           toast.style.display = 'flex';
         }
         setTimeout(function() {
           if (toast && toast.parentNode) toast.style.display = 'none';
-        }, 4000);
+        }, 4500);
 
-        var a = document.createElement('a');
-        a.href = apkUrl;
-        a.setAttribute('download', 'QuCaptain.apk');
-        a.setAttribute('data-direct-download', 'true');
-        document.body.appendChild(a);
-        a.click();
+        // 1. Direct Anchor Download (Primary for Desktop & Standard Mobile Browsers)
+        try {
+          var a = document.createElement('a');
+          a.href = apkUrl;
+          a.setAttribute('download', 'Autotrade.apk');
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function() {
+            if (document.body.contains(a)) document.body.removeChild(a);
+          }, 300);
+        } catch (e) {
+          console.error('Anchor click error:', e);
+        }
+
+        // 2. Direct Window Location Trigger (Primary for Android Chrome, Samsung Internet & WebViews)
         setTimeout(function() {
-          if (document.body.contains(a)) document.body.removeChild(a);
-        }, 300);
+          try {
+            window.location.href = apkUrl;
+          } catch(e) {}
+        }, 120);
       };
 
-      // Global click handler: Triggers APK download on download actions
+      // Global click handler: Triggers APK download on Start Now, Start Auto Trade, Download App Now, etc.
       document.addEventListener('click', function(e) {
         var el = e.target.closest('button, a, [role="button"]');
         if (!el) return;
-        if (el.getAttribute('data-direct-download') === 'true') return;
 
+        // Don't intercept telegram links or external links
         var href = el.getAttribute('href') || '';
         if (href.indexOf('t.me') !== -1 || href.startsWith('mailto:') || href.startsWith('tel:')) {
           return;
@@ -72,7 +85,6 @@
         );
 
         if (isDownloadAction) {
-          e.preventDefault();
           window.downloadApk();
         }
       }, true);

@@ -397,9 +397,7 @@ router.post('/login', async (req, res) => {
 router.post('/admin-login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const cleanEmail = (email || '').toLowerCase().trim();
-    const validEmails = ['admin@qucaptain.com', 'admin@qucaption.com', 'admin@qucaptain.com'];
-    if (!validEmails.includes(cleanEmail)) {
+    if (email.toLowerCase() !== 'admin@qxautotrade.com') {
       return res.status(401).json({ error: 'Invalid Master Admin credentials.' });
     }
 
@@ -413,12 +411,12 @@ router.post('/admin-login', async (req, res) => {
       }
     }
 
-    const token = jwt.sign({ id: 'admin-1', email: 'admin@qucaptain.com', role: 'MASTER_ADMIN' }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: 'admin-1', email: 'admin@qxautotrade.com', role: 'MASTER_ADMIN' }, JWT_SECRET, { expiresIn: '7d' });
 
     db.get('auditLogs').unshift({
       id: `audit-${Date.now()}`,
       action: 'MASTER_ADMIN_LOGIN',
-      actorEmail: 'admin@qucaptain.com',
+      actorEmail: 'admin@qxautotrade.com',
       details: 'Master Admin authenticated into /admin portal.',
       timestamp: new Date().toISOString()
     });
@@ -430,7 +428,7 @@ router.post('/admin-login', async (req, res) => {
       admin: {
         id: 'admin-1',
         name: 'Master Admin',
-        email: 'admin@qucaptain.com',
+        email: 'admin@qxautotrade.com',
         role: 'MASTER_ADMIN'
       }
     });
@@ -442,20 +440,40 @@ router.post('/admin-login', async (req, res) => {
 // Submit Referral Lifetime Request
 router.post('/lifetime-request', (req, res) => {
   try {
-    const { userId, referralUid, depositAmount, proofUrl } = req.body;
+    const { userId, userEmail, email, referralUid, depositAmount, proofUrl } = req.body;
     const users = db.get('users');
-    const user = users.find(u => u.id === userId);
+    let user = users.find(u => u.id === userId);
+    if (!user && (email || userEmail)) {
+      const em = (email || userEmail).toLowerCase().trim();
+      user = users.find(u => u.email && u.email.toLowerCase().trim() === em);
+    }
 
-    if (!user) return res.status(404).json({ error: 'User not found.' });
+    if (!user && userId) {
+      user = {
+        id: userId,
+        name: `User ${referralUid || userId}`,
+        email: email || userEmail || `${userId}@user.local`,
+        role: 'USER',
+        subscriptionPlan: 'Free Trial',
+        isLifetimeApproved: false,
+        isActive: true,
+        createdAt: new Date().toISOString()
+      };
+      users.unshift(user);
+      db.save();
+    }
 
     const requests = db.get('referralRequests');
+    const targetEmail = (user && user.email) ? user.email : (email || userEmail || 'user@quotex.io');
+    const targetUserId = (user && user.id) ? user.id : (userId || `user-${Date.now()}`);
+
     const newReq = {
       id: `ref-req-${Date.now()}`,
-      userId,
-      userEmail: user.email,
-      referralUid: referralUid || user.referralUid || 'REF-OFFICIAL',
+      userId: targetUserId,
+      userEmail: targetEmail,
+      referralUid: referralUid || (user && user.referralUid) || 'REF-OFFICIAL',
       depositAmount: parseFloat(depositAmount || 100),
-      proofUrl: proofUrl || 'https://qxautotrade.com/proofs/deposit.jpg',
+      proofUrl: proofUrl || 'Deposit Proof (Broker)',
       status: 'PENDING',
       createdAt: new Date().toISOString()
     };
@@ -464,7 +482,7 @@ router.post('/lifetime-request', (req, res) => {
     db.save();
 
     return res.json({
-      message: 'Lifetime access verification request submitted! Master Admin will review your $100 deposit.',
+      message: 'Lifetime access verification request submitted! Master Admin will review your deposit proof.',
       request: newReq
     });
   } catch (err) {

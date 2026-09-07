@@ -33,12 +33,6 @@ router.post('/notifications', (req, res) => {
   return res.json({ message: 'Notification preferences saved!', notifications: allNotifs[userId] });
 });
 
-// Get Available Subscription Plans (Public & In-App)
-router.get('/plans', (req, res) => {
-  const plans = db.get('subscriptionPlans') || [];
-  return res.json({ plans });
-});
-
 // Get User Security & 2FA Info
 router.get('/security/:userId', (req, res) => {
   const { userId } = req.params;
@@ -65,27 +59,22 @@ router.post('/toggle-2fa', (req, res) => {
   return res.json({ message: `2FA ${enabled ? 'enabled' : 'disabled'}.`, is2FAEnabled: userSecMap[userId].is2FAEnabled });
 });
 
-// Public Site Config Endpoint (Dynamic Plan Pricing Sync)
+// Public Site Config Endpoint
 router.get('/site-config', (req, res) => {
-  const cfg = { ...(db.get('siteConfig') || {}) };
-  const plans = db.get('subscriptionPlans') || [];
-  plans.forEach(p => {
-    const pName = (p.name || '').toLowerCase();
-    const pId = (p.id || '').toLowerCase();
-    const numPrice = parseFloat(p.price?.toString().replace(/[^0-9.]/g, '')) || 0;
-    if (pId.includes('basic') || pName.includes('basic')) {
-      cfg.priceBasic = numPrice || cfg.priceBasic || 40;
-    } else if (pId.includes('pro') || pName.includes('pro')) {
-      cfg.pricePro = numPrice || cfg.pricePro || 100;
-    } else if (pId.includes('quantum') || pName.includes('quantum')) {
-      cfg.priceQuantum = numPrice || cfg.priceQuantum || 250;
-    } else if (pId.includes('titan') || pName.includes('titan') || pId.includes('premium') || pName.includes('premium')) {
-      cfg.pricePremium = numPrice || cfg.pricePremium || 500;
-    } else if (pId.includes('apex') || pName.includes('apex') || pId.includes('lifetime') || pName.includes('lifetime')) {
-      cfg.priceLifetime = numPrice || cfg.priceLifetime || 1000;
-    }
-  });
-  return res.json({ siteConfig: cfg });
+  return res.json({ siteConfig: db.get('siteConfig') });
+});
+
+// Public Subscription Plans Endpoint
+router.get('/plans', (req, res) => {
+  const plans = (db.get('subscriptionPlans') || []).filter(p => p.isActive !== false);
+  const siteConfig = db.get('siteConfig') || {};
+  return res.json({ plans, siteConfig });
+});
+
+router.get('/public-plans', (req, res) => {
+  const plans = (db.get('subscriptionPlans') || []).filter(p => p.isActive !== false);
+  const siteConfig = db.get('siteConfig') || {};
+  return res.json({ plans, siteConfig });
 });
 
 // Active Announcements Endpoint
@@ -159,7 +148,26 @@ router.get('/profile/:userId', (req, res) => {
   try {
     const { userId } = req.params;
     const users = db.get('users') || [];
-    const user = users.find(u => u.id === userId || u.email?.toLowerCase() === userId?.toLowerCase());
+    let user = users.find(u => u.id === userId || u.email?.toLowerCase() === userId?.toLowerCase());
+
+    // Auto-upsert new mobile app user so fresh users immediately register in Master Admin
+    if (!user && userId && userId !== 'null' && userId !== 'undefined') {
+      user = {
+        id: userId,
+        name: `Trader ${userId.replace('user-', '').slice(0, 8)}`,
+        email: userId.includes('@') ? userId.toLowerCase() : `${userId}@trader.quotex`,
+        role: 'USER',
+        subscriptionPlan: 'Free Trial',
+        trialStartedAt: new Date().toISOString(),
+        subExpiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        isLifetimeApproved: false,
+        isActive: true,
+        createdAt: new Date().toISOString()
+      };
+      users.unshift(user);
+      db.save();
+    }
+
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     const planSubs = db.get('planSubscriptions') || [];

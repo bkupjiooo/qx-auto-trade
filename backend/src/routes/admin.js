@@ -243,16 +243,11 @@ router.get('/all-trade-logs', (req, res) => {
   return res.json({ tradeLogs });
 });
 
-// List Users (Sorted newest first, mapped for Admin UI compatibility)
+// List Users (Newest registrations appear first)
 router.get('/users', (req, res) => {
-  const users = db.get('users') || [];
-  const mapped = [...users].reverse().map(u => ({
-    ...u,
-    active: u.isActive !== false,
-    isActive: u.isActive !== false,
-    plan: u.subscriptionPlan || u.plan || 'Free Trial'
-  }));
-  return res.json({ users: mapped });
+  const users = [...(db.get('users') || [])];
+  users.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  return res.json({ users });
 });
 
 // Approve or Reject Referral Lifetime Free Access
@@ -482,13 +477,50 @@ router.post('/site-config', (req, res) => {
       updatedAt: new Date().toISOString()
     };
 
+    if (newConfig.priceBasic !== undefined) updatedConfig.priceBasic = parseFloat(newConfig.priceBasic) || 0;
+    if (newConfig.pricePro !== undefined) updatedConfig.pricePro = parseFloat(newConfig.pricePro) || 0;
+    if (newConfig.priceQuantum !== undefined) updatedConfig.priceQuantum = parseFloat(newConfig.priceQuantum) || 0;
+    if (newConfig.pricePremium !== undefined) updatedConfig.pricePremium = parseFloat(newConfig.pricePremium) || 0;
+
     db.set('siteConfig', updatedConfig);
+
+    // Sync updated prices to subscriptionPlans
+    const plans = db.get('subscriptionPlans') || [];
+    if (updatedConfig.priceBasic !== undefined) {
+      const basic = plans.find(p => p.id === 'plan-basic' || p.name.toLowerCase().includes('basic'));
+      if (basic) {
+        basic.price = `$${updatedConfig.priceBasic}`;
+        basic.numericPrice = updatedConfig.priceBasic;
+      }
+    }
+    if (updatedConfig.pricePro !== undefined) {
+      const pro = plans.find(p => p.id === 'plan-pro' || p.name.toLowerCase().includes('pro'));
+      if (pro) {
+        pro.price = `$${updatedConfig.pricePro}`;
+        pro.numericPrice = updatedConfig.pricePro;
+      }
+    }
+    if (updatedConfig.priceQuantum !== undefined) {
+      const quantum = plans.find(p => p.id === 'plan-quantum' || p.name.toLowerCase().includes('quantum'));
+      if (quantum) {
+        quantum.price = `$${updatedConfig.priceQuantum}`;
+        quantum.numericPrice = updatedConfig.priceQuantum;
+      }
+    }
+    if (updatedConfig.pricePremium !== undefined) {
+      const premium = plans.find(p => p.id === 'plan-premium' || p.name.toLowerCase().includes('premium'));
+      if (premium) {
+        premium.price = `$${updatedConfig.pricePremium}`;
+        premium.numericPrice = updatedConfig.pricePremium;
+      }
+    }
+    db.set('subscriptionPlans', plans);
 
     db.get('auditLogs').unshift({
       id: `audit-${Date.now()}`,
       action: 'ADMIN_UPDATE_SITE_CONFIG',
       actorEmail: 'admin@qxautotrade.com',
-      details: 'Updated site configuration, links, and referral settings',
+      details: 'Updated site configuration, plan pricing, and links',
       timestamp: new Date().toISOString()
     });
 
@@ -830,6 +862,16 @@ router.post('/plans', (req, res) => {
     plans.push(newPlan);
     db.set('subscriptionPlans', plans);
 
+    // Sync to siteConfig
+    const siteCfg = db.get('siteConfig') || {};
+    const pName = (name || '').toLowerCase();
+    const cleanNum = parseFloat(price.toString().replace(/[^0-9.]/g, '')) || 0;
+    if (pName.includes('basic')) siteCfg.priceBasic = cleanNum;
+    if (pName.includes('pro')) siteCfg.pricePro = cleanNum;
+    if (pName.includes('quantum')) siteCfg.priceQuantum = cleanNum;
+    if (pName.includes('premium')) siteCfg.pricePremium = cleanNum;
+    db.set('siteConfig', siteCfg);
+
     db.get('auditLogs').unshift({
       id: `audit-${Date.now()}`,
       action: 'PLAN_CREATED',
@@ -863,21 +905,15 @@ router.post('/plans/update', (req, res) => {
 
     db.set('subscriptionPlans', plans);
 
-    // Also sync to siteConfig for universal landing page consistency
-    if (plan.price) {
-      const numPrice = parseFloat(plan.price.toString().replace(/[^0-9.]/g, ''));
-      if (!isNaN(numPrice) && numPrice > 0) {
-        const siteConfig = db.get('siteConfig') || {};
-        const pName = (plan.name || '').toLowerCase();
-        const pId = (plan.id || '').toLowerCase();
-        if (pId.includes('basic') || pName.includes('basic')) siteConfig.priceBasic = numPrice;
-        else if (pId.includes('pro') || pName.includes('pro')) siteConfig.pricePro = numPrice;
-        else if (pId.includes('quantum') || pName.includes('quantum')) siteConfig.priceQuantum = numPrice;
-        else if (pId.includes('titan') || pName.includes('titan') || pId.includes('premium') || pName.includes('premium')) siteConfig.pricePremium = numPrice;
-        else if (pId.includes('apex') || pName.includes('apex') || pId.includes('lifetime') || pName.includes('lifetime')) siteConfig.priceLifetime = numPrice;
-        db.set('siteConfig', siteConfig);
-      }
-    }
+    // Sync to siteConfig
+    const siteCfg = db.get('siteConfig') || {};
+    const pName = (plan.name || '').toLowerCase();
+    const cleanPrice = parseFloat(plan.price.replace(/[^0-9.]/g, '')) || 0;
+    if (plan.id === 'plan-basic' || pName.includes('basic')) siteCfg.priceBasic = cleanPrice;
+    if (plan.id === 'plan-pro' || pName.includes('pro')) siteCfg.pricePro = cleanPrice;
+    if (plan.id === 'plan-quantum' || pName.includes('quantum')) siteCfg.priceQuantum = cleanPrice;
+    if (plan.id === 'plan-premium' || pName.includes('premium')) siteCfg.pricePremium = cleanPrice;
+    db.set('siteConfig', siteCfg);
 
     db.get('auditLogs').unshift({
       id: `audit-${Date.now()}`,

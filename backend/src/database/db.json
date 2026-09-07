@@ -3,7 +3,7 @@
     {
       "id": "admin-1",
       "name": "Master Admin",
-      "email": "admin@qucaptain.com",
+      "email": "admin@qxautotrade.com",
       "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
       "role": "MASTER_ADMIN",
       "trialStartedAt": "2026-07-29T19:04:24.670Z",
@@ -71,7 +71,7 @@
       "broker": "quotex",
       "accountType": "LIVE",
       "accountId": "QUOTEX-95013",
-      "email": "alex@qucaptain.com",
+      "email": "alex@qxautotrade.com",
       "encryptedToken": "enc_token_secured_rsa2048",
       "balance": 1450.5,
       "isConnected": true,
@@ -93,53 +93,90 @@
   "strategies": [
     {
       "id": "strat-1",
-      "name": "SHIELD",
+      "name": "Quotex OTC Volatility Scalper v3",
       "broker": "quotex",
-      "risk": "Low Risk",
-      "recommendedBalance": 50,
-      "winRate": 85,
+      "winRate": 88.5,
       "timeframe": "1M",
       "indicatorSummary": "RSI(14) Oversold + EMA(9/21) Crossover + Bollinger Squeeze",
-      "description": "Low risk volatility defense strategy for stable returns.",
+      "description": "High-frequency binary option setup designed for OTC pairs on Quotex.",
       "isActive": true,
       "createdBy": "Master Admin"
     },
     {
       "id": "strat-2",
-      "name": "BALANCE",
-      "broker": "quotex",
-      "risk": "Low Risk",
-      "recommendedBalance": 100,
-      "winRate": 88.5,
-      "timeframe": "1M",
+      "name": "Pocket Option Trend Rider Pro",
+      "broker": "pocketoption",
+      "winRate": 91.2,
+      "timeframe": "5M",
       "indicatorSummary": "MACD Zero-lag + SuperTrend (10,3) + Stochastic RSI",
-      "description": "Balanced trend following and capital preservation algorithm.",
+      "description": "Momentum trend following algorithm tuned for Pocket Option live assets.",
       "isActive": true,
       "createdBy": "Master Admin"
     },
     {
       "id": "strat-3",
-      "name": "PRECISION",
-      "broker": "quotex",
-      "risk": "Medium Risk",
-      "recommendedBalance": 200,
-      "winRate": 92,
+      "name": "Olymp Trade Reversal Master",
+      "broker": "olymptrade",
+      "winRate": 86.4,
       "timeframe": "1M",
       "indicatorSummary": "Pivot Point Reversal + Parabolic SAR + Volume Surge",
-      "description": "High accuracy precision execution for optimal win rate.",
+      "description": "Mean reversion strategy targeting instant price bounces.",
       "isActive": true,
       "createdBy": "Master Admin"
     },
     {
       "id": "strat-4",
-      "name": "TITAN",
-      "broker": "quotex",
-      "risk": "High Risk",
-      "recommendedBalance": 500,
-      "winRate": 95,
+      "name": "GuruTrade7 Smart Breakout",
+      "broker": "gurutrade7",
+      "winRate": 84,
+      "timeframe": "2M",
+      "indicatorSummary": "Support/Resistance Breakout + ADX > 25",
+      "description": "Breakout momentum capturer for index and currency pairs.",
+      "isActive": true,
+      "createdBy": "Master Admin"
+    },
+    {
+      "id": "strat-1787329959873",
+      "winRate": 85,
       "timeframe": "1M",
-      "indicatorSummary": "Support/Resistance Breakout + ADX Momentum + Institutional Flow",
-      "description": "Aggressive maximum-yield algorithm for high capital accounts.",
+      "indicatorSummary": "Custom Signal Algorithmic Setup",
+      "description": "Master Admin configured trading algorithm.",
+      "isActive": true,
+      "createdBy": "Master Admin"
+    },
+    {
+      "id": "strat-1787329961280",
+      "winRate": 85,
+      "timeframe": "1M",
+      "indicatorSummary": "Custom Signal Algorithmic Setup",
+      "description": "Master Admin configured trading algorithm.",
+      "isActive": true,
+      "createdBy": "Master Admin"
+    },
+    {
+      "id": "strat-1787329962125",
+      "winRate": 85,
+      "timeframe": "1M",
+      "indicatorSummary": "Custom Signal Algorithmic Setup",
+      "description": "Master Admin configured trading algorithm.",
+      "isActive": true,
+      "createdBy": "Master Admin"
+    },
+    {
+      "id": "strat-1787331019311",
+      "winRate": 85,
+      "timeframe": "1M",
+      "indicatorSummary": "Custom Signal Algorithmic Setup",
+      "description": "Master Admin configured trading algorithm.",
+      "isActive": true,
+      "createdBy": "Master Admin"
+    },
+    {
+      "id": "strat-1787331020573",
+      "winRate": 85,
+      "timeframe": "1M",
+      "indicatorSummary": "Custom Signal Algorithmic Setup",
+      "description": "Master Admin configured trading algorithm.",
       "isActive": true,
       "createdBy": "Master Admin"
     }
@@ -51482,10 +51519,10 @@
     {
       "id": "ref-req-1",
       "userId": "user-demo-1",
-      "userEmail": "alex@qucaptain.com",
+      "userEmail": "alex@qxautotrade.com",
       "referralUid": "REF-ALEX-882",
       "depositAmount": 100,
-      "proofUrl": "https://qucaptain.com/proofs/alex_100usd.png",
+      "proofUrl": "https://qxautotrade.com/proofs/alex_100usd.png",
       "status": "APPROVED",
       "createdAt": "2026-07-28T19:04:24.671Z"
     }
@@ -51496,7 +51533,7 @@
       "action": "ADMIN_DELETE_USER",
       "actorEmail": "Master Admin",
       "targetUserId": "user-1787424851409",
-      "details": "Deleted user demo@qucaptain.com (Demo User)",
+      "details": "Deleted user demo@qxautotrade.com (Demo User)",
       "timestamp": "2026-09-07T03:36:46.490Z"
     },
     {
@@ -51512,7 +51549,7 @@
       "action": "ADMIN_DELETE_USER",
       "actorEmail": "Master Admin",
       "targetUserId": "user-1786373135759",
-      "details": "Deleted user admin@qucaptain.comtestuser2@gmail.com (Test Test)",
+      "details": "Deleted user admin@qxautotrade.comtestuser2@gmail.com (Test Test)",
       "timestamp": "2026-09-07T03:36:39.618Z"
     },
     {
@@ -51520,7 +51557,7 @@
       "action": "ADMIN_DELETE_USER",
       "actorEmail": "Master Admin",
       "targetUserId": "user-1786368902656",
-      "details": "Deleted user admin@qucaptain.comtestuser@gmail.com (Test User)",
+      "details": "Deleted user admin@qxautotrade.comtestuser@gmail.com (Test User)",
       "timestamp": "2026-09-07T03:36:36.875Z"
     },
     {
@@ -51528,7 +51565,7 @@
       "action": "ADMIN_DELETE_USER",
       "actorEmail": "Master Admin",
       "targetUserId": "user-1785352926977",
-      "details": "Deleted user sarah@qucaptain.com (Sarah Trade)",
+      "details": "Deleted user sarah@qxautotrade.com (Sarah Trade)",
       "timestamp": "2026-09-07T03:36:33.810Z"
     },
     {
@@ -51536,7 +51573,7 @@
       "action": "ADMIN_DELETE_USER",
       "actorEmail": "Master Admin",
       "targetUserId": "user-demo-1",
-      "details": "Deleted user alex@qucaptain.com (Trader Alex)",
+      "details": "Deleted user alex@qxautotrade.com (Trader Alex)",
       "timestamp": "2026-09-07T03:36:29.640Z"
     },
     {
@@ -51550,21 +51587,21 @@
     {
       "id": "audit-1788751611523",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-09-07T03:26:51.523Z"
     },
     {
       "id": "audit-1788751511819",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-09-07T03:25:11.819Z"
     },
     {
       "id": "audit-1788751499149",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-09-07T03:24:59.149Z"
     },
@@ -51585,28 +51622,28 @@
     {
       "id": "audit-1788588747220",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-09-05T06:12:27.220Z"
     },
     {
       "id": "audit-1788537943331",
       "action": "ADMIN_UPDATE_SITE_CONFIG",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Updated site configuration, links, and referral settings",
       "timestamp": "2026-09-04T16:05:43.331Z"
     },
     {
       "id": "audit-1788537886329",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-09-04T16:04:46.329Z"
     },
     {
       "id": "audit-1788523358162",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-09-04T12:02:38.162Z"
     },
@@ -51634,14 +51671,14 @@
     {
       "id": "audit-1787489696011",
       "action": "USER_LOGIN",
-      "actorEmail": "demo@qucaptain.com",
+      "actorEmail": "demo@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-23T12:54:56.011Z"
     },
     {
       "id": "audit-1787489695839",
       "action": "ADMIN_UPDATE_SITE_CONFIG",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Updated site configuration, links, and referral settings",
       "timestamp": "2026-08-23T12:54:55.839Z"
     },
@@ -51662,7 +51699,7 @@
     {
       "id": "audit-1787486167130",
       "action": "QUOTEX_ACCOUNT_SYNCED",
-      "actorEmail": "demo@qucaptain.com",
+      "actorEmail": "demo@qxautotrade.com",
       "details": "Synced Quotex (LIVE) account: QX-LIVE-884184, balance: $1450.5",
       "timestamp": "2026-08-23T11:56:07.130Z"
     },
@@ -51676,7 +51713,7 @@
     {
       "id": "audit-1787486156323",
       "action": "QUOTEX_ACCOUNT_SYNCED",
-      "actorEmail": "demo@qucaptain.com",
+      "actorEmail": "demo@qxautotrade.com",
       "details": "Synced Quotex (LIVE) account: QX-LIVE-884184, balance: $1450.5",
       "timestamp": "2026-08-23T11:55:56.323Z"
     },
@@ -51704,7 +51741,7 @@
     {
       "id": "audit-1787485838472",
       "action": "USER_LOGIN",
-      "actorEmail": "demo@qucaptain.com",
+      "actorEmail": "demo@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-23T11:50:38.472Z"
     },
@@ -51718,7 +51755,7 @@
     {
       "id": "audit-1787485286455",
       "action": "USER_LOGIN",
-      "actorEmail": "demo@qucaptain.com",
+      "actorEmail": "demo@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-23T11:41:26.455Z"
     },
@@ -51739,42 +51776,42 @@
     {
       "id": "audit-1787484081001",
       "action": "USER_CHANGE_PASSWORD",
-      "actorEmail": "demo@qucaptain.com",
+      "actorEmail": "demo@qxautotrade.com",
       "details": "User updated account password successfully",
       "timestamp": "2026-08-23T11:21:21.001Z"
     },
     {
       "id": "audit-1787484080552",
       "action": "USER_LOGIN",
-      "actorEmail": "demo@qucaptain.com",
+      "actorEmail": "demo@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-23T11:21:20.552Z"
     },
     {
       "id": "audit-1787483794498",
       "action": "USER_LOGIN",
-      "actorEmail": "demo@qucaptain.com",
+      "actorEmail": "demo@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-23T11:16:34.498Z"
     },
     {
       "id": "audit-1787483290352",
       "action": "USER_LOGIN",
-      "actorEmail": "demo@qucaptain.com",
+      "actorEmail": "demo@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-23T11:08:10.352Z"
     },
     {
       "id": "audit-1787424879697",
       "action": "USER_LOGIN",
-      "actorEmail": "demo@qucaptain.com",
+      "actorEmail": "demo@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-22T18:54:39.697Z"
     },
     {
       "id": "audit-1787424851409",
       "action": "EMAIL_OTP_VERIFIED_REGISTER",
-      "actorEmail": "demo@qucaptain.com",
+      "actorEmail": "demo@qxautotrade.com",
       "details": "Email OTP verified successfully. 1-Hour Free Trial account activated.",
       "timestamp": "2026-08-22T18:54:11.409Z"
     },
@@ -51795,35 +51832,35 @@
     {
       "id": "audit-1787329313755",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-21T16:21:53.755Z"
     },
     {
       "id": "audit-1787328824039",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-21T16:13:44.039Z"
     },
     {
       "id": "audit-1787327607758",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-21T15:53:27.758Z"
     },
     {
       "id": "audit-1787327568523",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-08-21T15:52:48.523Z"
     },
     {
       "id": "audit-1787255522646",
       "action": "SESSION_STARTED",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Started trading session on QUOTEX (DEMO) with Strategy ID strat-1",
       "timestamp": "2026-08-20T19:52:02.646Z"
     },
@@ -51872,28 +51909,28 @@
     {
       "id": "audit-1787255324973",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-20T19:48:44.973Z"
     },
     {
       "id": "audit-1787253143385",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-20T19:12:23.385Z"
     },
     {
       "id": "audit-1787249953584",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-20T18:19:13.584Z"
     },
     {
       "id": "audit-1786560021050",
       "action": "SESSION_STARTED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Started trading session on QUOTEX (DEMO) with Strategy ID strat-1",
       "timestamp": "2026-08-12T18:40:21.050Z"
     },
@@ -52005,7 +52042,7 @@
     {
       "id": "audit-1786559925461",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-12T18:38:45.461Z"
     },
@@ -76988,7 +77025,7 @@
     {
       "id": "audit-1786396530240",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-10T21:15:30.240Z"
     },
@@ -77030,23 +77067,23 @@
     {
       "id": "audit-1786396194107",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-10T21:09:54.107Z"
     },
     {
       "id": "audit-1786396180645",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-10T21:09:40.645Z"
     },
     {
       "id": "audit-1786396153336",
       "action": "ADMIN_RESET_USER_PASSWORD",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "targetUserId": "user-demo-1",
-      "details": "Master Admin reset password for alex@qucaptain.com",
+      "details": "Master Admin reset password for alex@qxautotrade.com",
       "timestamp": "2026-08-10T21:09:13.336Z"
     },
     {
@@ -77087,21 +77124,21 @@
     {
       "id": "audit-1786395851544",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-10T21:04:11.544Z"
     },
     {
       "id": "audit-1786394231350",
       "action": "SESSION_STARTED",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Started trading session on QUOTEX (DEMO) with Strategy ID strat-1",
       "timestamp": "2026-08-10T20:37:11.350Z"
     },
     {
       "id": "audit-1786394059433",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-10T20:34:19.433Z"
     },
@@ -77122,240 +77159,240 @@
     {
       "id": "audit-1786393056730",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-10T20:17:36.730Z"
     },
     {
       "id": "audit-1786376652245",
       "action": "ADMIN_UPDATE_SITE_CONFIG",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Updated site configuration, links, and referral settings",
       "timestamp": "2026-08-10T15:44:12.245Z"
     },
     {
       "id": "audit-1786376647651",
       "action": "ADMIN_UPDATE_SITE_CONFIG",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Updated site configuration, links, and referral settings",
       "timestamp": "2026-08-10T15:44:07.651Z"
     },
     {
       "id": "audit-1786376624956",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-10T15:43:44.956Z"
     },
     {
       "id": "audit-1786376366414",
       "action": "ADMIN_UPDATE_SITE_CONFIG",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Updated site configuration, links, and referral settings",
       "timestamp": "2026-08-10T15:39:26.414Z"
     },
     {
       "id": "audit-1786376351335",
       "action": "ADMIN_UPDATE_SITE_CONFIG",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Updated site configuration, links, and referral settings",
       "timestamp": "2026-08-10T15:39:11.335Z"
     },
     {
       "id": "audit-1786375259841",
       "action": "ADMIN_UPDATE_SITE_CONFIG",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Updated site configuration, links, and referral settings",
       "timestamp": "2026-08-10T15:20:59.841Z"
     },
     {
       "id": "audit-1786375246424",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-08-10T15:20:46.424Z"
     },
     {
       "id": "audit-1786375183844",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-10T15:19:43.844Z"
     },
     {
       "id": "audit-1786374697791",
       "action": "ADMIN_UPDATE_SITE_CONFIG",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Updated site configuration, links, and referral settings",
       "timestamp": "2026-08-10T15:11:37.791Z"
     },
     {
       "id": "audit-1786373612490",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-08-10T14:53:32.490Z"
     },
     {
       "id": "audit-1786373206285",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.comtestuser2@gmail.com",
+      "actorEmail": "admin@qxautotrade.comtestuser2@gmail.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-10T14:46:46.285Z"
     },
     {
       "id": "audit-1786373135759",
       "action": "ADMIN_ADD_USER",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "targetUserId": "user-1786373135759",
-      "details": "Master Admin created user account for admin@qucaptain.comtestuser2@gmail.com",
+      "details": "Master Admin created user account for admin@qxautotrade.comtestuser2@gmail.com",
       "timestamp": "2026-08-10T14:45:35.759Z"
     },
     {
       "id": "audit-1786372501860",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-08-10T14:35:01.860Z"
     },
     {
       "id": "audit-1786372435803",
       "action": "STRATEGY_TOGGLED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Strategy Quotex OTC Volatility Scalper v3 set to ACTIVE",
       "timestamp": "2026-08-10T14:33:55.803Z"
     },
     {
       "id": "audit-1786372434713",
       "action": "STRATEGY_TOGGLED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Strategy Quotex OTC Volatility Scalper v3 set to INACTIVE",
       "timestamp": "2026-08-10T14:33:54.713Z"
     },
     {
       "id": "audit-1786372388591",
       "action": "MAINTENANCE_MODE_DISABLED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin set Maintenance Mode to false",
       "timestamp": "2026-08-10T14:33:08.591Z"
     },
     {
       "id": "audit-1786372381809",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-10T14:33:01.809Z"
     },
     {
       "id": "audit-1786372364917",
       "action": "MAINTENANCE_MODE_ENABLED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin set Maintenance Mode to true",
       "timestamp": "2026-08-10T14:32:44.917Z"
     },
     {
       "id": "audit-1786372296174",
       "action": "USER_ACTIVATED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "targetUserId": "user-1785352926977",
-      "details": "User account sarah@qucaptain.com marked as ACTIVE",
+      "details": "User account sarah@qxautotrade.com marked as ACTIVE",
       "timestamp": "2026-08-10T14:31:36.174Z"
     },
     {
       "id": "audit-1786372295535",
       "action": "USER_DEACTIVATED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "targetUserId": "user-1785352926977",
-      "details": "User account sarah@qucaptain.com marked as INACTIVE",
+      "details": "User account sarah@qxautotrade.com marked as INACTIVE",
       "timestamp": "2026-08-10T14:31:35.535Z"
     },
     {
       "id": "audit-1786372293294",
       "action": "USER_ACTIVATED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "targetUserId": "user-demo-1",
-      "details": "User account alex@qucaptain.com marked as ACTIVE",
+      "details": "User account alex@qxautotrade.com marked as ACTIVE",
       "timestamp": "2026-08-10T14:31:33.294Z"
     },
     {
       "id": "audit-1786372292515",
       "action": "USER_DEACTIVATED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "targetUserId": "user-demo-1",
-      "details": "User account alex@qucaptain.com marked as INACTIVE",
+      "details": "User account alex@qxautotrade.com marked as INACTIVE",
       "timestamp": "2026-08-10T14:31:32.515Z"
     },
     {
       "id": "audit-1786372290954",
       "action": "USER_ACTIVATED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "targetUserId": "admin-1",
-      "details": "User account admin@qucaptain.com marked as ACTIVE",
+      "details": "User account admin@qxautotrade.com marked as ACTIVE",
       "timestamp": "2026-08-10T14:31:30.955Z"
     },
     {
       "id": "audit-1786372290115",
       "action": "USER_DEACTIVATED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "targetUserId": "admin-1",
-      "details": "User account admin@qucaptain.com marked as INACTIVE",
+      "details": "User account admin@qxautotrade.com marked as INACTIVE",
       "timestamp": "2026-08-10T14:31:30.115Z"
     },
     {
       "id": "audit-1786372051571",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-08-10T14:27:31.571Z"
     },
     {
       "id": "audit-1786369008860",
       "action": "TOGGLE_EMERGENCY_CONTROL",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Emergency control userRegistrationEnabled set to false",
       "timestamp": "2026-08-10T13:36:48.861Z"
     },
     {
       "id": "audit-1786368915893",
       "action": "USER_DEACTIVATED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "targetUserId": "user-1786368902656",
-      "details": "User account admin@qucaptain.comtestuser@gmail.com marked as INACTIVE",
+      "details": "User account admin@qxautotrade.comtestuser@gmail.com marked as INACTIVE",
       "timestamp": "2026-08-10T13:35:15.893Z"
     },
     {
       "id": "audit-1786368902656",
       "action": "ADMIN_ADD_USER",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "targetUserId": "user-1786368902656",
-      "details": "Master Admin created user account for admin@qucaptain.comtestuser@gmail.com",
+      "details": "Master Admin created user account for admin@qxautotrade.comtestuser@gmail.com",
       "timestamp": "2026-08-10T13:35:02.656Z"
     },
     {
       "id": "audit-1786354397715",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-08-10T09:33:17.715Z"
     },
     {
       "id": "audit-1786294464938",
       "action": "ADMIN_UPDATE_SITE_CONFIG",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Updated site configuration, links, and referral settings",
       "timestamp": "2026-08-09T16:54:24.939Z"
     },
     {
       "id": "audit-1786294451391",
       "action": "ADMIN_UPDATE_SITE_CONFIG",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Updated site configuration, links, and referral settings",
       "timestamp": "2026-08-09T16:54:11.391Z"
     },
     {
       "id": "audit-1786294412785",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-08-09T16:53:32.785Z"
     },
@@ -77390,35 +77427,35 @@
     {
       "id": "audit-1785774035704",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T16:20:35.704Z"
     },
     {
       "id": "audit-1785774010178",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T16:20:10.178Z"
     },
     {
       "id": "audit-1785773956495",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-08-03T16:19:16.495Z"
     },
     {
       "id": "audit-1785773901649",
       "action": "ADMIN_UPDATE_SITE_CONFIG",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Updated site configuration, links, and referral settings",
       "timestamp": "2026-08-03T16:18:21.649Z"
     },
     {
       "id": "audit-1785773336877",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-08-03T16:08:56.877Z"
     },
@@ -77502,49 +77539,49 @@
     {
       "id": "audit-1785757780118",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:49:40.118Z"
     },
     {
       "id": "audit-1785757769525",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:49:29.525Z"
     },
     {
       "id": "audit-1785757610943",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:46:50.943Z"
     },
     {
       "id": "audit-1785756949677",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:35:49.677Z"
     },
     {
       "id": "audit-1785756650268",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:30:50.268Z"
     },
     {
       "id": "audit-1785756628263",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:30:28.263Z"
     },
     {
       "id": "audit-1785756615324",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-08-03T11:30:15.324Z"
     },
@@ -77558,14 +77595,14 @@
     {
       "id": "audit-1785756185257",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:23:05.257Z"
     },
     {
       "id": "audit-1785755999742",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:19:59.742Z"
     },
@@ -77579,49 +77616,49 @@
     {
       "id": "audit-1785755966159",
       "action": "SESSION_STARTED",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Started trading session on QUOTEX (DEMO) with Strategy ID strat-1",
       "timestamp": "2026-08-03T11:19:26.159Z"
     },
     {
       "id": "audit-1785755963908",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:19:23.908Z"
     },
     {
       "id": "audit-1785755928860",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:18:48.860Z"
     },
     {
       "id": "audit-1785755899960",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:18:19.960Z"
     },
     {
       "id": "audit-1785755733194",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:15:33.194Z"
     },
     {
       "id": "audit-1785755692042",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:14:52.042Z"
     },
     {
       "id": "audit-1785755445800",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T11:10:45.800Z"
     },
@@ -77635,7 +77672,7 @@
     {
       "id": "audit-1785740436565",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T07:00:36.565Z"
     },
@@ -77649,7 +77686,7 @@
     {
       "id": "audit-1785740406812",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T07:00:06.812Z"
     },
@@ -77698,21 +77735,21 @@
     {
       "id": "audit-1785739374465",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T06:42:54.465Z"
     },
     {
       "id": "audit-1785738513030",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T06:28:33.030Z"
     },
     {
       "id": "audit-1785738144339",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T06:22:24.339Z"
     },
@@ -77720,27 +77757,27 @@
       "id": "audit-1785737860383",
       "action": "BROKER_CONNECTED",
       "actorEmail": "user-demo-1",
-      "details": "Connected QUOTEX (DEMO) account: alex@qucaptain.com",
+      "details": "Connected QUOTEX (DEMO) account: alex@qxautotrade.com",
       "timestamp": "2026-08-03T06:17:40.383Z"
     },
     {
       "id": "audit-1785737775755",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T06:16:15.755Z"
     },
     {
       "id": "audit-1785737527440",
       "action": "SESSION_STARTED",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Started trading session on QUOTEX (DEMO) with Strategy ID strat-1",
       "timestamp": "2026-08-03T06:12:07.440Z"
     },
     {
       "id": "audit-1785737525688",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T06:12:05.688Z"
     },
@@ -77748,13 +77785,13 @@
       "id": "audit-1785737437047",
       "action": "BROKER_CONNECTED",
       "actorEmail": "user-demo-1",
-      "details": "Connected QUOTEX (DEMO) account: alex@qucaptain.com",
+      "details": "Connected QUOTEX (DEMO) account: alex@qxautotrade.com",
       "timestamp": "2026-08-03T06:10:37.048Z"
     },
     {
       "id": "audit-1785737429519",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T06:10:29.519Z"
     },
@@ -77769,13 +77806,13 @@
       "id": "audit-1785737389298",
       "action": "BROKER_CONNECTED",
       "actorEmail": "admin-1",
-      "details": "Connected QUOTEX (DEMO) account: admin@qucaptain.com",
+      "details": "Connected QUOTEX (DEMO) account: admin@qxautotrade.com",
       "timestamp": "2026-08-03T06:09:49.298Z"
     },
     {
       "id": "audit-1785737376592",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T06:09:36.592Z"
     },
@@ -77789,14 +77826,14 @@
     {
       "id": "audit-1785736705096",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T05:58:25.096Z"
     },
     {
       "id": "audit-1785736596148",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T05:56:36.148Z"
     },
@@ -77804,13 +77841,13 @@
       "id": "audit-1785736569657",
       "action": "BROKER_CONNECTED",
       "actorEmail": "user-demo-1",
-      "details": "Connected QUOTEX (DEMO) account: alex@qucaptain.com",
+      "details": "Connected QUOTEX (DEMO) account: alex@qxautotrade.com",
       "timestamp": "2026-08-03T05:56:09.657Z"
     },
     {
       "id": "audit-1785736561563",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T05:56:01.563Z"
     },
@@ -77818,20 +77855,20 @@
       "id": "audit-1785736142737",
       "action": "BROKER_CONNECTED",
       "actorEmail": "user-demo-1",
-      "details": "Connected QUOTEX (DEMO) account: alex@qucaptain.com",
+      "details": "Connected QUOTEX (DEMO) account: alex@qxautotrade.com",
       "timestamp": "2026-08-03T05:49:02.737Z"
     },
     {
       "id": "audit-1785736129973",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T05:48:49.973Z"
     },
     {
       "id": "audit-1785736112294",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T05:48:32.294Z"
     },
@@ -77839,34 +77876,34 @@
       "id": "audit-1785736063008",
       "action": "BROKER_CONNECTED",
       "actorEmail": "user-demo-1",
-      "details": "Connected QUOTEX (DEMO) account: alex@qucaptain.com",
+      "details": "Connected QUOTEX (DEMO) account: alex@qxautotrade.com",
       "timestamp": "2026-08-03T05:47:43.008Z"
     },
     {
       "id": "audit-1785736050101",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T05:47:30.101Z"
     },
     {
       "id": "audit-1785735550024",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T05:39:10.024Z"
     },
     {
       "id": "audit-1785735298148",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T05:34:58.148Z"
     },
     {
       "id": "audit-1785735204667",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T05:33:24.667Z"
     },
@@ -77874,125 +77911,125 @@
       "id": "audit-1785735172891",
       "action": "BROKER_CONNECTED",
       "actorEmail": "user-demo-1",
-      "details": "Connected QUOTEX (DEMO) account: alex@qucaptain.com",
+      "details": "Connected QUOTEX (DEMO) account: alex@qxautotrade.com",
       "timestamp": "2026-08-03T05:32:52.891Z"
     },
     {
       "id": "audit-1785735128777",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T05:32:08.777Z"
     },
     {
       "id": "audit-1785732607119",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-08-03T04:50:07.119Z"
     },
     {
       "id": "audit-1785732052358",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T04:40:52.358Z"
     },
     {
       "id": "audit-1785731841661",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T04:37:21.661Z"
     },
     {
       "id": "audit-1785731781602",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-08-03T04:36:21.602Z"
     },
     {
       "id": "audit-1785731750173",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-08-03T04:35:50.173Z"
     },
     {
       "id": "audit-1785411562325",
       "action": "SESSION_STARTED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Started trading session on QUOTEX (DEMO) with Strategy ID strat-1",
       "timestamp": "2026-07-30T11:39:22.325Z"
     },
     {
       "id": "audit-1785411416113",
       "action": "USER_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-07-30T11:36:56.113Z"
     },
     {
       "id": "audit-1785411025400",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-07-30T11:30:25.400Z"
     },
     {
       "id": "audit-1785410612267",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-07-30T11:23:32.267Z"
     },
     {
       "id": "audit-1785409214149",
       "action": "SESSION_STARTED",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Started trading session on QUOTEX (DEMO) with Strategy ID strat-3",
       "timestamp": "2026-07-30T11:00:14.149Z"
     },
     {
       "id": "audit-1785409201487",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Logged in successfully",
       "timestamp": "2026-07-30T11:00:01.487Z"
     },
     {
       "id": "audit-1785352952102",
       "action": "MASTER_ADMIN_LOGIN",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin authenticated into /admin portal.",
       "timestamp": "2026-07-29T19:22:32.102Z"
     },
     {
       "id": "audit-1785352926978",
       "action": "EMAIL_OTP_VERIFIED_REGISTER",
-      "actorEmail": "sarah@qucaptain.com",
+      "actorEmail": "sarah@qxautotrade.com",
       "details": "Email OTP verified successfully. 1-Hour Free Trial account activated.",
       "timestamp": "2026-07-29T19:22:06.978Z"
     },
     {
       "id": "audit-1785352505878",
       "action": "MAINTENANCE_MODE_DISABLED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin set Maintenance Mode to false",
       "timestamp": "2026-07-29T19:15:05.878Z"
     },
     {
       "id": "audit-1785352499985",
       "action": "MAINTENANCE_MODE_ENABLED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "details": "Master Admin set Maintenance Mode to true",
       "timestamp": "2026-07-29T19:14:59.985Z"
     },
     {
       "id": "audit-1785352080875",
       "action": "SESSION_STARTED",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "Started trading session on POCKETOPTION (DEMO) with Strategy ID strat-1",
       "timestamp": "2026-07-29T19:08:00.875Z"
     },
@@ -78006,14 +78043,14 @@
     {
       "id": "audit-1",
       "action": "USER_LOGIN",
-      "actorEmail": "alex@qucaptain.com",
+      "actorEmail": "alex@qxautotrade.com",
       "details": "User logged in successfully from 192.168.1.45",
       "timestamp": "2026-07-29T17:04:24.671Z"
     },
     {
       "id": "audit-2",
       "action": "LIFETIME_ACCESS_APPROVED",
-      "actorEmail": "admin@qucaptain.com",
+      "actorEmail": "admin@qxautotrade.com",
       "targetUserId": "user-demo-1",
       "details": "Master Admin verified $100 deposit and approved lifetime free access.",
       "timestamp": "2026-07-29T18:04:24.671Z"
@@ -78050,22 +78087,22 @@
   "errorLogs": [],
   "siteConfig": {
     "telegramLink": "https://t.me/newchannel",
-    "instagramLink": "https://instagram.com/qucaptain",
-    "youtubeLink": "https://youtube.com/c/qucaptain",
+    "instagramLink": "https://instagram.com/quotexautotrade",
+    "youtubeLink": "https://youtube.com/c/quotexautotrade",
     "referralLink": "https://quotex.com/ref/official",
     "referralDepositAmount": 250,
     "footerText": "TESTaFOOTER 2026",
     "paymentUsdt": "NEW_USDT_ADDRESS_123",
-    "paymentUpi": "qucaptain@upi",
+    "paymentUpi": "quotexautotrade@upi",
     "paymentBank": "Bank: QUOTEX Trade Ltd | A/C: 9988776655 | IFSC: QXIN0001234",
     "updatedAt": "2026-09-04T16:05:43.296Z",
-    "telegramSupport": "https://t.me/QuCaptain_Support",
-    "supportEmail": "support@qucaptain.com",
+    "telegramSupport": "https://t.me/Quotexautotrade_Support",
+    "supportEmail": "support@quotexautotrade.com",
     "liveChatUrl": "",
     "youtubeEmbedCode": "",
     "facebookLink": "",
     "twitterLink": "",
-    "siteName": "QuCaptain VIP",
+    "siteName": "QX AUTO TRADE VIP",
     "siteLogo": "",
     "favicon": ""
   },
@@ -78073,7 +78110,7 @@
     {
       "id": "sub-req-1787488380513",
       "userId": "user-1787424851409",
-      "userEmail": "user@qucaptain.com",
+      "userEmail": "user@qxautotrade.com",
       "userName": "Trader",
       "planName": "Basic",
       "price": "$49",
@@ -78086,7 +78123,7 @@
     {
       "id": "sub-req-1787488372224",
       "userId": "user-1787424851409",
-      "userEmail": "user@qucaptain.com",
+      "userEmail": "user@qxautotrade.com",
       "userName": "Trader",
       "planName": "Basic",
       "price": "$49",
@@ -78099,7 +78136,7 @@
     {
       "id": "sub-req-1787488370740",
       "userId": "user-1787424851409",
-      "userEmail": "user@qucaptain.com",
+      "userEmail": "user@qxautotrade.com",
       "userName": "Trader",
       "planName": "Pro",
       "price": "$99",
@@ -78112,7 +78149,7 @@
     {
       "id": "sub-req-1787488369629",
       "userId": "user-1787424851409",
-      "userEmail": "user@qucaptain.com",
+      "userEmail": "user@qxautotrade.com",
       "userName": "Trader",
       "planName": "Basic",
       "price": "$49",
@@ -78125,7 +78162,7 @@
     {
       "id": "sub-req-1787488369400",
       "userId": "user-1787424851409",
-      "userEmail": "user@qucaptain.com",
+      "userEmail": "user@qxautotrade.com",
       "userName": "Trader",
       "planName": "Basic",
       "price": "$49",
@@ -78138,7 +78175,7 @@
     {
       "id": "sub-req-1787488369235",
       "userId": "user-1787424851409",
-      "userEmail": "user@qucaptain.com",
+      "userEmail": "user@qxautotrade.com",
       "userName": "Trader",
       "planName": "Basic",
       "price": "$49",
@@ -78151,7 +78188,7 @@
     {
       "id": "sub-req-1787488369055",
       "userId": "user-1787424851409",
-      "userEmail": "user@qucaptain.com",
+      "userEmail": "user@qxautotrade.com",
       "userName": "Trader",
       "planName": "Basic",
       "price": "$49",
@@ -78164,7 +78201,7 @@
     {
       "id": "sub-req-1787488368890",
       "userId": "user-1787424851409",
-      "userEmail": "user@qucaptain.com",
+      "userEmail": "user@qxautotrade.com",
       "userName": "Trader",
       "planName": "Basic",
       "price": "$49",
@@ -78177,7 +78214,7 @@
     {
       "id": "sub-req-1787488368214",
       "userId": "user-1787424851409",
-      "userEmail": "user@qucaptain.com",
+      "userEmail": "user@qxautotrade.com",
       "userName": "Trader",
       "planName": "Basic",
       "price": "$49",
@@ -78190,7 +78227,7 @@
     {
       "id": "sub-req-1787488365767",
       "userId": "user-1787424851409",
-      "userEmail": "user@qucaptain.com",
+      "userEmail": "user@qxautotrade.com",
       "userName": "Trader",
       "planName": "Basic",
       "price": "$49",
@@ -78203,7 +78240,7 @@
     {
       "id": "sub-req-1787484080793",
       "userId": "user-1787424851409",
-      "userEmail": "user@qucaptain.com",
+      "userEmail": "user@qxautotrade.com",
       "userName": "Trader",
       "planName": "Basic",
       "price": "49",

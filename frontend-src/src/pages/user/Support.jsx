@@ -17,7 +17,7 @@ import {
 const defaultFaqs = [
   { q: 'How does auto trading work?', a: 'Our AI-powered system analyzes market conditions using advanced strategies and executes trades automatically on your connected broker account. You can pause or stop trading at any time.' },
   { q: 'Is my broker account safe?', a: 'Yes. We only use read and trade permissions. We never have withdrawal access to your funds. All connections are encrypted and secured.' },
-  { q: 'What brokers are supported?', a: 'We currently support Quotex with direct algorithmic execution.' },
+  { q: 'What brokers are supported?', a: 'We currently support Quotex, PocketOption, OlympTrade, and GuruTrade7. More brokers are being added regularly.' },
   { q: 'How do I change my strategy?', a: 'Go to the Strategies page from the sidebar. You can enable/disable different strategies, filter by broker, and view detailed parameters for each strategy.' },
   { q: 'Can I manually override trades?', a: 'Yes. You can pause auto-trading at any time to take manual control. Use the Pause button on the dashboard to stop automatic execution.' },
   { q: 'How do I cancel my subscription?', a: 'Contact our support team via Telegram or email, and we will process your cancellation within 24 hours.' },
@@ -71,7 +71,7 @@ export default function Support() {
   }
 
   const telegram = siteConfig?.telegramLink || siteConfig?.telegram || '#'
-  const email = siteConfig?.supportEmail || siteConfig?.email || 'support@qucaptain.com'
+  const email = siteConfig?.supportEmail || siteConfig?.email || 'support@qxautotrade.com'
   const liveChat = siteConfig?.liveChatLink || '#'
 
   const contactCards = [

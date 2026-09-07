@@ -27,7 +27,9 @@ export default function AdminUsers() {
     setLoading(true)
     try {
       const data = await api.getAdminUsers()
-      setUsers(data.users || data || [])
+      const rawUsers = data.users || data || []
+      const sorted = [...rawUsers].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+      setUsers(sorted)
     } catch (err) {
       setError(err.message)
     } finally {

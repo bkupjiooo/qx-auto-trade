@@ -34,7 +34,7 @@ app.use('/api/user', userRoutes);
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ONLINE',
-    service: 'QuCaptain Backend & Execution Engine',
+    service: 'QX Auto Trade Backend & Execution Engine',
     version: '2.4.2',
     timestamp: new Date().toISOString()
   });
@@ -59,63 +59,54 @@ const adminRoutes2 = ['/admin/login', '/admin/dashboard', '/admin/users', '/admi
 app.use('/dashboard', express.static(dashboardDist));
 
 // Explicit APK Download Route
-// Universal Robust APK Download Route (Matches any .apk request)
 app.get([
-  '/QuCaptain.apk',
-  '/downloads/QuCaptain.apk',
   '/Quotexautotrade.apk',
   '/downloads/Quotexautotrade.apk',
-  '/Autotrade.apk',
   '/downloads/Autotrade.apk',
-  '/downloads/qx-auto-trade.apk',
-  '/*.apk'
+  '/Autotrade.apk',
+  '/downloads/qx-auto-trade.apk'
 ], (req, res) => {
   const candidates = [
-    path.join(frontendDist, 'QuCaptain.apk'),
-    path.join(__dirname, '../../QuCaptain.apk'),
-    path.join(frontendDist, 'downloads/QuCaptain.apk'),
+    path.join(frontendDist, 'Quotexautotrade.apk'),
+    path.join(__dirname, '../../Quotexautotrade.apk'),
     path.join(frontendDist, 'downloads/Autotrade.apk'),
     path.join(frontendDist, 'Autotrade.apk'),
-    path.join(frontendDist, 'Quotexautotrade.apk'),
-    path.join(__dirname, '../../Quotexautotrade.apk')
+    path.join(__dirname, '../../frontend/dist/Quotexautotrade.apk'),
+    'C:\\Users\\omchoubey\\Desktop\\qmtrix\\Quotexautotrade.apk'
   ];
   for (const p of candidates) {
     if (fs.existsSync(p)) {
-      res.setHeader('Content-Type', 'application/vnd.android.package-archive');
-      res.setHeader('Content-Disposition', 'attachment; filename="QuCaptain.apk"');
-      return res.sendFile(path.resolve(p));
+      return res.download(p, 'Quotexautotrade.apk');
     }
   }
   res.status(404).send('APK file not found');
 });
 
-// Serve original frontend static files
-app.use(express.static(frontendDist));
-
-// Universal Dashboard and Admin routing
-app.get([
-  '/admin',
-  '/admin/*',
-  '/dashboard',
-  '/dashboard/*',
-  '/strategies',
-  '/settings',
-  '/history',
-  '/performance',
-  '/subscriptions',
-  '/support'
-], (req, res) => {
-  res.sendFile(path.join(dashboardDist, 'index.html'));
+// Dashboard SPA routes
+dashboardRoutes.forEach((route) => {
+  app.get(route, (req, res) => {
+    res.sendFile(path.join(dashboardDist, 'index.html'));
+  });
 });
+
+// Admin SPA routes - serve dashboard app
+adminRoutes2.forEach((route) => {
+  app.get(route, (req, res) => {
+    res.sendFile(path.join(dashboardDist, 'index.html'));
+  });
+});
+
+// Serve original frontend for everything else
+app.use(express.static(frontendDist));
 
 // Original SPA Fallback
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) return next();
-
+  
   if (req.path.startsWith('/admin') || req.path.startsWith('/dashboard')) {
     return res.sendFile(path.join(dashboardDist, 'index.html'));
   }
-
+  
   const indexPath = path.join(frontendDist, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
@@ -131,7 +122,7 @@ const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
   console.log(`=======================================================`);
-  console.log(` QuCaptain Backend Server listening on port ${PORT}`);
+  console.log(` QX AUTO TRADE Backend Server listening on port ${PORT}`);
   console.log(` WebSocket Real-Time Server Ready`);
   console.log(`=======================================================`);
 });
