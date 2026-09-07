@@ -118,9 +118,6 @@ const testimonials = [
 
 const brokers = [
   { name: 'Quotex', color: 'from-green-400 to-emerald-500' },
-  { name: 'PocketOption', color: 'from-blue-400 to-indigo-500' },
-  { name: 'OlympTrade', color: 'from-green-500 to-teal-500' },
-  { name: 'GuruTrade7', color: 'from-purple-400 to-pink-500' },
 ];
 
 export default function Landing() {
@@ -579,26 +576,26 @@ export default function Landing() {
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
               <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                Supported Brokers
+                Supported Broker
               </span>
             </h2>
-            <p className="text-gray-400">Connect seamlessly with top binary options platforms.</p>
+            <p className="text-gray-400">Directly integrated with Quotex for automated high-speed execution.</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {brokers.map((b, i) => (
+          <div className="flex justify-center">
+            <div
+              className="glass-card rounded-2xl p-8 flex flex-col items-center gap-4 hover:shadow-glow transition-all duration-300 max-w-sm w-full"
+            >
               <div
-                key={i}
-                className="glass-card rounded-2xl p-6 flex flex-col items-center gap-4 hover:shadow-glow transition-all duration-300 group hover:-translate-y-1"
+                className="w-16 h-16 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg"
               >
-                <div
-                  className={`w-14 h-14 rounded-xl bg-gradient-to-br ${b.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}
-                >
-                  <TrendingUp className="w-7 h-7 text-white" />
-                </div>
-                <span className="text-sm font-semibold text-white">{b.name}</span>
+                <TrendingUp className="w-8 h-8 text-white" />
               </div>
-            ))}
+              <span className="text-xl font-bold text-white">Quotex</span>
+              <span className="text-xs text-emerald-400 font-medium px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                Official Live Terminal Integrated
+              </span>
+            </div>
           </div>
         </div>
       </section>

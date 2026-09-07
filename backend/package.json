@@ -1,7 +1,7 @@
-{
-  "name": "qx-auto-trade-backend",
+﻿{
+  "name": "qucaptain-backend",
   "version": "1.0.0",
-  "description": "Backend engine for QX Auto Trade automated trading platform",
+  "description": "Backend engine for QuCaptain automated trading platform",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

@@ -32,17 +32,11 @@ import {
 } from 'lucide-react'
 
 const brokers = [
-  { id: 'quotex', name: 'Quotex', url: 'https://quotex.com/en' },
-  { id: 'pocketoption', name: 'PocketOption', url: 'https://pocketoption.com/en' },
-  { id: 'olymptrade', name: 'OlympTrade', url: 'https://olymptrade.com/en' },
-  { id: 'gurutrade7', name: 'GuruTrade7', url: 'https://gurutrade7.com' },
+  { id: 'quotex', name: 'Quotex', url: 'https://market-qx.pro/en/sign-up/fast/' },
 ]
 
 const brokerIconGradient = {
-  quotex: 'from-indigo-500 to-indigo-600 shadow-indigo-500/25',
-  pocketoption: 'from-sky-500 to-sky-600 shadow-sky-500/25',
-  olymptrade: 'from-emerald-500 to-emerald-600 shadow-emerald-500/25',
-  gurutrade7: 'from-amber-500 to-amber-600 shadow-amber-500/25',
+  quotex: 'from-emerald-500 to-teal-600 shadow-emerald-500/25',
 }
 
 const DEFAULT_RISK_SETTINGS = {

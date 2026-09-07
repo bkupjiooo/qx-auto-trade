@@ -1,4 +1,4 @@
-const path = require('path');
+﻿const path = require('path');
 const dotenv = require('dotenv');
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 const nodemailer = require('nodemailer');
@@ -8,7 +8,7 @@ const SMTP_PORT = parseInt(process.env.SMTP_PORT || '465', 10);
 const SMTP_SECURE = process.env.SMTP_SECURE !== 'false'; // true for 465
 const SMTP_USER = process.env.SMTP_USER || 'noreply@quotexautotrade.com';
 const SMTP_PASS = process.env.SMTP_PASS || 'Noreplyqx@2026';
-const SMTP_FROM_NAME = process.env.SMTP_FROM_NAME || 'QX AUTO TRADE';
+const SMTP_FROM_NAME = process.env.SMTP_FROM_NAME || 'QuCaptain';
 const SMTP_FROM_EMAIL = process.env.SMTP_FROM_EMAIL || 'noreply@quotexautotrade.com';
 
 // Initialize Dual Transporters: Port 587 (Primary STARTTLS) and Port 465 (Fallback SSL)
@@ -54,7 +54,7 @@ transporter587.verify((error, success) => {
  */
 async function sendOtpEmail(toEmail, otpCode, recipientName = 'Trader') {
   const fromHeader = `"${SMTP_FROM_NAME}" <${SMTP_FROM_EMAIL}>`;
-  const subject = `${otpCode} is your QX Auto Trade Verification Code`;
+  const subject = `${otpCode} is your QuCaptain Verification Code`;
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -80,12 +80,12 @@ async function sendOtpEmail(toEmail, otpCode, recipientName = 'Trader') {
     <body>
       <div class="container">
         <div class="header">
-          <h1 class="logo-title">⚡ QX AUTO TRADE</h1>
+          <h1 class="logo-title">⚡ QuCaptain</h1>
           <div class="sub-logo">Automated Trading Bot Platform</div>
         </div>
         <div class="body">
           <div class="greeting">Hello ${recipientName},</div>
-          <div class="desc">Thank you for starting your registration with <strong>QX Auto Trade</strong>. Please use the 6-digit Email OTP code below to verify your account and activate your Free Trial:</div>
+          <div class="desc">Thank you for starting your registration with <strong>QuCaptain</strong>. Please use the 6-digit Email OTP code below to verify your account and activate your Free Trial:</div>
           <div class="otp-box">
             <div class="otp-code">${otpCode}</div>
             <div class="expiry">⏱️ Valid for 10 Minutes Only</div>
@@ -93,7 +93,7 @@ async function sendOtpEmail(toEmail, otpCode, recipientName = 'Trader') {
           <div class="warning">🔒 If you did not request this verification code, please ignore this email. Never share your OTP with anyone.</div>
         </div>
         <div class="footer">
-          &copy; 2026 QX AUTO TRADE Platform. All Rights Reserved.<br>
+          &copy; 2026 QuCaptain Platform. All Rights Reserved.<br>
           Sent from <a href="mailto:${SMTP_FROM_EMAIL}" style="color:#64ffda;text-decoration:none;">${SMTP_FROM_EMAIL}</a>
         </div>
       </div>
@@ -130,7 +130,7 @@ async function sendOtpEmail(toEmail, otpCode, recipientName = 'Trader') {
  */
 async function sendWelcomeEmail(toEmail, recipientName = 'Trader', planName = 'Free Trial') {
   const fromHeader = `"${SMTP_FROM_NAME}" <${SMTP_FROM_EMAIL}>`;
-  const subject = `🎉 Welcome to QX Auto Trade - Your Account is Active!`;
+  const subject = `🎉 Welcome to QuCaptain - Your Account is Active!`;
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -162,7 +162,7 @@ async function sendWelcomeEmail(toEmail, recipientName = 'Trader', planName = 'F
     <body>
       <div class="container">
         <div class="header">
-          <h1 class="logo-title">⚡ QX AUTO TRADE</h1>
+          <h1 class="logo-title">⚡ QuCaptain</h1>
           <div class="sub-logo">Welcome to Automated Trading Excellence</div>
         </div>
         <div class="body">
@@ -191,7 +191,7 @@ async function sendWelcomeEmail(toEmail, recipientName = 'Trader', planName = 'F
           <div class="steps">
             <strong>🚀 Quick Start Steps:</strong>
             <ol>
-              <li>Log in to your <strong>QX Auto Trade Dashboard</strong>.</li>
+              <li>Log in to your <strong>QuCaptain Dashboard</strong>.</li>
               <li>Connect your <strong>Quotex / Pocket Option Account</strong>.</li>
               <li>Select <strong>Quotex OTC Volatility Scalper v3</strong> or your preferred strategy.</li>
               <li>Click <strong>START AUTO BOT</strong> to begin automated execution.</li>
@@ -203,7 +203,7 @@ async function sendWelcomeEmail(toEmail, recipientName = 'Trader', planName = 'F
           </div>
         </div>
         <div class="footer">
-          &copy; 2026 QX AUTO TRADE Platform. All Rights Reserved.<br>
+          &copy; 2026 QuCaptain Platform. All Rights Reserved.<br>
           Sent from <a href="mailto:${SMTP_FROM_EMAIL}" style="color:#64ffda;text-decoration:none;">${SMTP_FROM_EMAIL}</a>
         </div>
       </div>

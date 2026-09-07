@@ -12,7 +12,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react'
 
-const brokerFilters = ['All', 'Quotex', 'PocketOption', 'OlympTrade', 'GuruTrade7']
+const brokerFilters = ['All', 'Quotex']
 
 const brokerMeta = {
   quotex: {

@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const path = require('path');
@@ -34,7 +34,7 @@ app.use('/api/user', userRoutes);
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ONLINE',
-    service: 'QX Auto Trade Backend & Execution Engine',
+    service: 'QuCaptain Backend & Execution Engine',
     version: '2.4.2',
     timestamp: new Date().toISOString()
   });
@@ -60,6 +60,7 @@ app.use('/dashboard', express.static(dashboardDist));
 
 // Explicit APK Download Route
 app.get([
+  '/QuCaptain.apk',
   '/Quotexautotrade.apk',
   '/downloads/Quotexautotrade.apk',
   '/downloads/Autotrade.apk',
@@ -67,6 +68,8 @@ app.get([
   '/downloads/qx-auto-trade.apk'
 ], (req, res) => {
   const candidates = [
+    path.join(frontendDist, 'QuCaptain.apk'),
+    path.join(__dirname, '../../QuCaptain.apk'),
     path.join(frontendDist, 'Quotexautotrade.apk'),
     path.join(__dirname, '../../Quotexautotrade.apk'),
     path.join(frontendDist, 'downloads/Autotrade.apk'),
@@ -76,7 +79,7 @@ app.get([
   ];
   for (const p of candidates) {
     if (fs.existsSync(p)) {
-      return res.download(p, 'Quotexautotrade.apk');
+      return res.download(p, 'QuCaptain.apk');
     }
   }
   res.status(404).send('APK file not found');
@@ -123,7 +126,7 @@ const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
   console.log(`=======================================================`);
-  console.log(` QX AUTO TRADE Backend Server listening on port ${PORT}`);
+  console.log(` QuCaptain Backend Server listening on port ${PORT}`);
   console.log(` WebSocket Real-Time Server Ready`);
   console.log(`=======================================================`);
 });
