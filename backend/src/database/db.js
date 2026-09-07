@@ -172,6 +172,63 @@ const defaultData = {
   ],
   referralRequests: [],
   planSubscriptions: [],
+  subscriptionPlans: [
+    {
+      id: 'plan-basic',
+      name: 'Basic Plan',
+      price: '$40',
+      period: '/month',
+      depositAmount: 40,
+      features: ['Automated 1-Click Bot', 'Quotex OTC & Real Pairs', 'Standard Risk Management', 'Email Support'],
+      icon: 'Zap',
+      isActive: true,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'plan-pro',
+      name: 'Pro Plan',
+      price: '$100',
+      period: '/month',
+      depositAmount: 100,
+      features: ['All Basic Features', 'Advanced Martingale & Compounding', 'Real-time Signal Alerts', 'Priority Telegram Support'],
+      icon: 'Star',
+      isActive: true,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'plan-quantum',
+      name: 'Quantum Plan',
+      price: '$250',
+      period: '/3 months',
+      depositAmount: 250,
+      features: ['All Pro Features', 'High-Frequency Scalper Mode', 'Zero-Delay Webhook Execution', 'Dedicated VIP Manager'],
+      icon: 'Cpu',
+      isActive: true,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'plan-titan',
+      name: 'Titan Plan',
+      price: '$500',
+      period: '/6 months',
+      depositAmount: 500,
+      features: ['All Quantum Features', 'Multi-Asset Simultaneous Trading', 'Custom Algorithm Settings', '1-on-1 Strategy Setup'],
+      icon: 'Shield',
+      isActive: true,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'plan-apex',
+      name: 'Apex VIP Plan',
+      price: '$1000',
+      period: '/lifetime',
+      depositAmount: 1000,
+      features: ['Lifetime Access & Updates', 'Institutional Execution Algorithm', 'Private VIP Mastermind Group', '24/7 Direct Phone & Desk Support'],
+      icon: 'Crown',
+      isActive: true,
+      createdAt: new Date().toISOString()
+    }
+  ],
   errorLogs: [],
   auditLogs: [],
   announcements: [],
@@ -221,6 +278,9 @@ class Database {
         if (!this.data.systemConfig) this.data.systemConfig = defaultData.systemConfig;
         if (!this.data.siteConfig) this.data.siteConfig = defaultData.siteConfig;
         if (!this.data.planSubscriptions) this.data.planSubscriptions = [];
+        if (!this.data.subscriptionPlans || !this.data.subscriptionPlans.length) {
+          this.data.subscriptionPlans = defaultData.subscriptionPlans;
+        }
       } else {
         this.save();
       }

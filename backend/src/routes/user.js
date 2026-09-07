@@ -33,6 +33,12 @@ router.post('/notifications', (req, res) => {
   return res.json({ message: 'Notification preferences saved!', notifications: allNotifs[userId] });
 });
 
+// Get Available Subscription Plans (Public & In-App)
+router.get('/plans', (req, res) => {
+  const plans = db.get('subscriptionPlans') || [];
+  return res.json({ plans });
+});
+
 // Get User Security & 2FA Info
 router.get('/security/:userId', (req, res) => {
   const { userId } = req.params;
@@ -59,9 +65,27 @@ router.post('/toggle-2fa', (req, res) => {
   return res.json({ message: `2FA ${enabled ? 'enabled' : 'disabled'}.`, is2FAEnabled: userSecMap[userId].is2FAEnabled });
 });
 
-// Public Site Config Endpoint
+// Public Site Config Endpoint (Dynamic Plan Pricing Sync)
 router.get('/site-config', (req, res) => {
-  return res.json({ siteConfig: db.get('siteConfig') });
+  const cfg = { ...(db.get('siteConfig') || {}) };
+  const plans = db.get('subscriptionPlans') || [];
+  plans.forEach(p => {
+    const pName = (p.name || '').toLowerCase();
+    const pId = (p.id || '').toLowerCase();
+    const numPrice = parseFloat(p.price?.toString().replace(/[^0-9.]/g, '')) || 0;
+    if (pId.includes('basic') || pName.includes('basic')) {
+      cfg.priceBasic = numPrice || cfg.priceBasic || 40;
+    } else if (pId.includes('pro') || pName.includes('pro')) {
+      cfg.pricePro = numPrice || cfg.pricePro || 100;
+    } else if (pId.includes('quantum') || pName.includes('quantum')) {
+      cfg.priceQuantum = numPrice || cfg.priceQuantum || 250;
+    } else if (pId.includes('titan') || pName.includes('titan') || pId.includes('premium') || pName.includes('premium')) {
+      cfg.pricePremium = numPrice || cfg.pricePremium || 500;
+    } else if (pId.includes('apex') || pName.includes('apex') || pId.includes('lifetime') || pName.includes('lifetime')) {
+      cfg.priceLifetime = numPrice || cfg.priceLifetime || 1000;
+    }
+  });
+  return res.json({ siteConfig: cfg });
 });
 
 // Active Announcements Endpoint

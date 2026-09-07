@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { api } from '../api';
 import {
   Menu,
   X,
@@ -50,7 +51,6 @@ const features = [
     title: 'Secure Connection',
     desc: 'Encrypted API connections to your broker. We never hold your funds.',
   },
-  {
     icon: Clock,
     title: '24/7 Trading',
     desc: 'Round-the-clock automated trading across multiple currency pairs and assets.',
@@ -65,10 +65,10 @@ const sampleTrades = [
   { pair: 'EUR/GBP', type: 'CALL', amount: '$60', result: 'WIN', profit: '+$52.20', time: '28s ago' },
 ];
 
-const plans = [
+const defaultPlans = [
   {
     name: 'Basic',
-    price: '$29',
+    price: '$40',
     period: '/month',
     features: ['1 Trading Bot', 'Basic Strategies', 'Email Support', '2 Currency Pairs', 'Daily Reports'],
     cta: 'Get Started',
@@ -76,18 +76,18 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: '$79',
+    price: '$100',
     period: '/month',
     features: ['5 Trading Bots', 'Advanced Strategies', 'Priority Support', '10 Currency Pairs', 'Real-time Analytics', 'Custom Indicators'],
     cta: 'Start Pro',
     popular: true,
   },
   {
-    name: 'Premium',
-    price: '$149',
-    period: '/month',
+    name: 'Quantum',
+    price: '$250',
+    period: '/3 months',
     features: ['Unlimited Bots', 'All Strategies', 'Dedicated Support', 'All Currency Pairs', 'Advanced Analytics', 'Custom Indicators', 'API Access'],
-    cta: 'Go Premium',
+    cta: 'Go Quantum',
     popular: false,
   },
 ];
@@ -118,30 +118,6 @@ const testimonials = [
 
 const brokers = [
   { name: 'Quotex', color: 'from-green-400 to-emerald-500' },
-];
-
-export default function Landing() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const { user, logout } = useAuth();
-  const location = useLocation();
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useEffect(() => {
-    if (location.hash) {
-      const el = document.querySelector(location.hash);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [location]);
-
-  const navLinks = [
-    { label: 'Features', href: '#features' },
-    { label: 'Live Trades', href: '#live-trades' },
     { label: 'Pricing', href: '#pricing' },
     { label: 'Testimonials', href: '#testimonials' },
   ];

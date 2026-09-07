@@ -243,10 +243,16 @@ router.get('/all-trade-logs', (req, res) => {
   return res.json({ tradeLogs });
 });
 
-// List Users
+// List Users (Sorted newest first, mapped for Admin UI compatibility)
 router.get('/users', (req, res) => {
-  const users = db.get('users');
-  return res.json({ users });
+  const users = db.get('users') || [];
+  const mapped = [...users].reverse().map(u => ({
+    ...u,
+    active: u.isActive !== false,
+    isActive: u.isActive !== false,
+    plan: u.subscriptionPlan || u.plan || 'Free Trial'
+  }));
+  return res.json({ users: mapped });
 });
 
 // Approve or Reject Referral Lifetime Free Access
@@ -856,6 +862,22 @@ router.post('/plans/update', (req, res) => {
     plan.updatedAt = new Date().toISOString();
 
     db.set('subscriptionPlans', plans);
+
+    // Also sync to siteConfig for universal landing page consistency
+    if (plan.price) {
+      const numPrice = parseFloat(plan.price.toString().replace(/[^0-9.]/g, ''));
+      if (!isNaN(numPrice) && numPrice > 0) {
+        const siteConfig = db.get('siteConfig') || {};
+        const pName = (plan.name || '').toLowerCase();
+        const pId = (plan.id || '').toLowerCase();
+        if (pId.includes('basic') || pName.includes('basic')) siteConfig.priceBasic = numPrice;
+        else if (pId.includes('pro') || pName.includes('pro')) siteConfig.pricePro = numPrice;
+        else if (pId.includes('quantum') || pName.includes('quantum')) siteConfig.priceQuantum = numPrice;
+        else if (pId.includes('titan') || pName.includes('titan') || pId.includes('premium') || pName.includes('premium')) siteConfig.pricePremium = numPrice;
+        else if (pId.includes('apex') || pName.includes('apex') || pId.includes('lifetime') || pName.includes('lifetime')) siteConfig.priceLifetime = numPrice;
+        db.set('siteConfig', siteConfig);
+      }
+    }
 
     db.get('auditLogs').unshift({
       id: `audit-${Date.now()}`,

@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const path = require('path');
@@ -89,32 +89,33 @@ app.get([
   res.status(404).send('APK file not found');
 });
 
-// Dashboard SPA routes
-dashboardRoutes.forEach((route) => {
-  app.get(route, (req, res) => {
-    res.sendFile(path.join(dashboardDist, 'index.html'));
-  });
-});
-
-// Admin SPA routes - serve dashboard app
-adminRoutes2.forEach((route) => {
-  app.get(route, (req, res) => {
-    res.sendFile(path.join(dashboardDist, 'index.html'));
-  });
-});
-
-// Serve original frontend for everything else
+// Serve original frontend static files
 app.use(express.static(frontendDist));
+
+// Universal Dashboard and Admin routing
+app.get([
+  '/admin',
+  '/admin/*',
+  '/dashboard',
+  '/dashboard/*',
+  '/strategies',
+  '/settings',
+  '/history',
+  '/performance',
+  '/subscriptions',
+  '/support'
+], (req, res) => {
+  res.sendFile(path.join(dashboardDist, 'index.html'));
+});
 
 // Original SPA Fallback
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) return next();
-  
-  if (dashboardRoutes.some((r) => req.path === r || req.path.startsWith(r + '/')) ||
-      adminRoutes2.some((r) => req.path === r || req.path.startsWith(r + '/'))) {
+
+  if (req.path.startsWith('/admin') || req.path.startsWith('/dashboard')) {
     return res.sendFile(path.join(dashboardDist, 'index.html'));
   }
-  
+
   const indexPath = path.join(frontendDist, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
