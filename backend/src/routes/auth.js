@@ -492,6 +492,10 @@ router.post('/lifetime-request', (req, res) => {
 
 router.get('/test-smtp', async (req, res) => {
   const nodemailer = require('nodemailer');
+  const dns = require('dns');
+  if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+  }
   const results = {};
   
   // Test 465 (SSL)
@@ -500,8 +504,9 @@ router.get('/test-smtp', async (req, res) => {
       host: 'smtp.hostinger.com',
       port: 465,
       secure: true,
+      family: 4,
       auth: { user: 'noreply@quotexautotrade.com', pass: 'Noreplyqx@2026' },
-      connectionTimeout: 7000
+      connectionTimeout: 10000
     });
     await t465.verify();
     results.port465 = 'SUCCESS';
@@ -515,8 +520,9 @@ router.get('/test-smtp', async (req, res) => {
       host: 'smtp.hostinger.com',
       port: 587,
       secure: false,
+      family: 4,
       auth: { user: 'noreply@quotexautotrade.com', pass: 'Noreplyqx@2026' },
-      connectionTimeout: 7000
+      connectionTimeout: 10000
     });
     await t587.verify();
     results.port587 = 'SUCCESS';

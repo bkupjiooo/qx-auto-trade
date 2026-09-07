@@ -82,7 +82,7 @@ export const api = {
   addPlan: (data) => request('/admin/plans', { method: 'POST', body: JSON.stringify(data) }),
   updatePlan: (data) => request('/admin/plans/update', { method: 'POST', body: JSON.stringify(data) }),
   deletePlan: (data) => request('/admin/plans/delete', { method: 'POST', body: JSON.stringify(data) }),
-  getPublicPlans: () => request('/admin/plans'),
+  getPublicPlans: () => request('/user/public-plans'),
   updateStrategyParameters: (data) => request('/admin/strategy-parameters', { method: 'POST', body: JSON.stringify(data) }),
 
   getUserNotifications: (userId) => request(`/user/notifications/${userId}`),

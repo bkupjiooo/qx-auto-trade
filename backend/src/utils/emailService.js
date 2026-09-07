@@ -11,11 +11,18 @@ const SMTP_PASS = process.env.SMTP_PASS || 'Noreplyqx@2026';
 const SMTP_FROM_NAME = process.env.SMTP_FROM_NAME || 'QX AUTO TRADE';
 const SMTP_FROM_EMAIL = process.env.SMTP_FROM_EMAIL || 'noreply@quotexautotrade.com';
 
-// Initialize Dual Transporters: Port 587 (Primary STARTTLS) and Port 465 (Fallback SSL)
-const transporter587 = nodemailer.createTransport({
+const dns = require('dns');
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
+
+// Initialize Dual Transporters: Port 465 (Primary SSL) and Port 587 (Fallback TLS)
+// Explicitly force family: 4 to avoid ENETUNREACH on cloud environments (e.g. Render IPv6 restrictions)
+const transporter465 = nodemailer.createTransport({
   host: SMTP_HOST,
-  port: 587,
-  secure: false,
+  port: 465,
+  secure: true,
+  family: 4,
   auth: {
     user: SMTP_USER,
     pass: SMTP_PASS
@@ -26,10 +33,11 @@ const transporter587 = nodemailer.createTransport({
   connectionTimeout: 10000
 });
 
-const transporter465 = nodemailer.createTransport({
+const transporter587 = nodemailer.createTransport({
   host: SMTP_HOST,
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false,
+  family: 4,
   auth: {
     user: SMTP_USER,
     pass: SMTP_PASS

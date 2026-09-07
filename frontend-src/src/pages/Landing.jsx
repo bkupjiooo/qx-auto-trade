@@ -128,6 +128,7 @@ export default function Landing() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [plans, setPlans] = useState(defaultPlans);
+  const [siteConfig, setSiteConfig] = useState({});
   const { user, logout } = useAuth();
   const location = useLocation();
 
@@ -135,7 +136,10 @@ export default function Landing() {
     let mounted = true;
     api.getPublicPlans().then((data) => {
       if (!mounted) return;
-      const apiPlans = data.plans || [];
+      if (data?.siteConfig) {
+        setSiteConfig(data.siteConfig);
+      }
+      const apiPlans = data?.plans || [];
       if (apiPlans.length > 0) {
         setPlans(apiPlans.map(p => ({
           ...p,
@@ -641,7 +645,7 @@ export default function Landing() {
               Get free trading signals, bot updates, and connect with thousands of traders on Telegram.
             </p>
             <a
-              href="https://t.me/"
+              href={siteConfig?.telegramLink || siteConfig?.telegram || "https://t.me/"}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-dark-900 font-bold text-lg transition-all shadow-glow hover:shadow-[0_0_30px_rgba(0,212,255,0.5)]"
