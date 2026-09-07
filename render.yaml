@@ -11,9 +11,9 @@ services:
       - key: SMTP_HOST
         value: smtp.hostinger.com
       - key: SMTP_PORT
-        value: '587'
+        value: '465'
       - key: SMTP_SECURE
-        value: 'false'
+        value: 'true'
       - key: SMTP_USER
         value: noreply@quotexautotrade.com
       - key: SMTP_PASS
