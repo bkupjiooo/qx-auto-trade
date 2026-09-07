@@ -84,7 +84,7 @@ router.post('/force-stop-user', (req, res) => {
 // Edit User Details (Name, Email, Plan, Expiry, Active Status, Telegram ID, Broker ID, Broker Name, Trading Mode, MTG Level)
 router.post('/edit-user-details', (req, res) => {
   try {
-    const { userId, name, email, subscriptionPlan, subExpiresAt, isActive, isLifetimeApproved, telegramId, brokerId, brokerName, tradingMode, maxMtgLevel, adminEmail } = req.body;
+    const { userId, name, email, subscriptionPlan, plan, subExpiresAt, isActive, isLifetimeApproved, telegramId, brokerId, brokerName, tradingMode, maxMtgLevel, adminEmail } = req.body;
     const users = db.get('users');
     const user = users.find(u => u.id === userId);
 
@@ -92,7 +92,15 @@ router.post('/edit-user-details', (req, res) => {
 
     if (name) user.name = name;
     if (email) user.email = email.toLowerCase();
-    if (subscriptionPlan) user.subscriptionPlan = subscriptionPlan;
+    
+    const targetPlan = subscriptionPlan || plan;
+    if (targetPlan) {
+      user.subscriptionPlan = targetPlan;
+      if (targetPlan.toLowerCase().includes('free')) {
+        user.isLifetimeApproved = false;
+      }
+    }
+    
     if (subExpiresAt) user.subExpiresAt = subExpiresAt;
     if (isActive !== undefined) user.isActive = Boolean(isActive);
     if (isLifetimeApproved !== undefined) user.isLifetimeApproved = Boolean(isLifetimeApproved);

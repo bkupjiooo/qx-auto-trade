@@ -70,13 +70,77 @@ router.get('/announcements', (req, res) => {
   return res.json({ announcements });
 });
 
+function getPlanPriceAmount(planName) {
+  if (!planName) return 0;
+  const p = planName.toLowerCase();
+  if (p.includes('basic')) return 49.0;
+  if (p.includes('pro')) return 129.0;
+  if (p.includes('quantum')) return 239.0;
+  if (p.includes('premium')) return 450.0;
+  return 0;
+}
+
+function calculateReferralStats(user, users, planSubscriptions, allWithdrawals) {
+  if (!user) return { totalEarned: 0, availableBalance: 0, totalReferrals: 0, referredUsers: [], withdrawals: [] };
+  const userId = user.id;
+  const rawCode = user.referralUid || user.id;
+  const refCode = `QX-${rawCode.replace(/[^0-9A-Za-z]/g, '').slice(-6).toUpperCase()}`;
+
+  const referredUsers = users.filter(u => 
+    u.id !== user.id && u.referralUid && (
+      u.referralUid.toUpperCase() === refCode.toUpperCase() ||
+      u.referralUid.toUpperCase() === rawCode.toUpperCase() ||
+      u.referralUid === userId ||
+      (user.email && u.referralUid.toLowerCase() === user.email.toLowerCase())
+    )
+  );
+
+  let totalEarned = 0;
+  referredUsers.forEach(refUser => {
+    const userSubs = (planSubscriptions || []).filter(s => 
+      (s.userId === refUser.id || (refUser.email && s.userEmail && s.userEmail.toLowerCase() === refUser.email.toLowerCase())) &&
+      s.status === 'APPROVED'
+    );
+    if (userSubs.length > 0) {
+      userSubs.forEach(s => {
+        const amt = parseFloat(s.price || s.amount) || getPlanPriceAmount(s.planName);
+        totalEarned += amt * 0.10; // 10% commission on subscription bought
+      });
+    } else if (refUser.subscriptionPlan && !refUser.subscriptionPlan.toLowerCase().includes('free')) {
+      const amt = getPlanPriceAmount(refUser.subscriptionPlan);
+      totalEarned += amt * 0.10;
+    }
+  });
+
+  const withdrawals = (allWithdrawals || []).filter(w => 
+    w.userId === userId || (user.email && w.userEmail && w.userEmail.toLowerCase() === user.email.toLowerCase())
+  );
+  const totalWithdrawn = withdrawals
+    .filter(w => w.status === 'APPROVED' || w.status === 'PENDING')
+    .reduce((sum, w) => sum + (parseFloat(w.amount) || 0), 0);
+
+  const availableBalance = Math.max(0, totalEarned - totalWithdrawn);
+  return {
+    refCode,
+    totalReferrals: referredUsers.length,
+    totalEarned: Math.round(totalEarned * 100) / 100,
+    availableBalance: Math.round(availableBalance * 100) / 100,
+    referredUsers,
+    withdrawals
+  };
+}
+
 // Get User Profile Details
 router.get('/profile/:userId', (req, res) => {
   try {
     const { userId } = req.params;
-    const users = db.get('users');
+    const users = db.get('users') || [];
     const user = users.find(u => u.id === userId || u.email?.toLowerCase() === userId?.toLowerCase());
     if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const planSubs = db.get('planSubscriptions') || [];
+    const allWiths = db.get('commissionWithdrawals') || [];
+    const refStats = calculateReferralStats(user, users, planSubs, allWiths);
 
     return res.json({
       user: {
@@ -88,6 +152,9 @@ router.get('/profile/:userId', (req, res) => {
         subExpiresAt: user.subExpiresAt,
         isLifetimeApproved: Boolean(user.isLifetimeApproved),
         referralUid: user.referralUid,
+        referralBalance: refStats.availableBalance,
+        totalReferralEarned: refStats.totalEarned,
+        totalReferrals: refStats.totalReferrals,
         createdAt: user.createdAt,
         isActive: user.isActive !== false
       }
@@ -300,52 +367,27 @@ router.get('/referral-stats/:userId', (req, res) => {
     const users = db.get('users') || [];
     const user = users.find(u => u.id === userId || (u.email && u.email.toLowerCase() === userId.toLowerCase()));
     
-    // User referral code
-    const rawCode = user?.referralUid || (user?.id || userId);
-    const refCode = `QX-${rawCode.replace(/[^0-9A-Za-z]/g, '').slice(-6).toUpperCase()}`;
-    const referralLink = `https://quotexautotrade.com/register?ref=${refCode}`;
-
-    // Find all users who registered using this user's refCode or ID
-    const referredUsers = users.filter(u => 
-      u.referralUid && (
-        u.referralUid.toUpperCase() === refCode.toUpperCase() || 
-        u.referralUid === userId || 
-        (user?.email && u.referralUid.toLowerCase() === user.email.toLowerCase())
-      )
-    );
-
-    const totalReferrals = referredUsers.length;
-    // $25 per referred trader commission
-    let totalEarned = totalReferrals * 25.0;
-    
-    // Withdrawals
-    const allWithdrawals = db.get('commissionWithdrawals') || [];
-    const withdrawals = allWithdrawals.filter(w => 
-      w.userId === userId || (user?.email && w.userEmail && w.userEmail.toLowerCase() === user.email.toLowerCase())
-    );
-    
-    const totalWithdrawn = withdrawals
-      .filter(w => w.status === 'APPROVED' || w.status === 'PENDING')
-      .reduce((sum, w) => sum + (parseFloat(w.amount) || 0), 0);
-
-    const availableBalance = Math.max(0, totalEarned - totalWithdrawn);
+    const planSubs = db.get('planSubscriptions') || [];
+    const allWiths = db.get('commissionWithdrawals') || [];
+    const stats = calculateReferralStats(user, users, planSubs, allWiths);
+    const referralLink = `https://quotexautotrade.com/register?ref=${stats.refCode}`;
 
     return res.json({
-      referralCode: refCode,
+      referralCode: stats.refCode,
       referralLink,
-      totalReferrals,
-      totalEarned,
-      availableBalance,
-      commissionRate: '20%',
-      referredUsers: referredUsers.map(u => ({
+      totalReferrals: stats.totalReferrals,
+      totalEarned: stats.totalEarned,
+      availableBalance: stats.availableBalance,
+      commissionRate: '10%',
+      referredUsers: stats.referredUsers.map(u => ({
         id: u.id,
         name: u.name,
         email: u.email ? u.email.slice(0, 3) + '***@' + u.email.split('@')[1] : 'user***',
         joinedAt: u.createdAt,
         status: u.isActive ? 'Active' : 'Pending',
-        commissionEarned: 25.0
+        commissionEarned: Math.round((u.subscriptionPlan && !u.subscriptionPlan.toLowerCase().includes('free') ? getPlanPriceAmount(u.subscriptionPlan) * 0.10 : 0) * 100) / 100
       })),
-      withdrawals
+      withdrawals: stats.withdrawals
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -358,8 +400,8 @@ router.post('/withdraw-commission', (req, res) => {
     const { userId, userEmail, userName, amount, payoutMethod, payoutAddress } = req.body;
     const numAmount = parseFloat(amount);
 
-    if (!userId || isNaN(numAmount) || numAmount < 10) {
-      return res.status(400).json({ error: 'Minimum withdrawal amount is $10.00' });
+    if (!userId || isNaN(numAmount) || numAmount < 100) {
+      return res.status(400).json({ error: 'Minimum withdrawal amount is $100.00' });
     }
     if (!payoutMethod || !payoutAddress) {
       return res.status(400).json({ error: 'Payout method and payout address/details are required.' });

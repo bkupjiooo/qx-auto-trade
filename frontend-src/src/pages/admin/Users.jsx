@@ -64,7 +64,7 @@ export default function AdminUsers() {
     setSubmitting(true)
     setError('')
     try {
-      await api.editUserDetails({ userId: editUser.id, ...form })
+      await api.editUserDetails({ userId: editUser.id, subscriptionPlan: form.plan, plan: form.plan, name: form.name, email: form.email })
       setEditUser(null)
       setForm(emptyForm)
       fetchUsers()
@@ -121,7 +121,7 @@ export default function AdminUsers() {
   }
 
   const openEdit = (user) => {
-    setForm({ name: user.name || '', email: user.email || '', plan: user.plan || 'free', password: '' })
+    setForm({ name: user.name || '', email: user.email || '', plan: user.subscriptionPlan || user.plan || 'Free Trial', password: '' })
     setEditUser(user)
   }
 
@@ -193,8 +193,8 @@ export default function AdminUsers() {
                     <td className={`px-4 py-3 font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{user.name}</td>
                     <td className={`px-4 py-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{user.email}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-                        {user.plan || 'free'}
+                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                        {user.subscriptionPlan || user.plan || 'Free Trial'}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -280,7 +280,7 @@ export default function AdminUsers() {
           <form onSubmit={handleEdit} className="space-y-4">
             <Input label="Name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} required />
             <Input label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} required />
-            <Select label="Plan" value={form.plan} onChange={(v) => setForm({ ...form, plan: v })} options={['free', 'basic', 'premium', 'enterprise']} />
+            <Select label="Plan" value={form.plan} onChange={(v) => setForm({ ...form, plan: v })} options={['Free Trial', 'Basic Plan', 'Pro Plan', 'Quantum Plan', 'Premium Plan', 'Lifetime Free']} />
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setEditUser(null)} className={`px-4 py-2 text-sm transition-colors ${isDark ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'}`}>Cancel</button>
               <button type="submit" disabled={submitting} className="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white text-sm font-medium rounded-lg transition-colors">

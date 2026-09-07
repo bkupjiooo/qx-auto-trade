@@ -109,18 +109,18 @@ async function sendOtpEmail(toEmail, otpCode, recipientName = 'Trader') {
   };
 
   try {
-    const info = await transporter587.sendMail(mailOptions);
-    console.log(`[SMTP 587 SUCCESS] OTP Email sent to ${toEmail} | ID: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
-  } catch (err587) {
-    console.warn(`[SMTP 587 Failed, falling back to 465]: ${err587.message}`);
+    const info465 = await transporter465.sendMail(mailOptions);
+    console.log(`[SMTP 465 SUCCESS] OTP Email sent to ${toEmail} | ID: ${info465.messageId}`);
+    return { success: true, messageId: info465.messageId };
+  } catch (err465) {
+    console.warn(`[SMTP 465 Failed, falling back to 587]: ${err465.message}`);
     try {
-      const info465 = await transporter465.sendMail(mailOptions);
-      console.log(`[SMTP 465 SUCCESS] OTP Email sent to ${toEmail} | ID: ${info465.messageId}`);
-      return { success: true, messageId: info465.messageId };
-    } catch (err465) {
-      console.error(`[SMTP ALL PORTS FAILED] for ${toEmail}:`, err465.message);
-      return { success: false, error: err465.message };
+      const info587 = await transporter587.sendMail(mailOptions);
+      console.log(`[SMTP 587 SUCCESS] OTP Email sent to ${toEmail} | ID: ${info587.messageId}`);
+      return { success: true, messageId: info587.messageId };
+    } catch (err587) {
+      console.error(`[SMTP ALL PORTS FAILED] for ${toEmail}:`, err587.message);
+      return { success: false, error: err587.message };
     }
   }
 }
@@ -219,17 +219,17 @@ async function sendWelcomeEmail(toEmail, recipientName = 'Trader', planName = 'F
   };
 
   try {
-    const info = await transporter587.sendMail(mailOptions);
-    console.log(`[SMTP 587 SUCCESS] Welcome Email sent to ${toEmail} | ID: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
-  } catch (err587) {
+    const info465 = await transporter465.sendMail(mailOptions);
+    console.log(`[SMTP 465 SUCCESS] Welcome Email sent to ${toEmail} | ID: ${info465.messageId}`);
+    return { success: true, messageId: info465.messageId };
+  } catch (err465) {
     try {
-      const info465 = await transporter465.sendMail(mailOptions);
-      console.log(`[SMTP 465 SUCCESS] Welcome Email sent to ${toEmail} | ID: ${info465.messageId}`);
-      return { success: true, messageId: info465.messageId };
-    } catch (err465) {
-      console.error(`[SMTP ALL PORTS FAILED] Welcome email for ${toEmail}:`, err465.message);
-      return { success: false, error: err465.message };
+      const info587 = await transporter587.sendMail(mailOptions);
+      console.log(`[SMTP 587 SUCCESS] Welcome Email sent to ${toEmail} | ID: ${info587.messageId}`);
+      return { success: true, messageId: info587.messageId };
+    } catch (err587) {
+      console.error(`[SMTP ALL PORTS FAILED] Welcome email for ${toEmail}:`, err587.message);
+      return { success: false, error: err587.message };
     }
   }
 }

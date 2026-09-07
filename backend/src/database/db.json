@@ -14,109 +14,6 @@
       "depositVerified": true,
       "createdAt": "2026-07-29T19:04:24.671Z",
       "isActive": true
-    },
-    {
-      "id": "user-demo-1",
-      "name": "Trader Alex",
-      "email": "alex@qxautotrade.com",
-      "passwordHash": "$2a$10$VKQ6LfF52LLio34o7SRA8ezrRsEeUq0Emjd2GoJSzE58KeCdX1e3S",
-      "role": "USER",
-      "trialStartedAt": "2026-07-29T19:04:24.671Z",
-      "subscriptionPlan": "Pro",
-      "subExpiresAt": "2026-08-28T19:04:24.671Z",
-      "isLifetimeApproved": false,
-      "referralUid": "REF-ALEX-882",
-      "depositVerified": true,
-      "createdAt": "2026-07-29T19:04:24.671Z",
-      "isActive": true
-    },
-    {
-      "id": "user-1785352926977",
-      "name": "Sarah Trade",
-      "email": "sarah@qxautotrade.com",
-      "passwordHash": "$2a$10$zFzjs2TdE2PZYX9kbXHWMu/pq1gB7G9QHALX0dP1ny3WcVxhO7RJa",
-      "role": "USER",
-      "isActive": true,
-      "trialStartedAt": "2026-07-29T19:22:06.977Z",
-      "subscriptionPlan": "Free Trial",
-      "subExpiresAt": "2026-07-29T20:22:06.978Z",
-      "isLifetimeApproved": false,
-      "referralUid": null,
-      "depositVerified": false,
-      "createdAt": "2026-07-29T19:22:06.978Z"
-    },
-    {
-      "id": "user-1786368902656",
-      "name": "Test User",
-      "email": "admin@qxautotrade.comtestuser@gmail.com",
-      "passwordHash": "$2a$10$vMdoe8Wj.Y8H1d6MRQEzl.gDcAPP22xCaEYSERJgysJ2mtQtdb0Ji",
-      "role": "USER",
-      "isActive": false,
-      "subscriptionPlan": "Premium Plan",
-      "subExpiresAt": "2026-09-09T13:35:02.656Z",
-      "brokerName": "QUOTEX",
-      "brokerId": "QX-99999",
-      "telegramId": "@testuser",
-      "createdAt": "2026-08-10T13:35:02.656Z"
-    },
-    {
-      "id": "user-1786373135759",
-      "name": "Test Test",
-      "email": "admin@qxautotrade.comtestuser2@gmail.com",
-      "passwordHash": "$2a$10$.IOnwN./FJWcKLLbMgmKi.Gcr3jWHdH0Zp2D8.t0iYbTc1pGkwxDW",
-      "role": "USER",
-      "isActive": true,
-      "subscriptionPlan": "Free Trial",
-      "subExpiresAt": "2026-09-09T14:45:35.759Z",
-      "brokerName": "QUOTEX",
-      "brokerId": "QX-12345",
-      "telegramId": "@testuser",
-      "createdAt": "2026-08-10T14:45:35.759Z"
-    },
-    {
-      "id": "user-1787424851409",
-      "name": "Demo User",
-      "email": "demo@qxautotrade.com",
-      "passwordHash": "$2a$10$nudEwqnfhoaoHX5PXYx3aOLbOvnm8Vx.GnEeUsnwbIiRm0JSltrG2",
-      "role": "USER",
-      "isActive": true,
-      "trialStartedAt": "2026-08-22T18:54:11.409Z",
-      "subscriptionPlan": "Free Trial",
-      "subExpiresAt": "2026-08-22T19:54:11.409Z",
-      "isLifetimeApproved": false,
-      "referralUid": null,
-      "depositVerified": false,
-      "createdAt": "2026-08-22T18:54:11.409Z"
-    },
-    {
-      "id": "user-1787485286368",
-      "name": "Test OTP",
-      "email": "otp-test@qx.com",
-      "passwordHash": "$2a$10$TjHO34TaQVRVneOTTP0ndueC9dVU4A6jrYwT4L1hHtwa2KbQHIjeK",
-      "role": "USER",
-      "isActive": true,
-      "trialStartedAt": "2026-08-23T11:41:26.368Z",
-      "subscriptionPlan": "Free Trial",
-      "subExpiresAt": "2026-08-23T12:41:26.368Z",
-      "isLifetimeApproved": false,
-      "referralUid": null,
-      "depositVerified": false,
-      "createdAt": "2026-08-23T11:41:26.368Z"
-    },
-    {
-      "id": "user-1788612470060",
-      "name": "Om",
-      "email": "omchoubey123@gmail.com",
-      "passwordHash": "$2a$10$gkVlNdnRpr3RrDJr0mgYMuiqTZ9Z.pezYhiwWOzVkVSFbWxxsL28e",
-      "role": "USER",
-      "isActive": true,
-      "trialStartedAt": "2026-09-05T12:47:50.060Z",
-      "subscriptionPlan": "Free Trial",
-      "subExpiresAt": "2026-09-05T13:47:50.060Z",
-      "isLifetimeApproved": false,
-      "referralUid": null,
-      "depositVerified": false,
-      "createdAt": "2026-09-05T12:47:50.060Z"
     }
   ],
   "brokerConnections": [
@@ -51631,6 +51528,83 @@
     }
   ],
   "auditLogs": [
+    {
+      "id": "audit-1788752206490",
+      "action": "ADMIN_DELETE_USER",
+      "actorEmail": "Master Admin",
+      "targetUserId": "user-1787424851409",
+      "details": "Deleted user demo@qxautotrade.com (Demo User)",
+      "timestamp": "2026-09-07T03:36:46.490Z"
+    },
+    {
+      "id": "audit-1788752203453",
+      "action": "ADMIN_DELETE_USER",
+      "actorEmail": "Master Admin",
+      "targetUserId": "user-1787485286368",
+      "details": "Deleted user otp-test@qx.com (Test OTP)",
+      "timestamp": "2026-09-07T03:36:43.453Z"
+    },
+    {
+      "id": "audit-1788752199618",
+      "action": "ADMIN_DELETE_USER",
+      "actorEmail": "Master Admin",
+      "targetUserId": "user-1786373135759",
+      "details": "Deleted user admin@qxautotrade.comtestuser2@gmail.com (Test Test)",
+      "timestamp": "2026-09-07T03:36:39.618Z"
+    },
+    {
+      "id": "audit-1788752196875",
+      "action": "ADMIN_DELETE_USER",
+      "actorEmail": "Master Admin",
+      "targetUserId": "user-1786368902656",
+      "details": "Deleted user admin@qxautotrade.comtestuser@gmail.com (Test User)",
+      "timestamp": "2026-09-07T03:36:36.875Z"
+    },
+    {
+      "id": "audit-1788752193810",
+      "action": "ADMIN_DELETE_USER",
+      "actorEmail": "Master Admin",
+      "targetUserId": "user-1785352926977",
+      "details": "Deleted user sarah@qxautotrade.com (Sarah Trade)",
+      "timestamp": "2026-09-07T03:36:33.810Z"
+    },
+    {
+      "id": "audit-1788752189640",
+      "action": "ADMIN_DELETE_USER",
+      "actorEmail": "Master Admin",
+      "targetUserId": "user-demo-1",
+      "details": "Deleted user alex@qxautotrade.com (Trader Alex)",
+      "timestamp": "2026-09-07T03:36:29.640Z"
+    },
+    {
+      "id": "audit-1788751628520",
+      "action": "ADMIN_DELETE_USER",
+      "actorEmail": "Master Admin",
+      "targetUserId": "user-1788612470060",
+      "details": "Deleted user omchoubey123@gmail.com (Om)",
+      "timestamp": "2026-09-07T03:27:08.520Z"
+    },
+    {
+      "id": "audit-1788751611523",
+      "action": "MASTER_ADMIN_LOGIN",
+      "actorEmail": "admin@qxautotrade.com",
+      "details": "Master Admin authenticated into /admin portal.",
+      "timestamp": "2026-09-07T03:26:51.523Z"
+    },
+    {
+      "id": "audit-1788751511819",
+      "action": "MASTER_ADMIN_LOGIN",
+      "actorEmail": "admin@qxautotrade.com",
+      "details": "Master Admin authenticated into /admin portal.",
+      "timestamp": "2026-09-07T03:25:11.819Z"
+    },
+    {
+      "id": "audit-1788751499149",
+      "action": "MASTER_ADMIN_LOGIN",
+      "actorEmail": "admin@qxautotrade.com",
+      "details": "Master Admin authenticated into /admin portal.",
+      "timestamp": "2026-09-07T03:24:59.149Z"
+    },
     {
       "id": "audit-1788612478331",
       "action": "USER_LOGIN",

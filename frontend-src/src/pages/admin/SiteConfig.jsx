@@ -58,12 +58,13 @@ export default function AdminSiteConfig() {
   ]
 
   const socialFields = [
-    { key: 'telegramLink', label: 'Telegram Channel Link', type: 'url' },
+    { key: 'telegramLink', label: 'Telegram Community Channel Link', type: 'url' },
     { key: 'telegramSupport', label: 'Telegram Support Link / Username', type: 'text' },
+    { key: 'youtubeLink', label: 'YouTube Channel Link', type: 'url' },
+    { key: 'instagramLink', label: 'Instagram Page Link', type: 'url' },
+    { key: 'facebookLink', label: 'Facebook Page Link', type: 'url' },
     { key: 'whatsappLink', label: 'WhatsApp Link', type: 'url' },
     { key: 'twitterLink', label: 'Twitter / X Link', type: 'url' },
-    { key: 'instagramLink', label: 'Instagram Link', type: 'url' },
-    { key: 'youtubeLink', label: 'YouTube Link', type: 'url' },
   ]
 
   const paymentFields = [

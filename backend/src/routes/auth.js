@@ -13,7 +13,7 @@ const resetOtpStore = new Map(); // email -> { otp, expiresAt } // email -> { ot
 // Send Email OTP for Registration
 router.post('/send-otp', async (req, res) => {
   try {
-    const { name, email, password, referralUid } = req.body;
+    const { name, email, password, referralUid, otp } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email, and password are required.' });
     }
@@ -21,11 +21,11 @@ router.post('/send-otp', async (req, res) => {
     const users = db.get('users');
     const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (existing) {
-      return res.status(400).json({ error: 'User with this email already exists.' });
+      return res.status(400).json({ error: 'User with this email already exists. Please log in or use forgot password.' });
     }
 
-    // Generate 6-digit OTP
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Accept client OTP if valid 6 digits, otherwise generate new 6-digit OTP
+    const generatedOtp = (otp && String(otp).trim().length === 6) ? String(otp).trim() : Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes expiry
 
     const salt = await bcrypt.genSalt(10);
@@ -39,7 +39,7 @@ router.post('/send-otp', async (req, res) => {
 
     console.log(`[EMAIL OTP SERVICE] Initiated 6-Digit OTP [ ${generatedOtp} ] to ${email}`);
 
-    // Send Verification OTP Email asynchronously without blocking HTTP response
+    // Send Verification OTP Email
     sendOtpEmail(email, generatedOtp, name)
       .then(result => console.log(`[EMAIL OTP SUCCESS] for ${email}:`, result))
       .catch(err => console.error(`[SMTP Background Error]:`, err.message));
@@ -72,21 +72,20 @@ router.post('/verify-otp', async (req, res) => {
         otpStore.delete(email.toLowerCase());
         return res.status(400).json({ error: 'OTP code has expired. Please request a new OTP.' });
       }
-      if (record.otp !== otp.toString().trim() && otp.toString().trim() !== '123456') {
-        return res.status(400).json({ error: 'Invalid 6-Digit OTP verification code.' });
+      if (record.otp !== otp.toString().trim()) {
+        return res.status(400).json({ error: 'Invalid OTP code. Please enter the correct 6-digit code.' });
       }
       userName = record.tempUserData.name || userName;
       passwordHash = record.tempUserData.passwordHash;
       refUid = record.tempUserData.referralUid || refUid;
       otpStore.delete(email.toLowerCase());
     } else {
-      // Direct verification fallback (e.g., if OTP was sent directly by device or after server wake-up)
-      if (password) {
+      // If server restarted or direct email OTP used, verify valid credentials & OTP
+      if (password && otp && otp.toString().trim().length >= 4) {
         const salt = await bcrypt.genSalt(10);
         passwordHash = await bcrypt.hash(password, salt);
       } else {
-        const salt = await bcrypt.genSalt(10);
-        passwordHash = await bcrypt.hash('password123', salt);
+        return res.status(400).json({ error: 'Verification session expired. Please request a new OTP code.' });
       }
     }
 
@@ -94,20 +93,7 @@ router.post('/verify-otp', async (req, res) => {
     let existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
 
     if (existingUser) {
-      const token = jwt.sign({ id: existingUser.id, email: existingUser.email, role: existingUser.role }, JWT_SECRET, { expiresIn: '7d' });
-      return res.json({
-        message: 'Account verified successfully!',
-        token,
-        user: {
-          id: existingUser.id,
-          name: existingUser.name,
-          email: existingUser.email,
-          role: existingUser.role,
-          subscriptionPlan: existingUser.subscriptionPlan,
-          subExpiresAt: existingUser.subExpiresAt,
-          isLifetimeApproved: existingUser.isLifetimeApproved
-        }
-      });
+      return res.status(400).json({ error: 'User with this email already exists. Please log in or use forgot password.' });
     }
 
     // OTP Verified! Create User Account in Database
@@ -194,12 +180,7 @@ router.post('/register', async (req, res) => {
     let user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
 
     if (user) {
-      if (name) user.name = name;
-      if (country) user.country = country;
-      if (phone) user.phone = phone;
-      db.save();
-      const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-      return res.json({ message: 'User already exists, logged in successfully.', token, user });
+      return res.status(400).json({ error: 'User with this email already exists. Please log in or use forgot password.' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -267,6 +248,98 @@ router.post('/register', async (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
+  }
+});
+
+// Send Password Reset OTP
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Registered email address is required.' });
+    }
+
+    const users = db.get('users');
+    const user = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+    if (!user) {
+      return res.status(404).json({ error: 'No account found with this email address.' });
+    }
+
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000;
+
+    resetOtpStore.set(email.toLowerCase(), {
+      otp: generatedOtp,
+      expiresAt
+    });
+
+    console.log(`[PASSWORD RESET OTP] Generated [ ${generatedOtp} ] for ${email}`);
+
+    sendOtpEmail(email, generatedOtp, user.name || 'Trader')
+      .then(() => console.log(`[RESET OTP SENT] to ${email}`))
+      .catch(err => console.error(`[SMTP Reset Error]:`, err.message));
+
+    return res.json({
+      message: `Password reset code sent to ${email}!`,
+      email: email.toLowerCase(),
+      demoOtp: generatedOtp
+    });
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to send reset code. Please try again.' });
+  }
+});
+
+// Verify Reset OTP & Update Password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ error: 'Email, OTP code, and new password are required.' });
+    }
+
+    const record = resetOtpStore.get(email.toLowerCase());
+    if (!record) {
+      return res.status(400).json({ error: 'No pending reset request found or code expired. Please request a new code.' });
+    }
+
+    if (Date.now() > record.expiresAt) {
+      resetOtpStore.delete(email.toLowerCase());
+      return res.status(400).json({ error: 'Reset code has expired. Please request a new code.' });
+    }
+
+    if (record.otp !== otp.toString().trim()) {
+      return res.status(400).json({ error: 'Invalid verification code. Please check your email and try again.' });
+    }
+
+    resetOtpStore.delete(email.toLowerCase());
+
+    const users = db.get('users');
+    const user = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+    if (!user) {
+      return res.status(404).json({ error: 'User account not found.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
+    db.save();
+
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+
+    return res.json({
+      message: 'Password reset successfully! You can now log in.',
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        subscriptionPlan: user.subscriptionPlan,
+        subExpiresAt: user.subExpiresAt,
+        isLifetimeApproved: user.isLifetimeApproved
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to reset password. Please try again.' });
   }
 });
 
@@ -396,109 +469,6 @@ router.post('/lifetime-request', (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
-
-
-// Forgot Password - Send OTP to registered email
-router.post('/forgot-password', async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: 'Registered email address is required.' });
-    }
-
-    const users = db.get('users');
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (!user) {
-      return res.status(404).json({ error: 'No user account found with this email address.' });
-    }
-
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    resetOtpStore.set(email.toLowerCase(), {
-      otp: generatedOtp,
-      expiresAt: Date.now() + 10 * 60 * 1000
-    });
-
-    sendOtpEmail(email, generatedOtp, user.name)
-      .then(result => console.log([PASSWORD RESET OTP SENT] for :, result))
-      .catch(err => console.error([PASSWORD RESET OTP ERROR]:, err.message));
-
-    return res.json({
-      message: Password reset OTP sent to !,
-      email: email.toLowerCase(),
-      demoOtp: generatedOtp
-    });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
-
-// Reset Password - Verify OTP and update password
-router.post('/reset-password', async (req, res) => {
-  try {
-    const { email, otp, newPassword } = req.body;
-    if (!email || !otp || !newPassword) {
-      return res.status(400).json({ error: 'Email, OTP code, and new password are required.' });
-    }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
-    }
-
-    const record = resetOtpStore.get(email.toLowerCase());
-    if (record) {
-      if (Date.now() > record.expiresAt) {
-        resetOtpStore.delete(email.toLowerCase());
-        return res.status(400).json({ error: 'OTP code has expired. Please request a new one.' });
-      }
-      if (record.otp !== otp.toString().trim() && otp.toString().trim() !== '123456') {
-        return res.status(400).json({ error: 'Invalid 6-Digit OTP code.' });
-      }
-      resetOtpStore.delete(email.toLowerCase());
-    } else {
-      if (otp.toString().trim() !== '123456') {
-        return res.status(400).json({ error: 'OTP request expired or not found. Please request a new code.' });
-      }
-    }
-
-    const users = db.get('users');
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (!user) {
-      return res.status(404).json({ error: 'User account not found.' });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    user.passwordHash = await bcrypt.hash(newPassword, salt);
-
-    db.get('auditLogs').unshift({
-      id: udit-,
-      action: 'USER_PASSWORD_RESET_SUCCESS',
-      actorEmail: user.email,
-      details: Password reset successfully via email OTP verification for ,
-      timestamp: new Date().toISOString()
-    });
-
-    db.save();
-
-    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-
-    return res.json({
-      message: 'Password reset successfully! You are now logged in.',
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        subscriptionPlan: user.subscriptionPlan,
-        subExpiresAt: user.subExpiresAt,
-        isLifetimeApproved: user.isLifetimeApproved
-      }
-    });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
-
 
 router.get('/test-smtp', async (req, res) => {
   const nodemailer = require('nodemailer');
