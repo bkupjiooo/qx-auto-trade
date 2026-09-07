@@ -5,7 +5,7 @@ import { api } from '../../api'
 import { Shield, ArrowLeft, Eye, EyeOff } from 'lucide-react'
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState('admin@qxautotrade.com')
+  const [email, setEmail] = useState('admin@qucaptain.com')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)

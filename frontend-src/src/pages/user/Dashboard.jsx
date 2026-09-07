@@ -247,8 +247,8 @@ export default function Dashboard() {
       if (!popup || popup.closed) {
         clearInterval(checkClosed)
         try {
-          await api.connectBroker({ userId, broker: brokerId, email: user?.email || 'user@qxautotrade.com', password: 'connected' })
-          await api.syncBrokerData({ userId, broker: brokerId, email: user?.email || 'user@qxautotrade.com', balance: 1450.50 })
+          await api.connectBroker({ userId, broker: brokerId, email: user?.email || 'user@qucaptain.com', password: 'connected' })
+          await api.syncBrokerData({ userId, broker: brokerId, email: user?.email || 'user@qucaptain.com', balance: 1450.50 })
           toast(broker.name + ' connected successfully', 'success')
           fetchData()
         } catch {

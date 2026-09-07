@@ -71,7 +71,7 @@ export default function Support() {
   }
 
   const telegram = siteConfig?.telegramLink || siteConfig?.telegram || '#'
-  const email = siteConfig?.supportEmail || siteConfig?.email || 'support@qxautotrade.com'
+  const email = siteConfig?.supportEmail || siteConfig?.email || 'support@qucaptain.com'
   const liveChat = siteConfig?.liveChatLink || '#'
 
   const contactCards = [

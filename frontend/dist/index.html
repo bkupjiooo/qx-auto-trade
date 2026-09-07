@@ -15,7 +15,6 @@
       window.downloadApk = function() {
         var apkUrl = '/QuCaptain.apk';
         
-        // Show immediate visual confirmation toast
         var toast = document.getElementById('qx-apk-toast');
         if (!toast) {
           toast = document.createElement('div');
@@ -28,37 +27,25 @@
         }
         setTimeout(function() {
           if (toast && toast.parentNode) toast.style.display = 'none';
-        }, 4500);
+        }, 4000);
 
-        // 1. Direct Anchor Download (Primary for Desktop & Standard Mobile Browsers)
-        try {
-          var a = document.createElement('a');
-          a.href = apkUrl;
-          a.setAttribute('download', 'QuCaptain.apk');
-          a.style.display = 'none';
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(function() {
-            if (document.body.contains(a)) document.body.removeChild(a);
-          }, 300);
-        } catch (e) {
-          console.error('Anchor click error:', e);
-        }
-
-        // 2. Direct Window Location Trigger (Primary for Android Chrome, Samsung Internet & WebViews)
+        var a = document.createElement('a');
+        a.href = apkUrl;
+        a.setAttribute('download', 'QuCaptain.apk');
+        a.setAttribute('data-direct-download', 'true');
+        document.body.appendChild(a);
+        a.click();
         setTimeout(function() {
-          try {
-            window.location.href = apkUrl;
-          } catch(e) {}
-        }, 120);
+          if (document.body.contains(a)) document.body.removeChild(a);
+        }, 300);
       };
 
-      // Global click handler: Triggers APK download on Start Now, Start Auto Trade, Download App Now, etc.
+      // Global click handler: Triggers APK download on download actions
       document.addEventListener('click', function(e) {
         var el = e.target.closest('button, a, [role="button"]');
         if (!el) return;
+        if (el.getAttribute('data-direct-download') === 'true') return;
 
-        // Don't intercept telegram links or external links
         var href = el.getAttribute('href') || '';
         if (href.indexOf('t.me') !== -1 || href.startsWith('mailto:') || href.startsWith('tel:')) {
           return;
@@ -85,6 +72,7 @@
         );
 
         if (isDownloadAction) {
+          e.preventDefault();
           window.downloadApk();
         }
       }, true);

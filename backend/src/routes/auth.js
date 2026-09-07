@@ -397,7 +397,9 @@ router.post('/login', async (req, res) => {
 router.post('/admin-login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (email.toLowerCase() !== 'admin@qxautotrade.com') {
+    const cleanEmail = (email || '').toLowerCase().trim();
+    const validEmails = ['admin@qucaptain.com', 'admin@qucaption.com', 'admin@qucaptain.com'];
+    if (!validEmails.includes(cleanEmail)) {
       return res.status(401).json({ error: 'Invalid Master Admin credentials.' });
     }
 
@@ -411,12 +413,12 @@ router.post('/admin-login', async (req, res) => {
       }
     }
 
-    const token = jwt.sign({ id: 'admin-1', email: 'admin@qxautotrade.com', role: 'MASTER_ADMIN' }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: 'admin-1', email: 'admin@qucaptain.com', role: 'MASTER_ADMIN' }, JWT_SECRET, { expiresIn: '7d' });
 
     db.get('auditLogs').unshift({
       id: `audit-${Date.now()}`,
       action: 'MASTER_ADMIN_LOGIN',
-      actorEmail: 'admin@qxautotrade.com',
+      actorEmail: 'admin@qucaptain.com',
       details: 'Master Admin authenticated into /admin portal.',
       timestamp: new Date().toISOString()
     });
@@ -428,7 +430,7 @@ router.post('/admin-login', async (req, res) => {
       admin: {
         id: 'admin-1',
         name: 'Master Admin',
-        email: 'admin@qxautotrade.com',
+        email: 'admin@qucaptain.com',
         role: 'MASTER_ADMIN'
       }
     });

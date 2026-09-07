@@ -45,7 +45,7 @@ export default function AdminLayout() {
             <ShieldCheck className="w-4 h-4 text-white" />
           </div>
           <div className="min-w-0">
-            <p className={`text-xs font-bold truncate ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>QX Auto Trade</p>
+            <p className={`text-xs font-bold truncate ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>QuCaptain</p>
             <p className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Admin Panel</p>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="ml-auto lg:hidden">

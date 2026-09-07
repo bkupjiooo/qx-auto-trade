@@ -59,27 +59,31 @@ const adminRoutes2 = ['/admin/login', '/admin/dashboard', '/admin/users', '/admi
 app.use('/dashboard', express.static(dashboardDist));
 
 // Explicit APK Download Route
+// Universal Robust APK Download Route (Matches any .apk request)
 app.get([
   '/QuCaptain.apk',
+  '/downloads/QuCaptain.apk',
   '/Quotexautotrade.apk',
   '/downloads/Quotexautotrade.apk',
-  '/downloads/Autotrade.apk',
   '/Autotrade.apk',
-  '/downloads/qx-auto-trade.apk'
+  '/downloads/Autotrade.apk',
+  '/downloads/qx-auto-trade.apk',
+  '/*.apk'
 ], (req, res) => {
   const candidates = [
     path.join(frontendDist, 'QuCaptain.apk'),
     path.join(__dirname, '../../QuCaptain.apk'),
-    path.join(frontendDist, 'Quotexautotrade.apk'),
-    path.join(__dirname, '../../Quotexautotrade.apk'),
+    path.join(frontendDist, 'downloads/QuCaptain.apk'),
     path.join(frontendDist, 'downloads/Autotrade.apk'),
     path.join(frontendDist, 'Autotrade.apk'),
-    path.join(__dirname, '../../frontend/dist/Quotexautotrade.apk'),
-    'C:\\Users\\omchoubey\\Desktop\\qmtrix\\Quotexautotrade.apk'
+    path.join(frontendDist, 'Quotexautotrade.apk'),
+    path.join(__dirname, '../../Quotexautotrade.apk')
   ];
   for (const p of candidates) {
     if (fs.existsSync(p)) {
-      return res.download(p, 'QuCaptain.apk');
+      res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+      res.setHeader('Content-Disposition', 'attachment; filename="QuCaptain.apk"');
+      return res.sendFile(path.resolve(p));
     }
   }
   res.status(404).send('APK file not found');

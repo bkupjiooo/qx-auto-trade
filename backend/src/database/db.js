@@ -8,7 +8,7 @@ const defaultData = {
     {
       id: 'admin-1',
       name: 'Master Admin',
-      email: 'admin@qxautotrade.com',
+      email: 'admin@qucaptain.com',
       passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1', // password: admin123
       role: 'MASTER_ADMIN',
       isActive: true,
@@ -23,7 +23,7 @@ const defaultData = {
     {
       id: 'user-demo-1',
       name: 'Trader Alex',
-      email: 'alex@qxautotrade.com',
+      email: 'alex@qucaptain.com',
       passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1', // password: password123
       role: 'USER',
       isActive: true,
