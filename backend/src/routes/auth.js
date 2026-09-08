@@ -13,6 +13,15 @@ const resetOtpStore = new Map(); // email -> { otp, expiresAt } // email -> { ot
 // Send Email OTP for Registration
 router.post('/send-otp', async (req, res) => {
   try {
+    const siteConfig = db.get('siteConfig') || {};
+    if (siteConfig.maintenanceMode) {
+      return res.status(503).json({ error: 'Platform is currently undergoing scheduled maintenance. Please check back shortly.' });
+    }
+    const emergency = siteConfig.emergencyControls || {};
+    if (emergency.userRegistrationEnabled === false) {
+      return res.status(403).json({ error: 'New user registration is temporarily restricted by administrator.' });
+    }
+
     const { name, email, password, referralUid, otp } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email, and password are required.' });
@@ -57,6 +66,15 @@ router.post('/send-otp', async (req, res) => {
 // Verify Email OTP & Complete Registration (Robust against server sleep/direct OTP)
 router.post('/verify-otp', async (req, res) => {
   try {
+    const siteConfig = db.get('siteConfig') || {};
+    if (siteConfig.maintenanceMode) {
+      return res.status(503).json({ error: 'Platform is currently undergoing scheduled maintenance. Please check back shortly.' });
+    }
+    const emergency = siteConfig.emergencyControls || {};
+    if (emergency.userRegistrationEnabled === false) {
+      return res.status(403).json({ error: 'New user registration is temporarily restricted by administrator.' });
+    }
+
     const { email, otp, name, password, country, phone, referralUid } = req.body;
     if (!email || !otp) {
       return res.status(400).json({ error: 'Email and OTP code are required.' });
@@ -97,8 +115,9 @@ router.post('/verify-otp', async (req, res) => {
     }
 
     // OTP Verified! Create User Account in Database
+    const nowMs = Date.now();
     const newUser = {
-      id: `user-${Date.now()}`,
+      id: `user-${nowMs}`,
       name: userName,
       email: email.toLowerCase(),
       passwordHash,
@@ -106,16 +125,20 @@ router.post('/verify-otp', async (req, res) => {
       isActive: true,
       country: country || 'India 🇮🇳',
       phone: phone || '',
-      trialStartedAt: new Date().toISOString(),
+      trialStartedAt: new Date(nowMs).toISOString(),
+      trialStartedAtMs: nowMs,
+      trialExpiresAtMs: nowMs + 60 * 60 * 1000,
+      isFreeTrialExpired: false,
       subscriptionPlan: 'Free Trial',
-      subExpiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      subExpiresAt: new Date(nowMs + 60 * 60 * 1000).toISOString(),
+      planExpiresAt: new Date(nowMs + 60 * 60 * 1000).toISOString(),
       isLifetimeApproved: false,
       referralUid: refUid,
       depositVerified: false,
-      createdAt: new Date().toISOString()
+      createdAt: new Date(nowMs).toISOString()
     };
 
-    users.push(newUser);
+    users.unshift(newUser);
 
     // Initialize default risk settings for user
     const riskSettings = db.get('riskSettings');
@@ -143,9 +166,9 @@ router.post('/verify-otp', async (req, res) => {
 
     db.save();
 
-    sendWelcomeEmail(newUser.email, newUser.name, newUser.subscriptionPlan).catch(err => {
-      console.error('[SMTP Welcome Email Error]:', err.message);
-    });
+    // Send Welcome Email
+    sendWelcomeEmail(newUser.email, newUser.name, 'Free Trial (1 Hour Full Access)')
+      .catch(err => console.error('[SMTP Welcome Email Error]:', err.message));
 
     const token = jwt.sign({ id: newUser.id, email: newUser.email, role: newUser.role }, JWT_SECRET, { expiresIn: '7d' });
 
@@ -158,8 +181,12 @@ router.post('/verify-otp', async (req, res) => {
         email: newUser.email,
         role: newUser.role,
         trialStartedAt: newUser.trialStartedAt,
+        trialStartedAtMs: newUser.trialStartedAtMs,
+        trialExpiresAtMs: newUser.trialExpiresAtMs,
+        isFreeTrialExpired: newUser.isFreeTrialExpired,
         subscriptionPlan: newUser.subscriptionPlan,
         subExpiresAt: newUser.subExpiresAt,
+        planExpiresAt: newUser.planExpiresAt,
         isLifetimeApproved: newUser.isLifetimeApproved
       }
     });
@@ -171,6 +198,15 @@ router.post('/verify-otp', async (req, res) => {
 // Direct User Registration Endpoint (Guarantees every app user is in Admin Panel)
 router.post('/register', async (req, res) => {
   try {
+    const siteConfig = db.get('siteConfig') || {};
+    if (siteConfig.maintenanceMode) {
+      return res.status(503).json({ error: 'Platform is currently undergoing scheduled maintenance. Please check back shortly.' });
+    }
+    const emergency = siteConfig.emergencyControls || {};
+    if (emergency.userRegistrationEnabled === false) {
+      return res.status(403).json({ error: 'New user registration is temporarily restricted by administrator.' });
+    }
+
     const { name, email, password, referralUid, country, phone } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required.' });
@@ -186,8 +222,9 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
+    const nowMs = Date.now();
     const newUser = {
-      id: `user-${Date.now()}`,
+      id: `user-${nowMs}`,
       name: name || 'Trader',
       email: email.toLowerCase(),
       passwordHash,
@@ -195,16 +232,20 @@ router.post('/register', async (req, res) => {
       isActive: true,
       country: country || 'India 🇮🇳',
       phone: phone || '',
-      trialStartedAt: new Date().toISOString(),
+      trialStartedAt: new Date(nowMs).toISOString(),
+      trialStartedAtMs: nowMs,
+      trialExpiresAtMs: nowMs + 60 * 60 * 1000,
+      isFreeTrialExpired: false,
       subscriptionPlan: 'Free Trial',
-      subExpiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      subExpiresAt: new Date(nowMs + 60 * 60 * 1000).toISOString(),
+      planExpiresAt: new Date(nowMs + 60 * 60 * 1000).toISOString(),
       isLifetimeApproved: false,
       referralUid: referralUid || null,
       depositVerified: false,
-      createdAt: new Date().toISOString()
+      createdAt: new Date(nowMs).toISOString()
     };
 
-    users.push(newUser);
+    users.unshift(newUser);
 
     const riskSettings = db.get('riskSettings');
     riskSettings[newUser.id] = {
@@ -241,8 +282,13 @@ router.post('/register', async (req, res) => {
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
+        trialStartedAt: newUser.trialStartedAt,
+        trialStartedAtMs: newUser.trialStartedAtMs,
+        trialExpiresAtMs: newUser.trialExpiresAtMs,
+        isFreeTrialExpired: newUser.isFreeTrialExpired,
         subscriptionPlan: newUser.subscriptionPlan,
         subExpiresAt: newUser.subExpiresAt,
+        planExpiresAt: newUser.planExpiresAt,
         isLifetimeApproved: newUser.isLifetimeApproved
       }
     });
@@ -354,6 +400,15 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
+    const siteConfig = db.get('siteConfig') || {};
+    if (siteConfig.maintenanceMode && user.role !== 'ADMIN') {
+      return res.status(503).json({ error: 'Platform is currently undergoing scheduled maintenance. Please check back shortly.' });
+    }
+    const emergency = siteConfig.emergencyControls || {};
+    if (emergency.userLoginEnabled === false && user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'User login is temporarily paused by administrator.' });
+    }
+
     if (user.isActive === false) {
       return res.status(403).json({ error: 'Your account is deactivated. Please contact Master Admin.' });
     }
@@ -374,6 +429,10 @@ router.post('/login', async (req, res) => {
     });
     db.save();
 
+    const trialStartMs = user.trialStartedAtMs || (user.trialStartedAt ? new Date(user.trialStartedAt).getTime() : Date.now());
+    const trialExpMs = user.trialExpiresAtMs || (trialStartMs + 3600000);
+    const isTrialExp = user.isFreeTrialExpired ?? (Date.now() > trialExpMs);
+
     return res.json({
       message: 'Login successful!',
       token,
@@ -383,9 +442,13 @@ router.post('/login', async (req, res) => {
         email: user.email,
         role: user.role,
         trialStartedAt: user.trialStartedAt,
-        subscriptionPlan: user.subscriptionPlan,
+        trialStartedAtMs: trialStartMs,
+        trialExpiresAtMs: trialExpMs,
+        isFreeTrialExpired: isTrialExp,
+        subscriptionPlan: user.subscriptionPlan || 'Free Trial',
         subExpiresAt: user.subExpiresAt,
-        isLifetimeApproved: user.isLifetimeApproved
+        planExpiresAt: user.planExpiresAt || user.subExpiresAt,
+        isLifetimeApproved: user.isLifetimeApproved || false
       }
     });
   } catch (err) {

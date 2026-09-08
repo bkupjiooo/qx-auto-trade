@@ -75,7 +75,10 @@ export const api = {
   bulkDeletePlanSubscriptions: (data) => request('/admin/bulk-delete-plan-subscriptions', { method: 'POST', body: JSON.stringify(data) }),
   getCommissionWithdrawals: () => request('/admin/commission-withdrawals'),
   approveCommissionWithdrawal: (data) => request('/admin/approve-commission-withdrawal', { method: 'POST', body: JSON.stringify(data) }),
+  editCommissionWithdrawal: (data) => request('/admin/edit-commission-withdrawal', { method: 'POST', body: JSON.stringify(data) }),
+  reactivateFreeTrial: (data) => request('/admin/reactivate-free-trial', { method: 'POST', body: JSON.stringify(data) }),
   addStrategy: (data) => request('/admin/add-strategy', { method: 'POST', body: JSON.stringify(data) }),
+  editStrategy: (data) => request('/admin/edit-strategy', { method: 'POST', body: JSON.stringify(data) }),
   deleteStrategy: (data) => request('/admin/delete-strategy', { method: 'POST', body: JSON.stringify(data) }),
   toggleStrategyActive: (data) => request('/admin/toggle-strategy-active', { method: 'POST', body: JSON.stringify(data) }),
 

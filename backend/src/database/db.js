@@ -238,6 +238,15 @@ const defaultData = {
     pricePro: 129,
     priceQuantum: 239,
     pricePremium: 450,
+    enableUPI: true,
+    enableBankTransfer: true,
+    enableUSDT: true,
+    brokerLinks: {
+      quotex: 'https://broker-qx.pro/sign-up/?lid=345678',
+      pocketOption: 'https://pocketoption.com/register',
+      binomo: 'https://binomo.com',
+      olympTrade: 'https://olymptrade.com'
+    },
     footerText: 'QUOTEX AUTO TRADE © 2026. All rights reserved.',
     paymentUsdt: 'TQUOTEXautoTradeAddress1234567890USDT',
     paymentUpi: 'quotexautotrade@upi',
@@ -282,6 +291,10 @@ class Database {
         if (this.data.siteConfig.pricePro === undefined) this.data.siteConfig.pricePro = 129;
         if (this.data.siteConfig.priceQuantum === undefined) this.data.siteConfig.priceQuantum = 239;
         if (this.data.siteConfig.pricePremium === undefined) this.data.siteConfig.pricePremium = 450;
+        if (this.data.siteConfig.enableUPI === undefined) this.data.siteConfig.enableUPI = true;
+        if (this.data.siteConfig.enableBankTransfer === undefined) this.data.siteConfig.enableBankTransfer = true;
+        if (this.data.siteConfig.enableUSDT === undefined) this.data.siteConfig.enableUSDT = true;
+        if (!this.data.siteConfig.brokerLinks) this.data.siteConfig.brokerLinks = defaultData.siteConfig.brokerLinks;
       } else {
         this.save();
       }

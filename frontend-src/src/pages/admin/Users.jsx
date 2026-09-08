@@ -66,7 +66,14 @@ export default function AdminUsers() {
     setSubmitting(true)
     setError('')
     try {
-      await api.editUserDetails({ userId: editUser.id, subscriptionPlan: form.plan, plan: form.plan, name: form.name, email: form.email })
+      await api.editUserDetails({
+        userId: editUser.id,
+        subscriptionPlan: form.plan,
+        plan: form.plan,
+        name: form.name,
+        email: form.email,
+        planExpiresAt: form.planExpiresAt || null
+      })
       setEditUser(null)
       setForm(emptyForm)
       fetchUsers()
@@ -123,8 +130,30 @@ export default function AdminUsers() {
   }
 
   const openEdit = (user) => {
-    setForm({ name: user.name || '', email: user.email || '', plan: user.subscriptionPlan || user.plan || 'Free Trial', password: '' })
+    const expDate = user.planExpiresAt || user.subExpiresAt || '';
+    setForm({
+      name: user.name || '',
+      email: user.email || '',
+      plan: user.subscriptionPlan || user.plan || 'Free Trial',
+      planExpiresAt: expDate ? new Date(expDate).toISOString().slice(0, 16) : '',
+      password: ''
+    })
     setEditUser(user)
+  }
+
+  const handleReactivateTrial = async () => {
+    if (!editUser) return;
+    setSubmitting(true)
+    setError('')
+    try {
+      await api.reactivateFreeTrial({ userId: editUser.id })
+      setEditUser(null)
+      fetchUsers()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -159,7 +188,9 @@ export default function AdminUsers() {
               placeholder="Search users..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className={`w-full pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isDark ? 'bg-gray-700 border border-gray-600 text-white placeholder-gray-400' : 'bg-white border border-gray-200 text-gray-900'}`}
+              className={`w-full pl-9 pr-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'
+              }`}
             />
           </div>
         </div>
@@ -168,6 +199,7 @@ export default function AdminUsers() {
           <table className="w-full text-sm">
             <thead>
               <tr className={`border-b ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>
+                <th className={`text-left px-4 py-3 font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>User ID</th>
                 <th className={`text-left px-4 py-3 font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Name</th>
                 <th className={`text-left px-4 py-3 font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Email</th>
                 <th className={`text-left px-4 py-3 font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Plan</th>
@@ -179,19 +211,20 @@ export default function AdminUsers() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6" className={`px-4 py-12 text-center ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  <td colSpan="7" className={`px-4 py-12 text-center ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                     <Loader2 className="w-5 h-5 animate-spin mx-auto" />
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className={`px-4 py-12 text-center text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  <td colSpan="7" className={`px-4 py-12 text-center text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                     No users found
                   </td>
                 </tr>
               ) : (
                 filtered.map((user) => (
                   <tr key={user.id} className={`border-b ${isDark ? 'border-gray-800 hover:bg-gray-700/50' : 'border-gray-50 hover:bg-gray-50/50'}`}>
+                    <td className={`px-4 py-3 font-mono text-xs font-semibold ${isDark ? 'text-cyan-400' : 'text-primary-600'}`}>{user.id}</td>
                     <td className={`px-4 py-3 font-medium ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{user.name}</td>
                     <td className={`px-4 py-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{user.email}</td>
                     <td className="px-4 py-3">
@@ -283,6 +316,23 @@ export default function AdminUsers() {
             <Input label="Name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} required />
             <Input label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} required />
             <Select label="Plan" value={form.plan} onChange={(v) => setForm({ ...form, plan: v })} options={['Free Trial', 'Basic Plan', 'Pro Plan', 'Quantum Plan', 'Premium Plan', 'Lifetime Free']} />
+            <Input label="Plan Expiry Date & Time" type="datetime-local" value={form.planExpiresAt || ''} onChange={(v) => setForm({ ...form, planExpiresAt: v })} />
+            
+            <div className={`p-3 rounded-lg border flex items-center justify-between ${isDark ? 'bg-gray-700/50 border-gray-600' : 'bg-amber-50 border-amber-200'}`}>
+              <div>
+                <p className="text-xs font-medium text-amber-700 dark:text-amber-300">Free Trial Management</p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">Give user 1 hour free trial again</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleReactivateTrial}
+                disabled={submitting}
+                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded shadow transition-colors"
+              >
+                ⚡ Re-activate 1 Hr Free Trial
+              </button>
+            </div>
+
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setEditUser(null)} className={`px-4 py-2 text-sm transition-colors ${isDark ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'}`}>Cancel</button>
               <button type="submit" disabled={submitting} className="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white text-sm font-medium rounded-lg transition-colors">

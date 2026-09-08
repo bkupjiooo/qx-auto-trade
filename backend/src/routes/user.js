@@ -297,7 +297,20 @@ router.post('/subscribe-plan', (req, res) => {
       return res.status(400).json({ error: 'User ID and Plan Name are required.' });
     }
 
-    const subscriptions = db.get('planSubscriptions');
+    const subscriptions = db.get('planSubscriptions') || [];
+    // Check if user already has a pending subscription request to prevent fake/spam duplicates
+    const existingPending = subscriptions.find(s => 
+      (s.userId === userId || (userEmail && s.userEmail.toLowerCase() === userEmail.toLowerCase())) &&
+      s.status === 'PENDING'
+    );
+    if (existingPending) {
+      return res.status(400).json({ error: 'You already have a pending verification request. Please wait for Master Admin approval before submitting again.' });
+    }
+
+    if (!paymentTxId || String(paymentTxId).trim().length < 4) {
+      return res.status(400).json({ error: 'Please provide a valid Transaction Hash / UTR or Payment Reference.' });
+    }
+
     const newSub = {
       id: `sub-req-${Date.now()}`,
       userId,
@@ -306,7 +319,7 @@ router.post('/subscribe-plan', (req, res) => {
       planName,
       price: price || '$0',
       paymentMethod: paymentMethod || 'USDT',
-      paymentTxId: paymentTxId || 'TX-PENDING',
+      paymentTxId: paymentTxId.trim(),
       paymentProof: paymentProof || 'Reference/Proof Uploaded',
       status: 'PENDING',
       createdAt: new Date().toISOString()
@@ -429,14 +442,19 @@ router.get('/referral-stats/:userId', (req, res) => {
 // Submit Commission Withdrawal Request
 router.post('/withdraw-commission', (req, res) => {
   try {
-    const { userId, userEmail, userName, amount, payoutMethod, payoutAddress } = req.body;
+    const { userId, userEmail, userName, amount, payoutMethod, payoutAddress, paymentMethod, paymentDetails } = req.body;
     const numAmount = parseFloat(amount);
+    const method = payoutMethod || paymentMethod || 'USDT (TRC20)';
+    const address = payoutAddress || paymentDetails || '';
 
-    if (!userId || isNaN(numAmount) || numAmount < 100) {
-      return res.status(400).json({ error: 'Minimum withdrawal amount is $100.00' });
+    const siteConfig = db.get('siteConfig') || {};
+    const minWithdrawal = parseFloat(siteConfig.minReferralWithdrawal) || 10;
+
+    if (!userId || isNaN(numAmount) || numAmount < minWithdrawal) {
+      return res.status(400).json({ error: `Minimum withdrawal amount is $${minWithdrawal.toFixed(2)}` });
     }
-    if (!payoutMethod || !payoutAddress) {
-      return res.status(400).json({ error: 'Payout method and payout address/details are required.' });
+    if (!address) {
+      return res.status(400).json({ error: 'Payout address or payment details are required.' });
     }
 
     const withdrawals = db.get('commissionWithdrawals');
@@ -446,8 +464,8 @@ router.post('/withdraw-commission', (req, res) => {
       userEmail: userEmail || 'user@qxautotrade.com',
       userName: userName || 'Trader',
       amount: numAmount,
-      payoutMethod,
-      payoutAddress,
+      payoutMethod: method,
+      payoutAddress: address,
       status: 'PENDING',
       createdAt: new Date().toISOString()
     };

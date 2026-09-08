@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { api } from '../../api'
-import { CreditCard, Check, X, Trash2, RefreshCw, Loader2 } from 'lucide-react'
+import { CreditCard, Check, X, Trash2, RefreshCw, Loader2, Pencil } from 'lucide-react'
 import { useTheme } from '../../ThemeContext'
 
 export default function AdminSubscriptions() {
@@ -13,6 +13,8 @@ export default function AdminSubscriptions() {
   const [selected, setSelected] = useState([])
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false)
+  const [editWithdrawal, setEditWithdrawal] = useState(null)
+  const [withdrawalForm, setWithdrawalForm] = useState({ amount: '', status: 'PENDING', notes: '' })
   const [toast, setToast] = useState(null)
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -20,6 +22,26 @@ export default function AdminSubscriptions() {
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type })
     setTimeout(() => setToast(null), 3000)
+  }
+
+  const handleEditWithdrawal = async (e) => {
+    e.preventDefault()
+    setSubmitting('editW')
+    try {
+      await api.editCommissionWithdrawal({
+        withdrawalId: editWithdrawal.id,
+        amount: Number(withdrawalForm.amount),
+        status: withdrawalForm.status,
+        notes: withdrawalForm.notes
+      })
+      showToast('Referral withdrawal updated successfully')
+      setEditWithdrawal(null)
+      fetchSubscriptions()
+    } catch {
+      showToast('Failed to update withdrawal', 'error')
+    } finally {
+      setSubmitting(null)
+    }
   }
 
   const fetchSubscriptions = async () => {
@@ -221,6 +243,15 @@ export default function AdminSubscriptions() {
                               </button>
                             </>
                           )}
+                          <button
+                            onClick={() => {
+                              setWithdrawalForm({ amount: w.amount, status: w.status, notes: w.notes || '' })
+                              setEditWithdrawal(w)
+                            }}
+                            className={`inline-flex items-center gap-1 px-2 py-1 border text-[10px] font-semibold rounded-md transition-colors ${isDark ? 'border-gray-600 text-gray-300 hover:bg-gray-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                          >
+                            <Pencil className="w-3 h-3" /> Edit
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -350,6 +381,65 @@ export default function AdminSubscriptions() {
                 {submitting === 'bulk' ? 'Deleting...' : `Delete ${selected.length} Items`}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Withdrawal Modal */}
+      {editWithdrawal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditWithdrawal(null)} />
+          <div className={`relative rounded-xl shadow-2xl w-full max-w-md p-5 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`text-sm font-bold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>Edit Withdrawal Request</h3>
+              <button onClick={() => setEditWithdrawal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+            </div>
+            <form onSubmit={handleEditWithdrawal} className="space-y-4">
+              <div>
+                <p className="text-xs text-gray-400">User: <strong className="text-gray-200">{editWithdrawal.userName}</strong> ({editWithdrawal.userEmail})</p>
+                <p className="text-xs text-gray-400 mt-1">Method: <strong className="text-blue-400">{editWithdrawal.payoutMethod}</strong></p>
+                <p className="text-xs text-gray-400 font-mono mt-0.5 truncate">Address: {editWithdrawal.payoutAddress}</p>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold mb-1 text-gray-300">Withdrawal Amount ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  value={withdrawalForm.amount}
+                  onChange={(e) => setWithdrawalForm({ ...withdrawalForm, amount: e.target.value })}
+                  className={`w-full px-3 py-2 rounded-lg border text-sm ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold mb-1 text-gray-300">Status</label>
+                <select
+                  value={withdrawalForm.status}
+                  onChange={(e) => setWithdrawalForm({ ...withdrawalForm, status: e.target.value })}
+                  className={`w-full px-3 py-2 rounded-lg border text-sm ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                >
+                  <option value="PENDING">PENDING</option>
+                  <option value="APPROVED">APPROVED (Paid)</option>
+                  <option value="REJECTED">REJECTED</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold mb-1 text-gray-300">Admin Notes / Tx Hash (Optional)</label>
+                <input
+                  type="text"
+                  value={withdrawalForm.notes}
+                  onChange={(e) => setWithdrawalForm({ ...withdrawalForm, notes: e.target.value })}
+                  placeholder="e.g. Paid via UPI Txn ID / USDT TxHash"
+                  className={`w-full px-3 py-2 rounded-lg border text-sm ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setEditWithdrawal(null)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${isDark ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}>Cancel</button>
+                <button type="submit" disabled={submitting === 'editW'} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 disabled:opacity-50">
+                  {submitting === 'editW' ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

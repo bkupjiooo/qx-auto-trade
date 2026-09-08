@@ -102,6 +102,11 @@ router.post('/edit-user-details', (req, res) => {
     }
     
     if (subExpiresAt) user.subExpiresAt = subExpiresAt;
+    if (planExpiresAt) {
+      user.planExpiresAt = planExpiresAt;
+      user.subExpiresAt = planExpiresAt;
+    }
+    if (isFreeTrialExpired !== undefined) user.isFreeTrialExpired = Boolean(isFreeTrialExpired);
     if (isActive !== undefined) user.isActive = Boolean(isActive);
     if (isLifetimeApproved !== undefined) user.isLifetimeApproved = Boolean(isLifetimeApproved);
     if (telegramId !== undefined) user.telegramId = telegramId;
@@ -134,6 +139,67 @@ router.post('/edit-user-details', (req, res) => {
 
     db.save();
     return res.json({ message: 'User details updated successfully!', user, riskSettings: riskSettingsMap[userId] });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Reactivate Free Trial (1 Hour Full Access) by Admin
+router.post('/reactivate-free-trial', (req, res) => {
+  try {
+    const { userId, adminEmail } = req.body;
+    const users = db.get('users') || [];
+    const user = users.find(u => u.id === userId || (u.email && u.email.toLowerCase() === (userId || '').toLowerCase()));
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    const nowMs = Date.now();
+    user.trialStartedAt = new Date(nowMs).toISOString();
+    user.trialStartedAtMs = nowMs;
+    user.trialExpiresAtMs = nowMs + 60 * 60 * 1000;
+    user.subExpiresAt = new Date(nowMs + 60 * 60 * 1000).toISOString();
+    user.planExpiresAt = new Date(nowMs + 60 * 60 * 1000).toISOString();
+    user.isFreeTrialExpired = false;
+    user.subscriptionPlan = 'Free Trial';
+
+    db.get('auditLogs').unshift({
+      id: `audit-${Date.now()}`,
+      action: 'ADMIN_REACTIVATE_FREE_TRIAL',
+      actorEmail: adminEmail || 'Master Admin',
+      targetUserId: user.id,
+      details: `Reactivated 1-Hour Free Trial for ${user.name} (${user.email})`,
+      timestamp: new Date().toISOString()
+    });
+
+    db.save();
+    return res.json({ message: `Free Trial re-activated for 1 hour for ${user.name}!`, user });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Edit & Rename Strategy by Admin
+router.post('/edit-strategy', (req, res) => {
+  try {
+    const { strategyId, name, description, winRate, timeframe, adminEmail } = req.body;
+    const strategies = db.get('strategies') || [];
+    const strat = strategies.find(s => s.id === strategyId);
+    if (!strat) return res.status(404).json({ error: 'Strategy not found.' });
+
+    if (name) strat.name = name;
+    if (description !== undefined) strat.description = description;
+    if (winRate !== undefined) strat.winRate = parseFloat(winRate);
+    if (timeframe) strat.timeframe = timeframe;
+
+    db.get('auditLogs').unshift({
+      id: `audit-${Date.now()}`,
+      action: 'ADMIN_EDIT_STRATEGY',
+      actorEmail: adminEmail || 'Master Admin',
+      details: `Renamed/Updated strategy ${strat.name}`,
+      timestamp: new Date().toISOString()
+    });
+
+    db.save();
+    return res.json({ message: 'Strategy updated successfully!', strategy: strat, strategies });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -332,7 +398,7 @@ router.post('/toggle-announcement-active', (req, res) => {
   const ann = announcements.find(a => a.id === announcementId);
   if (!ann) return res.status(404).json({ error: 'Announcement not found.' });
 
-  ann.isActive = Boolean(isActive);
+  ann.isActive = (isActive !== undefined) ? Boolean(isActive) : !ann.isActive;
   db.save();
   return res.json({ message: `Announcement set to ${ann.isActive ? 'Active' : 'Inactive'}`, announcements });
 });
@@ -561,6 +627,34 @@ router.post('/approve-plan-subscription', (req, res) => {
       else if (sub.planName.includes('Premium')) durationDays = 365;
 
       user.subExpiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString();
+      user.planExpiresAt = user.subExpiresAt;
+      user.isFreeTrialExpired = false;
+
+      // 10% Referral Commission Credit to Referrer
+      if (user.referralUid) {
+        const cleanRef = user.referralUid.trim();
+        const referrer = users.find(u =>
+          u.id === cleanRef ||
+          (u.email && u.email.toLowerCase() === cleanRef.toLowerCase()) ||
+          (u.referralUid && u.referralUid.toUpperCase() === cleanRef.toUpperCase()) ||
+          (`QX-${(u.referralUid || u.id).replace(/[^0-9A-Za-z]/g, '').slice(-6).toUpperCase()}` === cleanRef.toUpperCase())
+        );
+        if (referrer && referrer.id !== user.id) {
+          const rawPrice = parseFloat(String(sub.price || '0').replace(/[^0-9.]/g, '')) || 0;
+          const commAmount = rawPrice * 0.10;
+          if (commAmount > 0) {
+            referrer.referralEarnings = (referrer.referralEarnings || 0) + commAmount;
+            db.get('auditLogs').unshift({
+              id: `audit-${Date.now()}`,
+              action: 'REFERRAL_COMMISSION_CREDITED',
+              actorEmail: 'System',
+              targetUserId: referrer.id,
+              details: `Credited $${commAmount.toFixed(2)} (10%) commission to ${referrer.email} for ${user.email}'s ${sub.planName} purchase.`,
+              timestamp: new Date().toISOString()
+            });
+          }
+        }
+      }
     }
 
     db.get('auditLogs').unshift({
@@ -985,6 +1079,34 @@ router.post('/approve-commission-withdrawal', (req, res) => {
 
     db.save();
     return res.json({ message: `Withdrawal request marked as ${item.status}`, withdrawal: item });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Edit Commission Withdrawal Amount & Details by Admin
+router.post('/edit-commission-withdrawal', (req, res) => {
+  try {
+    const { withdrawalId, amount, status, adminNotes } = req.body;
+    const withdrawals = db.get('commissionWithdrawals') || [];
+    const item = withdrawals.find(w => w.id === withdrawalId);
+    if (!item) return res.status(404).json({ error: 'Withdrawal request not found.' });
+
+    if (amount !== undefined) item.amount = parseFloat(amount);
+    if (status) item.status = status;
+    if (adminNotes !== undefined) item.notes = adminNotes;
+    item.updatedAt = new Date().toISOString();
+
+    db.get('auditLogs').unshift({
+      id: `audit-${Date.now()}`,
+      action: 'EDIT_COMMISSION_WITHDRAWAL',
+      actorEmail: 'Master Admin',
+      details: `Updated withdrawal ${withdrawalId}: Amount=$${item.amount}, Status=${item.status}`,
+      timestamp: new Date().toISOString()
+    });
+
+    db.save();
+    return res.json({ message: 'Withdrawal request updated successfully!', withdrawal: item });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

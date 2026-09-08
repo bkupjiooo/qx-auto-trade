@@ -50,11 +50,19 @@ export default function AdminSiteConfig() {
   const generalFields = [
     { key: 'siteName', label: 'Site Name', type: 'text' },
     { key: 'siteTagline', label: 'Tagline', type: 'text' },
-    { key: 'supportEmail', label: 'Support Email', type: 'email' },
+    { key: 'supportEmail', label: 'Support Email (Shown in App About Us & Active Session)', type: 'email' },
     { key: 'logoUrl', label: 'Logo URL', type: 'url' },
     { key: 'faviconUrl', label: 'Favicon URL', type: 'url' },
-    { key: 'referralLink', label: 'Quotex Broker Referral Link', type: 'url' },
+    { key: 'minReferralWithdrawal', label: 'Min Referral Withdrawal Amount ($)', type: 'number' },
     { key: 'referralDepositAmount', label: 'Min Referral Deposit ($)', type: 'number' },
+  ]
+
+  const brokerFields = [
+    { key: 'referralLink', label: 'Quotex Broker Referral Link (Default)', type: 'url' },
+    { key: 'pocketOptionLink', label: 'Pocket Option Referral Link', type: 'url' },
+    { key: 'binomoLink', label: 'Binomo Referral Link', type: 'url' },
+    { key: 'expertOptionLink', label: 'Expert Option Referral Link', type: 'url' },
+    { key: 'olympTradeLink', label: 'Olymp Trade Referral Link', type: 'url' },
   ]
 
   const socialFields = [
@@ -84,6 +92,7 @@ export default function AdminSiteConfig() {
 
   const otherFields = [
     { key: 'footerText', label: 'Footer Copyright / Text', type: 'text' },
+    { key: 'announcementText', label: 'App Broadcast Announcement Banner', type: 'text' },
   ]
 
   if (loading) {
@@ -127,7 +136,42 @@ export default function AdminSiteConfig() {
           ))}
         </Section>
 
-        <Section title="Payment Settings (USDT, UPI, Bank)">
+        <Section title="Official Broker Referral Links (Popup & App Broker Section)">
+          {brokerFields.map((f) => (
+            <Field key={f.key} field={f} value={config[f.key] || ''} onChange={(v) => handleChange(f.key, v)} />
+          ))}
+        </Section>
+
+        <Section title="Payment Settings & Method Toggles">
+          <div className="col-span-1 sm:col-span-2 p-3 rounded-lg border flex flex-wrap items-center gap-6 bg-gray-50 dark:bg-gray-700/40 border-gray-200 dark:border-gray-700 mb-2">
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold">
+              <input
+                type="checkbox"
+                checked={config.enableUSDT !== false}
+                onChange={(e) => handleChange('enableUSDT', e.target.checked)}
+                className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
+              />
+              <span className={isDark ? 'text-gray-200' : 'text-gray-800'}>Enable USDT (TRC20)</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold">
+              <input
+                type="checkbox"
+                checked={config.enableUPI !== false}
+                onChange={(e) => handleChange('enableUPI', e.target.checked)}
+                className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
+              />
+              <span className={isDark ? 'text-gray-200' : 'text-gray-800'}>Enable UPI Payment</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold">
+              <input
+                type="checkbox"
+                checked={config.enableBankTransfer !== false}
+                onChange={(e) => handleChange('enableBankTransfer', e.target.checked)}
+                className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
+              />
+              <span className={isDark ? 'text-gray-200' : 'text-gray-800'}>Enable Bank Transfer</span>
+            </label>
+          </div>
           {paymentFields.map((f) => (
             <Field key={f.key} field={f} value={config[f.key] || ''} onChange={(v) => handleChange(f.key, v)} />
           ))}

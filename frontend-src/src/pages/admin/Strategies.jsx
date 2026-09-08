@@ -80,6 +80,15 @@ export default function AdminStrategies() {
     setSubmitting(true)
     setError('')
     try {
+      if (params.name) {
+        await api.editStrategy({
+          strategyId: editStrategy.id,
+          name: params.name,
+          description: params.description,
+          winRate: Number(params.winRate || 85),
+          timeframe: params.timeframe
+        })
+      }
       await api.updateStrategyParameters({ strategyId: editStrategy.id, ...params })
       setEditStrategy(null)
       fetchStrategies()
@@ -92,6 +101,10 @@ export default function AdminStrategies() {
 
   const openEdit = (strategy) => {
     setParams({
+      name: strategy.name || '',
+      description: strategy.description || '',
+      winRate: strategy.winRate ?? 85,
+      timeframe: strategy.timeframe || '1m',
       rsiPeriod: strategy.rsiPeriod ?? strategy.parameters?.rsiPeriod ?? 14,
       rsiOverbought: strategy.rsiOverbought ?? strategy.parameters?.rsiOverbought ?? 70,
       rsiOversold: strategy.rsiOversold ?? strategy.parameters?.rsiOversold ?? 30,
@@ -238,9 +251,16 @@ export default function AdminStrategies() {
 
       {/* Edit Parameters Modal */}
       {editStrategy && (
-        <Modal title={`Parameters — ${editStrategy.name}`} onClose={() => setEditStrategy(null)}>
+        <Modal title={`Edit Strategy — ${editStrategy.name}`} onClose={() => setEditStrategy(null)}>
           <form onSubmit={handleUpdateParams} className="space-y-4">
-            <p className={`text-xs uppercase tracking-wider font-medium ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>RSI</p>
+            <div className="space-y-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+              <Input label="Strategy Name" value={params.name} onChange={(v) => setParams({ ...params, name: v })} required />
+              <div className="grid grid-cols-2 gap-3">
+                <Input label="Win Rate (%)" type="number" value={params.winRate} onChange={(v) => setParams({ ...params, winRate: v })} />
+                <Select label="Timeframe" value={params.timeframe} onChange={(v) => setParams({ ...params, timeframe: v })} options={['1m', '5m', '15m', '30m', '1h', '4h']} />
+              </div>
+            </div>
+            <p className={`text-xs uppercase tracking-wider font-medium ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>RSI Parameters</p>
             <div className="grid grid-cols-3 gap-3">
               <Input label="Period" type="number" value={params.rsiPeriod} onChange={(v) => setParams({ ...params, rsiPeriod: Number(v) })} />
               <Input label="Overbought" type="number" value={params.rsiOverbought} onChange={(v) => setParams({ ...params, rsiOverbought: Number(v) })} />
