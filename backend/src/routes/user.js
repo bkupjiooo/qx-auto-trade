@@ -63,8 +63,19 @@ router.post('/toggle-2fa', (req, res) => {
 router.get('/site-config', (req, res) => {
   const siteConfig = db.get('siteConfig') || {};
   const sysConfig = db.get('systemConfig') || {};
+  const quotexLink = siteConfig.referralLink || siteConfig.brokerLinks?.quotex || 'https://broker-qx.pro/sign-up/?lid=1650958';
+  const brokerLinks = {
+    quotex: quotexLink,
+    pocketOption: siteConfig.pocketOptionLink || siteConfig.brokerLinks?.pocketOption || 'https://pocketoption.com/register',
+    binomo: siteConfig.binomoLink || siteConfig.brokerLinks?.binomo || 'https://binomo.com/register',
+    expertOption: siteConfig.expertOptionLink || siteConfig.brokerLinks?.expertOption || 'https://expertoption.com/register',
+    olympTrade: siteConfig.olympTradeLink || siteConfig.brokerLinks?.olympTrade || 'https://olymptrade.com/register',
+    ...(siteConfig.brokerLinks || {})
+  };
   const merged = {
     ...siteConfig,
+    referralLink: quotexLink,
+    brokerLinks,
     maintenanceMode: Boolean(sysConfig.maintenanceMode || siteConfig.maintenanceMode),
     globalEmergencyStop: Boolean(sysConfig.globalEmergencyStop),
     emergencyControls: {
