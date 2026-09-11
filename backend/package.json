@@ -5,7 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js"
+    "dev": "node --watch-path=src/server.js --watch-path=src/routes --watch-path=src/engine --watch-path=src/websocket src/server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

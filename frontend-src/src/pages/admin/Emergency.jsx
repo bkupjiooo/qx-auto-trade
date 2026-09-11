@@ -34,7 +34,7 @@ export default function AdminEmergency() {
 
   const handleToggle = async (key, value) => {
     setLoading(true)
-    try { await api.toggleEmergencyControl({ key, value }); showToast(`${key} ${value ? 'enabled' : 'disabled'}`); fetchStats() }
+    try { await api.toggleEmergencyControl({ controlKey: key, enabled: value, key, value }); showToast(`${key} ${value ? 'enabled' : 'disabled'}`); fetchStats() }
     catch (e) { showToast(e.message, 'error') } finally { setLoading(false) }
   }
 

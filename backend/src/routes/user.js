@@ -61,7 +61,21 @@ router.post('/toggle-2fa', (req, res) => {
 
 // Public Site Config Endpoint
 router.get('/site-config', (req, res) => {
-  return res.json({ siteConfig: db.get('siteConfig') });
+  const siteConfig = db.get('siteConfig') || {};
+  const sysConfig = db.get('systemConfig') || {};
+  const merged = {
+    ...siteConfig,
+    maintenanceMode: Boolean(sysConfig.maintenanceMode || siteConfig.maintenanceMode),
+    globalEmergencyStop: Boolean(sysConfig.globalEmergencyStop),
+    emergencyControls: {
+      userRegistrationEnabled: true,
+      userLoginEnabled: true,
+      tradingStrategiesEnabled: true,
+      ...(siteConfig.emergencyControls || {}),
+      ...(sysConfig.emergencyControls || {})
+    }
+  };
+  return res.json({ siteConfig: merged, config: merged });
 });
 
 // Public Subscription Plans Endpoint
@@ -180,15 +194,21 @@ router.get('/profile/:userId', (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        subscriptionPlan: user.subscriptionPlan || 'Free Trial',
-        subExpiresAt: user.subExpiresAt,
+        subscriptionPlan: user.subscriptionPlan || user.plan || 'Free Trial',
+        plan: user.subscriptionPlan || user.plan || 'Free Trial',
+        subExpiresAt: user.subExpiresAt || user.planExpiresAt,
+        planExpiresAt: user.planExpiresAt || user.subExpiresAt,
+        isFreeTrialExpired: (user.isFreeTrialExpired !== undefined) ? Boolean(user.isFreeTrialExpired) : ((user.trialExpiresAtMs && Date.now() > user.trialExpiresAtMs) ? true : false),
+        trialExpiresAtMs: user.trialExpiresAtMs || (user.trialStartedAt ? new Date(user.trialStartedAt).getTime() + 3600000 : null),
+        trialStartedAtMs: user.trialStartedAtMs,
         isLifetimeApproved: Boolean(user.isLifetimeApproved),
         referralUid: user.referralUid,
         referralBalance: refStats.availableBalance,
         totalReferralEarned: refStats.totalEarned,
         totalReferrals: refStats.totalReferrals,
         createdAt: user.createdAt,
-        isActive: user.isActive !== false
+        isActive: user.isActive !== false,
+        active: user.isActive !== false
       }
     });
   } catch (err) {

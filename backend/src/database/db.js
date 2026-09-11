@@ -300,15 +300,23 @@ class Database {
       }
     } catch (err) {
       console.error('Error loading database file, fallback to default:', err.message);
+      // If db.json exists, do not immediately overwrite with defaultData
       this.data = defaultData;
     }
   }
 
   save() {
     try {
-      fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf8');
+      const tmpFile = `${DB_FILE}.tmp.${Date.now()}`;
+      fs.writeFileSync(tmpFile, JSON.stringify(this.data, null, 2), 'utf8');
+      fs.renameSync(tmpFile, DB_FILE);
     } catch (err) {
-      console.error('Failed to save database:', err.message);
+      // Fallback direct write
+      try {
+        fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf8');
+      } catch (e) {
+        console.error('Failed to save database:', e.message);
+      }
     }
   }
 

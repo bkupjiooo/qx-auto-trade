@@ -73,6 +73,7 @@ export const api = {
   editDepositRequest: (data) => request('/admin/edit-deposit-request', { method: 'POST', body: JSON.stringify(data) }),
   deletePlanSubscription: (data) => request('/admin/delete-plan-subscription', { method: 'POST', body: JSON.stringify(data) }),
   bulkDeletePlanSubscriptions: (data) => request('/admin/bulk-delete-plan-subscriptions', { method: 'POST', body: JSON.stringify(data) }),
+  clearTestPlanSubscriptions: () => request('/admin/clear-test-plan-subscriptions', { method: 'POST' }),
   getCommissionWithdrawals: () => request('/admin/commission-withdrawals'),
   approveCommissionWithdrawal: (data) => request('/admin/approve-commission-withdrawal', { method: 'POST', body: JSON.stringify(data) }),
   editCommissionWithdrawal: (data) => request('/admin/edit-commission-withdrawal', { method: 'POST', body: JSON.stringify(data) }),

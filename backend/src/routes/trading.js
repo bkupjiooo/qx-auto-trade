@@ -34,6 +34,22 @@ router.get('/session/:userId', (req, res) => {
 // Start active session
 router.post('/start', (req, res) => {
   try {
+    const sysConfig = db.get('systemConfig') || {};
+    const siteConfig = db.get('siteConfig') || {};
+    const isMaintenance = sysConfig.maintenanceMode || siteConfig.maintenanceMode;
+    const isGlobalStop = sysConfig.globalEmergencyStop;
+    const isStrategyEnabled = (sysConfig.emergencyControls?.tradingStrategiesEnabled !== false) && (siteConfig.emergencyControls?.tradingStrategiesEnabled !== false);
+
+    if (isMaintenance) {
+      return res.status(503).json({ error: 'Trading is temporarily paused due to scheduled system maintenance.' });
+    }
+    if (isGlobalStop) {
+      return res.status(403).json({ error: 'Global Emergency Stop is currently ACTIVE. Trading is temporarily halted.' });
+    }
+    if (!isStrategyEnabled) {
+      return res.status(403).json({ error: 'Automated trading strategy execution is temporarily paused by administrator.' });
+    }
+
     const { userId, broker, strategyId, accountType } = req.body;
     if (!userId || !broker || !strategyId) {
       return res.status(400).json({ error: 'User ID, Broker, and Strategy ID are required.' });

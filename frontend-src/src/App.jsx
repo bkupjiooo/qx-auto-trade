@@ -19,6 +19,8 @@ import AdminPlanManager from './pages/admin/PlanManager'
 import AdminSiteConfig from './pages/admin/SiteConfig'
 import AdminAnnouncements from './pages/admin/Announcements'
 import AdminEmergency from './pages/admin/Emergency'
+import AdminLiveSessions from './pages/admin/LiveSessions'
+import AdminDeposits from './pages/admin/Deposits'
 import AdminLogin from './pages/admin/AdminLogin'
 
 function ProtectedUserRoute({ children }) {
@@ -58,6 +60,8 @@ function AppRoutes() {
         <Route path="/admin/site-config" element={<AdminSiteConfig />} />
         <Route path="/admin/announcements" element={<AdminAnnouncements />} />
         <Route path="/admin/emergency" element={<AdminEmergency />} />
+        <Route path="/admin/live-sessions" element={<AdminLiveSessions />} />
+        <Route path="/admin/deposits" element={<AdminDeposits />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

@@ -48,13 +48,20 @@ router.post('/clear-emergency-stop', (req, res) => {
 
 // Toggle Maintenance Mode
 router.post('/toggle-maintenance', (req, res) => {
-  const { enabled, adminEmail } = req.body;
-  const config = db.get('systemConfig');
-  config.maintenanceMode = Boolean(enabled);
-  config.updatedAt = new Date().toISOString();
-  db.set('systemConfig', config);
+  const { enabled, isMaintenance, adminEmail } = req.body;
+  const maintenanceState = (enabled !== undefined) ? Boolean(enabled) : Boolean(isMaintenance);
 
-  if (enabled) {
+  const sysConfig = db.get('systemConfig') || {};
+  sysConfig.maintenanceMode = maintenanceState;
+  sysConfig.updatedAt = new Date().toISOString();
+  db.set('systemConfig', sysConfig);
+
+  const siteConfig = db.get('siteConfig') || {};
+  siteConfig.maintenanceMode = maintenanceState;
+  siteConfig.updatedAt = new Date().toISOString();
+  db.set('siteConfig', siteConfig);
+
+  if (maintenanceState) {
     for (const [userId, session] of tradingEngine.activeSessions.entries()) {
       tradingEngine.stopSession(userId, 'System Scheduled Maintenance');
     }
@@ -62,14 +69,14 @@ router.post('/toggle-maintenance', (req, res) => {
 
   db.get('auditLogs').unshift({
     id: `audit-${Date.now()}`,
-    action: enabled ? 'MAINTENANCE_MODE_ENABLED' : 'MAINTENANCE_MODE_DISABLED',
+    action: maintenanceState ? 'MAINTENANCE_MODE_ENABLED' : 'MAINTENANCE_MODE_DISABLED',
     actorEmail: adminEmail || 'Master Admin',
-    details: `Master Admin set Maintenance Mode to ${enabled}`,
+    details: `Master Admin set Maintenance Mode to ${maintenanceState}`,
     timestamp: new Date().toISOString()
   });
   db.save();
 
-  return res.json({ message: `Maintenance mode ${enabled ? 'enabled' : 'disabled'}.`, systemConfig: config });
+  return res.json({ message: `Maintenance mode ${maintenanceState ? 'enabled' : 'disabled'}.`, systemConfig: sysConfig, siteConfig });
 });
 
 // Force Stop Single User Bot
@@ -84,7 +91,7 @@ router.post('/force-stop-user', (req, res) => {
 // Edit User Details (Name, Email, Plan, Expiry, Active Status, Telegram ID, Broker ID, Broker Name, Trading Mode, MTG Level)
 router.post('/edit-user-details', (req, res) => {
   try {
-    const { userId, name, email, subscriptionPlan, plan, subExpiresAt, isActive, isLifetimeApproved, telegramId, brokerId, brokerName, tradingMode, maxMtgLevel, adminEmail } = req.body;
+    const { userId, name, email, subscriptionPlan, plan, subExpiresAt, planExpiresAt, isFreeTrialExpired, isActive, active, isLifetimeApproved, telegramId, brokerId, brokerName, tradingMode, maxMtgLevel, adminEmail } = req.body;
     const users = db.get('users');
     const user = users.find(u => u.id === userId);
 
@@ -96,18 +103,34 @@ router.post('/edit-user-details', (req, res) => {
     const targetPlan = subscriptionPlan || plan;
     if (targetPlan) {
       user.subscriptionPlan = targetPlan;
-      if (targetPlan.toLowerCase().includes('free')) {
+      user.plan = targetPlan;
+      if (targetPlan.toLowerCase().includes('free') && !targetPlan.toLowerCase().includes('lifetime')) {
         user.isLifetimeApproved = false;
+      } else if (targetPlan.toLowerCase().includes('lifetime')) {
+        user.isLifetimeApproved = true;
+        user.isFreeTrialExpired = false;
+      } else {
+        // Upgraded to a paid plan (Basic, Pro, Quantum, Premium, etc.)
+        user.isFreeTrialExpired = false;
       }
     }
     
-    if (subExpiresAt) user.subExpiresAt = subExpiresAt;
     if (planExpiresAt) {
       user.planExpiresAt = planExpiresAt;
       user.subExpiresAt = planExpiresAt;
+    } else if (subExpiresAt) {
+      user.subExpiresAt = subExpiresAt;
+      user.planExpiresAt = subExpiresAt;
     }
-    if (isFreeTrialExpired !== undefined) user.isFreeTrialExpired = Boolean(isFreeTrialExpired);
-    if (isActive !== undefined) user.isActive = Boolean(isActive);
+
+    if (isFreeTrialExpired !== undefined) {
+      user.isFreeTrialExpired = Boolean(isFreeTrialExpired);
+    }
+    if (isActive !== undefined || active !== undefined) {
+      const activeVal = (isActive !== undefined) ? Boolean(isActive) : Boolean(active);
+      user.isActive = activeVal;
+      user.active = activeVal;
+    }
     if (isLifetimeApproved !== undefined) user.isLifetimeApproved = Boolean(isLifetimeApproved);
     if (telegramId !== undefined) user.telegramId = telegramId;
     if (brokerId !== undefined) user.brokerId = brokerId;
@@ -160,6 +183,9 @@ router.post('/reactivate-free-trial', (req, res) => {
     user.planExpiresAt = new Date(nowMs + 60 * 60 * 1000).toISOString();
     user.isFreeTrialExpired = false;
     user.subscriptionPlan = 'Free Trial';
+    user.plan = 'Free Trial';
+    user.isActive = true;
+    user.active = true;
 
     db.get('auditLogs').unshift({
       id: `audit-${Date.now()}`,
@@ -239,28 +265,31 @@ router.post('/reset-user-password', async (req, res) => {
 
 // Toggle User Active Status
 router.post('/toggle-user-active', (req, res) => {
-  const { userId, isActive, adminEmail } = req.body;
+  const { userId, isActive, active, adminEmail } = req.body;
   const users = db.get('users');
   const user = users.find(u => u.id === userId);
 
   if (!user) return res.status(404).json({ error: 'User not found.' });
 
-  user.isActive = Boolean(isActive);
-  if (!isActive) {
+  const nextActive = (isActive !== undefined) ? Boolean(isActive) : (active !== undefined ? Boolean(active) : (user.isActive === false || user.active === false));
+  user.isActive = nextActive;
+  user.active = nextActive;
+
+  if (!nextActive) {
     tradingEngine.stopSession(userId, 'Account deactivated by Master Admin');
   }
 
   db.get('auditLogs').unshift({
     id: `audit-${Date.now()}`,
-    action: isActive ? 'USER_ACTIVATED' : 'USER_DEACTIVATED',
+    action: nextActive ? 'USER_ACTIVATED' : 'USER_DEACTIVATED',
     actorEmail: adminEmail || 'Master Admin',
     targetUserId: userId,
-    details: `User account ${user.email} marked as ${isActive ? 'ACTIVE' : 'INACTIVE'}`,
+    details: `User account ${user.email} marked as ${nextActive ? 'ACTIVE' : 'INACTIVE'}`,
     timestamp: new Date().toISOString()
   });
 
   db.save();
-  return res.json({ message: `User ${user.email} ${isActive ? 'activated' : 'deactivated'}.`, user });
+  return res.json({ message: `User ${user.email} ${nextActive ? 'activated' : 'deactivated'}.`, user, isActive: nextActive, active: nextActive });
 });
 
 // List All Live User Sessions
@@ -393,14 +422,16 @@ router.put('/announcements/:id', (req, res) => {
 
 // Toggle Announcement Active Status
 router.post('/toggle-announcement-active', (req, res) => {
-  const { announcementId, isActive } = req.body;
+  const { announcementId, isActive, active } = req.body;
   const announcements = db.get('announcements') || [];
   const ann = announcements.find(a => a.id === announcementId);
   if (!ann) return res.status(404).json({ error: 'Announcement not found.' });
 
-  ann.isActive = (isActive !== undefined) ? Boolean(isActive) : !ann.isActive;
+  const nextState = (isActive !== undefined) ? Boolean(isActive) : (active !== undefined ? Boolean(active) : !(ann.isActive || ann.active));
+  ann.isActive = nextState;
+  ann.active = nextState;
   db.save();
-  return res.json({ message: `Announcement set to ${ann.isActive ? 'Active' : 'Inactive'}`, announcements });
+  return res.json({ message: `Announcement set to ${nextState ? 'Active' : 'Inactive'}`, announcements, isActive: nextState, active: nextState });
 });
 
 // Add New User by Admin
@@ -486,29 +517,45 @@ router.post('/change-admin-password', async (req, res) => {
 // Toggle Individual Emergency Controls (User Reg, User Login, Trading Strategies)
 router.post('/toggle-emergency-control', (req, res) => {
   try {
-    const { controlKey, enabled, adminEmail } = req.body;
-    const config = db.get('systemConfig') || {};
-    if (!config.emergencyControls) {
-      config.emergencyControls = {
+    const { controlKey, enabled, key, value, adminEmail } = req.body;
+    const targetKey = controlKey || key;
+    const isEnabled = (enabled !== undefined) ? Boolean(enabled) : Boolean(value);
+
+    if (!targetKey) {
+      return res.status(400).json({ error: 'Control key is required.' });
+    }
+
+    const sysConfig = db.get('systemConfig') || {};
+    if (!sysConfig.emergencyControls) {
+      sysConfig.emergencyControls = {
         userRegistrationEnabled: true,
         userLoginEnabled: true,
         tradingStrategiesEnabled: true
       };
     }
-    config.emergencyControls[controlKey] = Boolean(enabled);
-    config.updatedAt = new Date().toISOString();
-    db.set('systemConfig', config);
+    sysConfig.emergencyControls[targetKey] = isEnabled;
+    sysConfig.updatedAt = new Date().toISOString();
+    db.set('systemConfig', sysConfig);
+
+    // Synchronize to siteConfig as well
+    const siteConfig = db.get('siteConfig') || {};
+    if (!siteConfig.emergencyControls) {
+      siteConfig.emergencyControls = { ...sysConfig.emergencyControls };
+    }
+    siteConfig.emergencyControls[targetKey] = isEnabled;
+    siteConfig.updatedAt = new Date().toISOString();
+    db.set('siteConfig', siteConfig);
 
     db.get('auditLogs').unshift({
       id: `audit-${Date.now()}`,
       action: 'TOGGLE_EMERGENCY_CONTROL',
       actorEmail: adminEmail || 'Master Admin',
-      details: `Emergency control ${controlKey} set to ${enabled}`,
+      details: `Emergency control ${targetKey} set to ${isEnabled}`,
       timestamp: new Date().toISOString()
     });
 
     db.save();
-    return res.json({ message: `Control ${controlKey} set to ${enabled}`, systemConfig: config });
+    return res.json({ message: `Control ${targetKey} set to ${isEnabled}`, systemConfig: sysConfig, siteConfig });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -848,6 +895,19 @@ router.post('/bulk-delete-plan-subscriptions', (req, res) => {
     });
     db.save();
     return res.json({ message: `${subscriptionIds.length} subscriptions deleted!`, subscriptions: remaining });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Clear fake and test plan subscriptions
+router.post('/clear-test-plan-subscriptions', (req, res) => {
+  try {
+    const subscriptions = db.get('planSubscriptions') || [];
+    const remaining = subscriptions.filter(s => s.paymentTxId !== 'TX-PENDING' && s.userEmail !== 'user@qxautotrade.com');
+    db.set('planSubscriptions', remaining);
+    db.save();
+    return res.json({ message: 'Purged fake and test subscription requests.', subscriptions: remaining });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

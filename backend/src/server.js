@@ -58,7 +58,7 @@ console.log(`[Static Files] Serving fresh frontend production build from: ${fron
 
 const dashboardDist = path.join(frontendDist, 'dashboard-app');
 const dashboardRoutes = ['/dashboard', '/strategies', '/settings', '/history', '/performance', '/subscriptions', '/support'];
-const adminRoutes2 = ['/admin/login', '/admin/dashboard', '/admin/users', '/admin/strategies', '/admin/subscriptions', '/admin/plan-manager', '/admin/site-config', '/admin/announcements'];
+const adminRoutes2 = ['/admin', '/admin/login', '/admin/dashboard', '/admin/users', '/admin/strategies', '/admin/subscriptions', '/admin/deposits', '/admin/live-sessions', '/admin/plan-manager', '/admin/site-config', '/admin/announcements', '/admin/emergency', '/admin/trade-logs', '/admin/activity-logs', '/admin/audit', '/admin/error-logs', '/admin/security'];
 
 // Serve dashboard static assets
 app.use('/dashboard', express.static(dashboardDist));

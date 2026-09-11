@@ -48,7 +48,8 @@ export default function AdminAnnouncements() {
 
   const handleToggle = async (announcement) => {
     try {
-      await api.toggleAnnouncementActive({ announcementId: announcement.id })
+      const isCurrentlyActive = (announcement.isActive !== undefined) ? announcement.isActive : Boolean(announcement.active);
+      await api.toggleAnnouncementActive({ announcementId: announcement.id, isActive: !isCurrentlyActive, active: !isCurrentlyActive })
       fetchAnnouncements()
     } catch (err) {
       setError(err.message)
@@ -124,8 +125,8 @@ export default function AdminAnnouncements() {
                       <span className={`text-xs ${isDark ? 'text-gray-600' : 'text-gray-300'}`}>•</span>
                       <span className={`text-xs capitalize ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{a.target || 'all'}</span>
                       <span className={`text-xs ${isDark ? 'text-gray-600' : 'text-gray-300'}`}>•</span>
-                      <span className={`text-xs font-medium ${a.active ? (isDark ? 'text-green-400' : 'text-green-600') : (isDark ? 'text-gray-500' : 'text-gray-400')}`}>
-                        {a.active ? 'Active' : 'Inactive'}
+                      <span className={`text-xs font-medium ${(a.isActive !== undefined ? a.isActive : Boolean(a.active)) ? (isDark ? 'text-green-400' : 'text-green-600') : (isDark ? 'text-gray-500' : 'text-gray-400')}`}>
+                        {(a.isActive !== undefined ? a.isActive : Boolean(a.active)) ? 'Active' : 'Inactive'}
                       </span>
                     </div>
                   </div>
@@ -134,9 +135,9 @@ export default function AdminAnnouncements() {
                   <button
                     onClick={() => handleToggle(a)}
                     className={`p-1.5 rounded-md transition-colors ${isDark ? 'text-gray-500 hover:text-amber-400 hover:bg-amber-500/10' : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50'}`}
-                    title={a.active ? 'Deactivate' : 'Activate'}
+                    title={(a.isActive !== undefined ? a.isActive : Boolean(a.active)) ? 'Deactivate' : 'Activate'}
                   >
-                    {a.active ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
+                    {(a.isActive !== undefined ? a.isActive : Boolean(a.active)) ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
                   </button>
                   <button
                     onClick={() => { setDeleteTarget(a); setError(''); }}

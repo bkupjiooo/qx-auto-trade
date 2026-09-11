@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../../api'
 import { useAuth } from '../../AuthContext'
 import { useTheme } from '../../ThemeContext'
@@ -38,13 +39,13 @@ export default function AdminDashboard() {
     },
     {
       label: 'Active Sessions',
-      value: stats?.activeSessions ?? 0,
+      value: stats?.activeSessionsCount ?? stats?.activeSessions ?? 0,
       icon: Radio,
       color: isDark ? 'bg-green-500/10 text-green-400' : 'bg-green-50 text-green-600',
     },
     {
       label: 'Pending Deposits',
-      value: stats?.pendingDeposits ?? 0,
+      value: stats?.pendingReferralsCount ?? stats?.pendingDeposits ?? 0,
       icon: Wallet,
       color: isDark ? 'bg-amber-500/10 text-amber-400' : 'bg-amber-50 text-amber-600',
     },
@@ -97,11 +98,11 @@ export default function AdminDashboard() {
                 <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Maintenance Mode</span>
               </div>
               <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                stats?.maintenanceMode
+                (stats?.maintenanceMode || stats?.systemConfig?.maintenanceMode)
                   ? (isDark ? 'bg-amber-500/10 text-amber-400' : 'bg-amber-50 text-amber-700')
                   : (isDark ? 'bg-green-500/10 text-green-400' : 'bg-green-50 text-green-700')
               }`}>
-                {stats?.maintenanceMode ? 'Active' : 'Inactive'}
+                {(stats?.maintenanceMode || stats?.systemConfig?.maintenanceMode) ? 'Active' : 'Inactive'}
               </span>
             </div>
             <div className={`flex items-center justify-between py-2 border-b last:border-0 ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>
@@ -110,11 +111,11 @@ export default function AdminDashboard() {
                 <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Emergency Stop</span>
               </div>
               <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                stats?.emergencyStop
+                (stats?.emergencyStop || stats?.systemConfig?.globalEmergencyStop)
                   ? (isDark ? 'bg-red-500/10 text-red-400' : 'bg-red-50 text-red-700')
                   : (isDark ? 'bg-green-500/10 text-green-400' : 'bg-green-50 text-green-700')
               }`}>
-                {stats?.emergencyStop ? 'Active' : 'Inactive'}
+                {(stats?.emergencyStop || stats?.systemConfig?.globalEmergencyStop) ? 'Active' : 'Inactive'}
               </span>
             </div>
           </div>
@@ -123,34 +124,34 @@ export default function AdminDashboard() {
         <div className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-xl border p-5`}>
           <h2 className={`text-sm font-semibold mb-4 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>Quick Actions</h2>
           <div className="grid grid-cols-2 gap-3">
-            <a
-              href="/admin/users"
+            <Link
+              to="/admin/users"
               className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border transition-colors ${isDark ? 'border-gray-700 hover:bg-gray-700 text-gray-300' : 'border-gray-200 hover:bg-gray-50 text-gray-700'}`}
             >
               <Users className={`w-4 h-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
               Manage Users
-            </a>
-            <a
-              href="/admin/live-sessions"
+            </Link>
+            <Link
+              to="/admin/live-sessions"
               className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border transition-colors ${isDark ? 'border-gray-700 hover:bg-gray-700 text-gray-300' : 'border-gray-200 hover:bg-gray-50 text-gray-700'}`}
             >
               <Radio className={`w-4 h-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
               Live Sessions
-            </a>
-            <a
-              href="/admin/deposits"
+            </Link>
+            <Link
+              to="/admin/deposits"
               className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border transition-colors ${isDark ? 'border-gray-700 hover:bg-gray-700 text-gray-300' : 'border-gray-200 hover:bg-gray-50 text-gray-700'}`}
             >
               <Wallet className={`w-4 h-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
               Review Deposits
-            </a>
-            <a
-              href="/admin/emergency"
+            </Link>
+            <Link
+              to="/admin/emergency"
               className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border transition-colors ${isDark ? 'border-red-500/30 hover:bg-red-500/10 text-red-400' : 'border-red-200 hover:bg-red-50 text-red-700'}`}
             >
               <AlertTriangle className="w-4 h-4 text-red-400" />
               Emergency
-            </a>
+            </Link>
           </div>
         </div>
       </div>

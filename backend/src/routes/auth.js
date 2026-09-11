@@ -10,14 +10,29 @@ const JWT_SECRET = process.env.JWT_SECRET || 'qx_auto_trade_secret_key_2026';
 const otpStore = new Map(); // email -> { otp, expiresAt, tempUserData }
 const resetOtpStore = new Map(); // email -> { otp, expiresAt } // email -> { otp, expiresAt, tempUserData }
 
+function getSystemSettings() {
+  const sys = db.get('systemConfig') || {};
+  const site = db.get('siteConfig') || {};
+  return {
+    maintenanceMode: Boolean(sys.maintenanceMode || site.maintenanceMode),
+    emergencyControls: {
+      userRegistrationEnabled: true,
+      userLoginEnabled: true,
+      tradingStrategiesEnabled: true,
+      ...(site.emergencyControls || {}),
+      ...(sys.emergencyControls || {})
+    }
+  };
+}
+
 // Send Email OTP for Registration
 router.post('/send-otp', async (req, res) => {
   try {
-    const siteConfig = db.get('siteConfig') || {};
-    if (siteConfig.maintenanceMode) {
+    const settings = getSystemSettings();
+    if (settings.maintenanceMode) {
       return res.status(503).json({ error: 'Platform is currently undergoing scheduled maintenance. Please check back shortly.' });
     }
-    const emergency = siteConfig.emergencyControls || {};
+    const emergency = settings.emergencyControls || {};
     if (emergency.userRegistrationEnabled === false) {
       return res.status(403).json({ error: 'New user registration is temporarily restricted by administrator.' });
     }
@@ -66,11 +81,11 @@ router.post('/send-otp', async (req, res) => {
 // Verify Email OTP & Complete Registration (Robust against server sleep/direct OTP)
 router.post('/verify-otp', async (req, res) => {
   try {
-    const siteConfig = db.get('siteConfig') || {};
-    if (siteConfig.maintenanceMode) {
+    const settings = getSystemSettings();
+    if (settings.maintenanceMode) {
       return res.status(503).json({ error: 'Platform is currently undergoing scheduled maintenance. Please check back shortly.' });
     }
-    const emergency = siteConfig.emergencyControls || {};
+    const emergency = settings.emergencyControls || {};
     if (emergency.userRegistrationEnabled === false) {
       return res.status(403).json({ error: 'New user registration is temporarily restricted by administrator.' });
     }
@@ -198,11 +213,11 @@ router.post('/verify-otp', async (req, res) => {
 // Direct User Registration Endpoint (Guarantees every app user is in Admin Panel)
 router.post('/register', async (req, res) => {
   try {
-    const siteConfig = db.get('siteConfig') || {};
-    if (siteConfig.maintenanceMode) {
+    const settings = getSystemSettings();
+    if (settings.maintenanceMode) {
       return res.status(503).json({ error: 'Platform is currently undergoing scheduled maintenance. Please check back shortly.' });
     }
-    const emergency = siteConfig.emergencyControls || {};
+    const emergency = settings.emergencyControls || {};
     if (emergency.userRegistrationEnabled === false) {
       return res.status(403).json({ error: 'New user registration is temporarily restricted by administrator.' });
     }
@@ -400,12 +415,12 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
-    const siteConfig = db.get('siteConfig') || {};
-    if (siteConfig.maintenanceMode && user.role !== 'ADMIN') {
+    const settings = getSystemSettings();
+    if (settings.maintenanceMode && user.role !== 'ADMIN' && user.role !== 'MASTER_ADMIN') {
       return res.status(503).json({ error: 'Platform is currently undergoing scheduled maintenance. Please check back shortly.' });
     }
-    const emergency = siteConfig.emergencyControls || {};
-    if (emergency.userLoginEnabled === false && user.role !== 'ADMIN') {
+    const emergency = settings.emergencyControls || {};
+    if (emergency.userLoginEnabled === false && user.role !== 'ADMIN' && user.role !== 'MASTER_ADMIN') {
       return res.status(403).json({ error: 'User login is temporarily paused by administrator.' });
     }
 

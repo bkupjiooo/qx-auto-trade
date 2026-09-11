@@ -162,9 +162,25 @@ export default function AdminSubscriptions() {
           <h1 className={`text-lg font-bold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>Subscriptions</h1>
           <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Manage plan subscription requests</p>
         </div>
-        <button onClick={fetchSubscriptions} className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-medium ${isDark ? 'border-gray-700 text-gray-300 hover:bg-gray-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
-          <RefreshCw className="w-3.5 h-3.5" /> Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              try {
+                await api.clearTestPlanSubscriptions()
+                showToast('Purged fake/test subscription requests')
+                fetchSubscriptions()
+              } catch (e) {
+                showToast('Failed to purge test requests', 'error')
+              }
+            }}
+            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${isDark ? 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10' : 'border-amber-200 text-amber-700 hover:bg-amber-50'}`}
+          >
+            🧹 Purge Test Requests
+          </button>
+          <button onClick={fetchSubscriptions} className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-medium ${isDark ? 'border-gray-700 text-gray-300 hover:bg-gray-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+            <RefreshCw className="w-3.5 h-3.5" /> Refresh
+          </button>
+        </div>
       </div>
 
       {/* Top Tabs */}

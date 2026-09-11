@@ -72,7 +72,9 @@ export default function AdminUsers() {
         plan: form.plan,
         name: form.name,
         email: form.email,
-        planExpiresAt: form.planExpiresAt || null
+        planExpiresAt: form.planExpiresAt || null,
+        isActive: form.isActive !== false,
+        active: form.isActive !== false
       })
       setEditUser(null)
       setForm(emptyForm)
@@ -99,7 +101,8 @@ export default function AdminUsers() {
 
   const handleToggle = async (user) => {
     try {
-      await api.toggleUserActive({ userId: user.id })
+      const isCurrentlyActive = (user.isActive !== false && user.active !== false);
+      await api.toggleUserActive({ userId: user.id, isActive: !isCurrentlyActive, active: !isCurrentlyActive })
       fetchUsers()
     } catch (err) {
       setError(err.message)
@@ -136,6 +139,7 @@ export default function AdminUsers() {
       email: user.email || '',
       plan: user.subscriptionPlan || user.plan || 'Free Trial',
       planExpiresAt: expDate ? new Date(expDate).toISOString().slice(0, 16) : '',
+      isActive: (user.isActive !== false && user.active !== false),
       password: ''
     })
     setEditUser(user)
@@ -234,11 +238,11 @@ export default function AdminUsers() {
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                        user.active !== false
+                        (user.isActive !== false && user.active !== false)
                           ? (isDark ? 'bg-green-500/10 text-green-400' : 'bg-green-50 text-green-700')
                           : (isDark ? 'bg-red-500/10 text-red-400' : 'bg-red-50 text-red-700')
                       }`}>
-                        {user.active !== false ? 'Active' : 'Inactive'}
+                        {(user.isActive !== false && user.active !== false) ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                     <td className={`px-4 py-3 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -256,9 +260,9 @@ export default function AdminUsers() {
                         <button
                           onClick={() => handleToggle(user)}
                           className={`p-1.5 rounded-md transition-colors ${isDark ? 'text-gray-500 hover:text-amber-400 hover:bg-amber-500/10' : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50'}`}
-                          title={user.active !== false ? 'Deactivate' : 'Activate'}
+                          title={(user.isActive !== false && user.active !== false) ? 'Deactivate' : 'Activate'}
                         >
-                          {user.active !== false ? <PowerOff className="w-3.5 h-3.5" /> : <Power className="w-3.5 h-3.5" />}
+                          {(user.isActive !== false && user.active !== false) ? <PowerOff className="w-3.5 h-3.5" /> : <Power className="w-3.5 h-3.5" />}
                         </button>
                         <button
                           onClick={() => handleForceStop(user)}
@@ -316,6 +320,12 @@ export default function AdminUsers() {
             <Input label="Name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} required />
             <Input label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} required />
             <Select label="Plan" value={form.plan} onChange={(v) => setForm({ ...form, plan: v })} options={['Free Trial', 'Basic Plan', 'Pro Plan', 'Quantum Plan', 'Premium Plan', 'Lifetime Free']} />
+            <Select
+              label="Account Status"
+              value={form.isActive ? 'Active' : 'Inactive'}
+              onChange={(v) => setForm({ ...form, isActive: v === 'Active' })}
+              options={['Active', 'Inactive']}
+            />
             <Input label="Plan Expiry Date & Time" type="datetime-local" value={form.planExpiresAt || ''} onChange={(v) => setForm({ ...form, planExpiresAt: v })} />
             
             <div className={`p-3 rounded-lg border flex items-center justify-between ${isDark ? 'bg-gray-700/50 border-gray-600' : 'bg-amber-50 border-amber-200'}`}>
