@@ -1,13 +1,15 @@
 const BASE = '/api'
 
 async function request(path, options = {}) {
+  const token = localStorage.getItem('qx_admin_token') || localStorage.getItem('qx_token')
+  const authHeader = token ? { Authorization: `Bearer ${token}` } : {}
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: { 'Content-Type': 'application/json', ...authHeader, ...options.headers },
     ...options,
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: 'Request failed' }))
-    throw new Error(err.message || `HTTP ${res.status}`)
+    throw new Error(err.error || err.message || `HTTP ${res.status}`)
   }
   if (res.headers.get('content-type')?.includes('application/json')) {
     return res.json()

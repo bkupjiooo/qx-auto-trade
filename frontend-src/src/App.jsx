@@ -50,6 +50,7 @@ function AppRoutes() {
         <Route path="/support" element={<UserSupport />} />
       </Route>
 
+      <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
