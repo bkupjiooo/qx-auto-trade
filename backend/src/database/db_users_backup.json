@@ -1,0 +1,101 @@
+{
+  "users": [
+    {
+      "id": "admin-1",
+      "name": "Master Admin",
+      "email": "admin@qxautotrade.com",
+      "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
+      "role": "MASTER_ADMIN",
+      "isActive": true,
+      "trialStartedAt": "2026-07-29T19:04:24.670Z",
+      "subscriptionPlan": "Premium Plan",
+      "subExpiresAt": "2099-12-31T23:59:59.000Z",
+      "isLifetimeApproved": true,
+      "referralUid": "REF-MASTER-001",
+      "depositVerified": true,
+      "createdAt": "2026-07-29T19:04:24.671Z"
+    },
+    {
+      "id": "user-1788612470060",
+      "name": "Om",
+      "email": "omchoubey123@gmail.com",
+      "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
+      "role": "USER",
+      "isActive": true,
+      "subscriptionPlan": "Premium Plan (Lifetime)",
+      "subExpiresAt": "2099-12-31T23:59:59.000Z",
+      "planExpiresAt": "2099-12-31T23:59:59.000Z",
+      "isLifetimeApproved": true,
+      "depositVerified": true,
+      "createdAt": "2026-09-05T12:47:50.060Z"
+    },
+    {
+      "id": "user-demo-1",
+      "name": "Trader Alex",
+      "email": "alex@qxautotrade.com",
+      "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
+      "role": "USER",
+      "isActive": true,
+      "trialStartedAt": "2026-07-29T19:04:24.670Z",
+      "subscriptionPlan": "Pro Plan",
+      "subExpiresAt": "2027-01-01T00:00:00.000Z",
+      "isLifetimeApproved": false,
+      "referralUid": "REF-ALEX-882",
+      "depositVerified": true,
+      "createdAt": "2026-07-29T19:04:24.671Z"
+    },
+    {
+      "id": "user-1785352926977",
+      "name": "Sarah Trade",
+      "email": "sarah@qxautotrade.com",
+      "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
+      "role": "USER",
+      "isActive": true,
+      "subscriptionPlan": "Pro Plan",
+      "subExpiresAt": "2027-01-01T00:00:00.000Z",
+      "isLifetimeApproved": false,
+      "depositVerified": true,
+      "createdAt": "2026-08-01T10:00:00.000Z"
+    },
+    {
+      "id": "user-1",
+      "name": "Quotex Trader",
+      "email": "quotex_trader@qxbroker.com",
+      "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
+      "role": "USER",
+      "isActive": true,
+      "subscriptionPlan": "Basic Plan",
+      "subExpiresAt": "2027-01-01T00:00:00.000Z",
+      "isLifetimeApproved": false,
+      "depositVerified": true,
+      "createdAt": "2026-08-03T11:21:50.902Z"
+    },
+    {
+      "id": "user-1787424851409",
+      "name": "Demo User",
+      "email": "demo@qxautotrade.com",
+      "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
+      "role": "USER",
+      "isActive": true,
+      "subscriptionPlan": "Free Trial",
+      "subExpiresAt": "2027-01-01T00:00:00.000Z",
+      "isLifetimeApproved": false,
+      "depositVerified": false,
+      "createdAt": "2026-08-23T11:58:02.204Z"
+    },
+    {
+      "id": "user-1787485286368",
+      "name": "Test OTP",
+      "email": "otp-test@qx.com",
+      "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
+      "role": "USER",
+      "isActive": true,
+      "subscriptionPlan": "Free Trial",
+      "subExpiresAt": "2027-01-01T00:00:00.000Z",
+      "isLifetimeApproved": false,
+      "depositVerified": false,
+      "createdAt": "2026-08-23T11:41:26.368Z"
+    }
+  ],
+  "updatedAt": "2026-09-12T16:32:06.772Z"
+}

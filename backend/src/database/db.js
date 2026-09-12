@@ -12,13 +12,27 @@ const defaultData = {
       passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1', // password: admin123
       role: 'MASTER_ADMIN',
       isActive: true,
-      trialStartedAt: new Date().toISOString(),
+      trialStartedAt: '2026-07-29T19:04:24.670Z',
       subscriptionPlan: 'Premium Plan',
       subExpiresAt: '2099-12-31T23:59:59.000Z',
       isLifetimeApproved: true,
       referralUid: 'REF-MASTER-001',
       depositVerified: true,
-      createdAt: new Date().toISOString()
+      createdAt: '2026-07-29T19:04:24.671Z'
+    },
+    {
+      id: 'user-1788612470060',
+      name: 'Om',
+      email: 'omchoubey123@gmail.com',
+      passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1',
+      role: 'USER',
+      isActive: true,
+      subscriptionPlan: 'Premium Plan (Lifetime)',
+      subExpiresAt: '2099-12-31T23:59:59.000Z',
+      planExpiresAt: '2099-12-31T23:59:59.000Z',
+      isLifetimeApproved: true,
+      depositVerified: true,
+      createdAt: '2026-09-05T12:47:50.060Z'
     },
     {
       id: 'user-demo-1',
@@ -27,13 +41,65 @@ const defaultData = {
       passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1', // password: password123
       role: 'USER',
       isActive: true,
-      trialStartedAt: new Date().toISOString(),
+      trialStartedAt: '2026-07-29T19:04:24.670Z',
       subscriptionPlan: 'Pro Plan',
-      subExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      subExpiresAt: '2027-01-01T00:00:00.000Z',
       isLifetimeApproved: false,
       referralUid: 'REF-ALEX-882',
       depositVerified: true,
-      createdAt: new Date().toISOString()
+      createdAt: '2026-07-29T19:04:24.671Z'
+    },
+    {
+      id: 'user-1785352926977',
+      name: 'Sarah Trade',
+      email: 'sarah@qxautotrade.com',
+      passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1',
+      role: 'USER',
+      isActive: true,
+      subscriptionPlan: 'Pro Plan',
+      subExpiresAt: '2027-01-01T00:00:00.000Z',
+      isLifetimeApproved: false,
+      depositVerified: true,
+      createdAt: '2026-08-01T10:00:00.000Z'
+    },
+    {
+      id: 'user-1',
+      name: 'Quotex Trader',
+      email: 'quotex_trader@qxbroker.com',
+      passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1',
+      role: 'USER',
+      isActive: true,
+      subscriptionPlan: 'Basic Plan',
+      subExpiresAt: '2027-01-01T00:00:00.000Z',
+      isLifetimeApproved: false,
+      depositVerified: true,
+      createdAt: '2026-08-03T11:21:50.902Z'
+    },
+    {
+      id: 'user-1787424851409',
+      name: 'Demo User',
+      email: 'demo@qxautotrade.com',
+      passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1',
+      role: 'USER',
+      isActive: true,
+      subscriptionPlan: 'Free Trial',
+      subExpiresAt: '2027-01-01T00:00:00.000Z',
+      isLifetimeApproved: false,
+      depositVerified: false,
+      createdAt: '2026-08-23T11:58:02.204Z'
+    },
+    {
+      id: 'user-1787485286368',
+      name: 'Test OTP',
+      email: 'otp-test@qx.com',
+      passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1',
+      role: 'USER',
+      isActive: true,
+      subscriptionPlan: 'Free Trial',
+      subExpiresAt: '2027-01-01T00:00:00.000Z',
+      isLifetimeApproved: false,
+      depositVerified: false,
+      createdAt: '2026-08-23T11:41:26.368Z'
     }
   ],
   brokerConnections: [
@@ -263,10 +329,64 @@ const defaultData = {
   }
 };
 
+const USERS_REGISTRY_FILE = path.join(__dirname, 'users_registry.json');
+const BACKUP_FILE = path.join(__dirname, 'db_users_backup.json');
+
 class Database {
   constructor() {
-    this.data = defaultData;
+    this.data = JSON.parse(JSON.stringify(defaultData));
     this.init();
+  }
+
+  // Merge multiple user arrays ensuring no user is ever lost or downgraded
+  mergeUserLists(...lists) {
+    const userMap = new Map();
+
+    for (const list of lists) {
+      if (!Array.isArray(list)) continue;
+      for (const u of list) {
+        if (!u || (!u.id && !u.email)) continue;
+        const key = (u.email ? u.email.toLowerCase().trim() : u.id);
+        const existing = userMap.get(key) || (u.id ? userMap.get(u.id) : null);
+
+        if (!existing) {
+          userMap.set(key, { ...u });
+          if (u.id) userMap.set(u.id, userMap.get(key));
+        } else {
+          // Merge smartly: preserve real names, paid plans, active status
+          const isExistingPaid = existing.subscriptionPlan && existing.subscriptionPlan !== 'Free Trial';
+          const isIncomingPaid = u.subscriptionPlan && u.subscriptionPlan !== 'Free Trial';
+          const plan = isExistingPaid ? existing.subscriptionPlan : (isIncomingPaid ? u.subscriptionPlan : (existing.subscriptionPlan || u.subscriptionPlan || 'Free Trial'));
+          const isLifetime = Boolean(existing.isLifetimeApproved || u.isLifetimeApproved);
+
+          const merged = {
+            ...existing,
+            ...u,
+            name: (u.name && !u.name.startsWith('Trader user-')) ? u.name : (existing.name || u.name || 'Trader'),
+            email: (u.email && !u.email.includes('@trader.quotex')) ? u.email.toLowerCase() : (existing.email || u.email),
+            subscriptionPlan: plan,
+            isLifetimeApproved: isLifetime,
+            isActive: existing.isActive !== undefined ? existing.isActive : (u.isActive !== undefined ? u.isActive : true),
+            passwordHash: existing.passwordHash || u.passwordHash || defaultData.users[0].passwordHash,
+            createdAt: existing.createdAt || u.createdAt || new Date().toISOString()
+          };
+          userMap.set(key, merged);
+          if (merged.id) userMap.set(merged.id, merged);
+        }
+      }
+    }
+
+    // Return unique users array
+    const seenIds = new Set();
+    const uniqueUsers = [];
+    for (const user of userMap.values()) {
+      const uid = user.id || user.email;
+      if (!seenIds.has(uid)) {
+        seenIds.add(uid);
+        uniqueUsers.push(user);
+      }
+    }
+    return uniqueUsers;
   }
 
   init() {
@@ -274,49 +394,167 @@ class Database {
       if (!fs.existsSync(path.dirname(DB_FILE))) {
         fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
       }
+
+      let loadedUsers = [];
+
+      // 1. Read primary DB_FILE if available
       if (fs.existsSync(DB_FILE)) {
-        const fileContent = fs.readFileSync(DB_FILE, 'utf8');
-        this.data = JSON.parse(fileContent);
-        // Ensure new tables are initialized if missing from existing JSON
-        if (!this.data.userNotifications) this.data.userNotifications = defaultData.userNotifications;
-        if (!this.data.userSecurity) this.data.userSecurity = defaultData.userSecurity;
-        if (!this.data.errorLogs) this.data.errorLogs = [];
-        if (!this.data.systemConfig) this.data.systemConfig = defaultData.systemConfig;
-        if (!this.data.siteConfig) this.data.siteConfig = defaultData.siteConfig;
-        if (!this.data.planSubscriptions) this.data.planSubscriptions = [];
-        if (!this.data.subscriptionPlans || this.data.subscriptionPlans.length === 0) {
-          this.data.subscriptionPlans = defaultData.subscriptionPlans;
+        try {
+          const fileContent = fs.readFileSync(DB_FILE, 'utf8');
+          const parsed = JSON.parse(fileContent);
+          this.data = parsed;
+          if (Array.isArray(parsed.users)) loadedUsers.push(...parsed.users);
+        } catch (e) {
+          console.error('[DB] Primary file load warning:', e.message);
         }
-        if (this.data.siteConfig.priceBasic === undefined) this.data.siteConfig.priceBasic = 49;
-        if (this.data.siteConfig.pricePro === undefined) this.data.siteConfig.pricePro = 129;
-        if (this.data.siteConfig.priceQuantum === undefined) this.data.siteConfig.priceQuantum = 239;
-        if (this.data.siteConfig.pricePremium === undefined) this.data.siteConfig.pricePremium = 450;
-        if (this.data.siteConfig.enableUPI === undefined) this.data.siteConfig.enableUPI = true;
-        if (this.data.siteConfig.enableBankTransfer === undefined) this.data.siteConfig.enableBankTransfer = true;
-        if (this.data.siteConfig.enableUSDT === undefined) this.data.siteConfig.enableUSDT = true;
-        if (!this.data.siteConfig.brokerLinks) this.data.siteConfig.brokerLinks = defaultData.siteConfig.brokerLinks;
-      } else {
-        this.save();
       }
+
+      // 2. Read USERS_REGISTRY_FILE if available
+      if (fs.existsSync(USERS_REGISTRY_FILE)) {
+        try {
+          const regContent = fs.readFileSync(USERS_REGISTRY_FILE, 'utf8');
+          const regParsed = JSON.parse(regContent);
+          const regUsers = Array.isArray(regParsed) ? regParsed : (regParsed.users || []);
+          loadedUsers.push(...regUsers);
+        } catch (e) {
+          console.error('[DB] Users registry load warning:', e.message);
+        }
+      }
+
+      // 3. Read BACKUP_FILE if available
+      if (fs.existsSync(BACKUP_FILE)) {
+        try {
+          const bkpContent = fs.readFileSync(BACKUP_FILE, 'utf8');
+          const bkpParsed = JSON.parse(bkpContent);
+          const bkpUsers = Array.isArray(bkpParsed) ? bkpParsed : (bkpParsed.users || []);
+          loadedUsers.push(...bkpUsers);
+        } catch (e) {
+          console.error('[DB] Users backup load warning:', e.message);
+        }
+      }
+
+      // Merge all users with defaultData so registered users are NEVER lost
+      this.data.users = this.mergeUserLists(defaultData.users, loadedUsers, this.data.users || []);
+
+      // Ensure critical tables exist
+      if (!this.data.userNotifications) this.data.userNotifications = defaultData.userNotifications;
+      if (!this.data.userSecurity) this.data.userSecurity = defaultData.userSecurity;
+      if (!this.data.errorLogs) this.data.errorLogs = [];
+      if (!this.data.systemConfig) this.data.systemConfig = defaultData.systemConfig;
+      if (!this.data.siteConfig) this.data.siteConfig = defaultData.siteConfig;
+      if (!this.data.planSubscriptions) this.data.planSubscriptions = [];
+      if (!this.data.riskSettings) this.data.riskSettings = defaultData.riskSettings;
+      if (!this.data.brokerConnections) this.data.brokerConnections = defaultData.brokerConnections;
+      if (!this.data.strategies) this.data.strategies = defaultData.strategies;
+      if (!this.data.tradeLogs) this.data.tradeLogs = defaultData.tradeLogs;
+      if (!this.data.auditLogs) this.data.auditLogs = [];
+      if (!this.data.subscriptionPlans || this.data.subscriptionPlans.length === 0) {
+        this.data.subscriptionPlans = defaultData.subscriptionPlans;
+      }
+      if (this.data.siteConfig.priceBasic === undefined) this.data.siteConfig.priceBasic = 49;
+      if (this.data.siteConfig.pricePro === undefined) this.data.siteConfig.pricePro = 129;
+      if (this.data.siteConfig.priceQuantum === undefined) this.data.siteConfig.priceQuantum = 239;
+      if (this.data.siteConfig.pricePremium === undefined) this.data.siteConfig.pricePremium = 450;
+      if (this.data.siteConfig.enableUPI === undefined) this.data.siteConfig.enableUPI = true;
+      if (this.data.siteConfig.enableBankTransfer === undefined) this.data.siteConfig.enableBankTransfer = true;
+      if (this.data.siteConfig.enableUSDT === undefined) this.data.siteConfig.enableUSDT = true;
+      if (!this.data.siteConfig.brokerLinks) this.data.siteConfig.brokerLinks = defaultData.siteConfig.brokerLinks;
+
+      // Save merged snapshot to disk
+      this.save();
+      console.log(`[DB] Database initialized successfully. Total permanent users: ${this.data.users.length}`);
     } catch (err) {
-      console.error('Error loading database file, fallback to default:', err.message);
-      // If db.json exists, do not immediately overwrite with defaultData
-      this.data = defaultData;
+      console.error('[DB] Error initializing database:', err.message);
+      this.data.users = this.mergeUserLists(defaultData.users, this.data.users || []);
     }
   }
 
   save() {
     try {
+      const jsonContent = JSON.stringify(this.data, null, 2);
       const tmpFile = `${DB_FILE}.tmp.${Date.now()}`;
-      fs.writeFileSync(tmpFile, JSON.stringify(this.data, null, 2), 'utf8');
+      fs.writeFileSync(tmpFile, jsonContent, 'utf8');
       fs.renameSync(tmpFile, DB_FILE);
     } catch (err) {
-      // Fallback direct write
       try {
         fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf8');
       } catch (e) {
-        console.error('Failed to save database:', e.message);
+        console.error('[DB] Failed to save DB_FILE:', e.message);
       }
+    }
+
+    // Always keep an updated users-only registry file & backup file
+    try {
+      const usersJson = JSON.stringify({ users: this.data.users, updatedAt: new Date().toISOString() }, null, 2);
+      fs.writeFileSync(USERS_REGISTRY_FILE, usersJson, 'utf8');
+      fs.writeFileSync(BACKUP_FILE, usersJson, 'utf8');
+    } catch (e) {
+      // Non-fatal
+    }
+  }
+
+  // Safe Upsert user method: updates or inserts without losing user details
+  upsertUser(userData) {
+    if (!userData) return null;
+    const users = this.get('users');
+    const lookupId = userData.id;
+    const lookupEmail = userData.email ? userData.email.toLowerCase().trim() : null;
+
+    let index = users.findIndex(u => (lookupId && u.id === lookupId) || (lookupEmail && u.email && u.email.toLowerCase() === lookupEmail));
+
+    if (index >= 0) {
+      // User exists: update without downgrading plan or losing real email
+      const existing = users[index];
+      const isExistingPaid = existing.subscriptionPlan && existing.subscriptionPlan !== 'Free Trial';
+      const isIncomingPaid = userData.subscriptionPlan && userData.subscriptionPlan !== 'Free Trial';
+      const plan = isExistingPaid ? existing.subscriptionPlan : (isIncomingPaid ? userData.subscriptionPlan : existing.subscriptionPlan);
+
+      users[index] = {
+        ...existing,
+        ...userData,
+        name: (userData.name && !userData.name.startsWith('Trader user-')) ? userData.name : existing.name,
+        email: (userData.email && !userData.email.includes('@trader.quotex')) ? userData.email.toLowerCase() : existing.email,
+        subscriptionPlan: plan || 'Free Trial',
+        isLifetimeApproved: Boolean(existing.isLifetimeApproved || userData.isLifetimeApproved),
+        isActive: userData.isActive !== undefined ? userData.isActive : (existing.isActive !== undefined ? existing.isActive : true)
+      };
+      this.save();
+      return users[index];
+    } else {
+      // User does not exist: create user
+      const nowMs = Date.now();
+      const newUser = {
+        id: userData.id || `user-${nowMs}`,
+        name: userData.name || 'Trader',
+        email: (userData.email && !userData.email.includes('@trader.quotex')) ? userData.email.toLowerCase() : `${userData.id || nowMs}@trader.quotex`,
+        role: userData.role || 'USER',
+        subscriptionPlan: userData.subscriptionPlan || 'Free Trial',
+        subExpiresAt: userData.subExpiresAt || new Date(nowMs + 60 * 60 * 1000).toISOString(),
+        isLifetimeApproved: Boolean(userData.isLifetimeApproved),
+        isActive: userData.isActive !== undefined ? userData.isActive : true,
+        createdAt: userData.createdAt || new Date(nowMs).toISOString()
+      };
+      users.unshift(newUser);
+
+      // Default risk settings if missing
+      const riskSettings = this.get('riskSettings');
+      if (!riskSettings[newUser.id]) {
+        riskSettings[newUser.id] = {
+          mode: 'MTG',
+          amountType: 'FIXED',
+          fixedAmount: 10,
+          percentageAmount: 2.0,
+          mtgMultiplier: 2.1,
+          maxMtgLevel: 5,
+          dailyProfitTarget: 100,
+          dailyStopLoss: 150,
+          maxTradesPerSession: 15,
+          maxConsecutiveLosses: 3,
+          minBalanceProtection: 50
+        };
+      }
+      this.save();
+      return newUser;
     }
   }
 
@@ -334,3 +572,4 @@ class Database {
 }
 
 module.exports = new Database();
+

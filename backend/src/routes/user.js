@@ -168,29 +168,87 @@ function calculateReferralStats(user, users, planSubscriptions, allWithdrawals) 
   };
 }
 
+// Synchronize User Profile Session (Explicit recovery / auto-upsert)
+router.post('/sync-profile', (req, res) => {
+  try {
+    const { userId, email, name, subscriptionPlan, subExpiresAt, isLifetimeApproved, isActive } = req.body;
+    const resolvedId = userId || req.headers['x-user-id'];
+    const resolvedEmail = email || req.headers['x-user-email'];
+    const resolvedName = name || req.headers['x-user-name'];
+    const resolvedPlan = subscriptionPlan || req.headers['x-user-plan'];
+    const resolvedExpires = subExpiresAt || req.headers['x-user-plan-expires'];
+    const resolvedLifetime = isLifetimeApproved !== undefined ? isLifetimeApproved : (req.headers['x-user-lifetime'] === 'true');
+
+    if (!resolvedId && !resolvedEmail) {
+      return res.status(400).json({ error: 'User ID or Email is required for sync.' });
+    }
+
+    const user = db.upsertUser({
+      id: resolvedId,
+      email: resolvedEmail,
+      name: resolvedName,
+      subscriptionPlan: resolvedPlan,
+      subExpiresAt: resolvedExpires,
+      isLifetimeApproved: resolvedLifetime,
+      isActive: isActive !== undefined ? isActive : true
+    });
+
+    return res.json({ message: 'User profile synchronized successfully', user });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // Get User Profile Details
 router.get('/profile/:userId', (req, res) => {
   try {
     const { userId } = req.params;
+    const headerEmail = req.headers['x-user-email'];
+    const headerName = req.headers['x-user-name'];
+    const headerPlan = req.headers['x-user-plan'];
+    const headerExpires = req.headers['x-user-plan-expires'];
+    const headerLifetime = req.headers['x-user-lifetime'] === 'true';
+
     const users = db.get('users') || [];
-    let user = users.find(u => u.id === userId || u.email?.toLowerCase() === userId?.toLowerCase());
+    let user = users.find(u => (userId && u.id === userId) || (userId && u.email?.toLowerCase() === userId.toLowerCase()) || (headerEmail && u.email?.toLowerCase() === headerEmail.toLowerCase()));
 
     // Auto-upsert new mobile app user so fresh users immediately register in Master Admin
     if (!user && userId && userId !== 'null' && userId !== 'undefined') {
-      user = {
+      const realEmail = (headerEmail && headerEmail.includes('@')) ? headerEmail.toLowerCase() : (userId.includes('@') ? userId.toLowerCase() : `${userId}@trader.quotex`);
+      const realName = headerName || (userId.includes('@') ? userId.split('@')[0] : `Trader ${userId.replace('user-', '').slice(0, 8)}`);
+      user = db.upsertUser({
         id: userId,
-        name: `Trader ${userId.replace('user-', '').slice(0, 8)}`,
-        email: userId.includes('@') ? userId.toLowerCase() : `${userId}@trader.quotex`,
+        name: realName,
+        email: realEmail,
         role: 'USER',
-        subscriptionPlan: 'Free Trial',
-        trialStartedAt: new Date().toISOString(),
-        subExpiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-        isLifetimeApproved: false,
+        subscriptionPlan: headerPlan || 'Free Trial',
+        subExpiresAt: headerExpires || new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        isLifetimeApproved: headerLifetime,
         isActive: true,
         createdAt: new Date().toISOString()
-      };
-      users.unshift(user);
-      db.save();
+      });
+    } else if (user) {
+      // Enrich user details from client headers if missing
+      let modified = false;
+      if (headerName && (!user.name || user.name.startsWith('Trader user-'))) {
+        user.name = headerName;
+        modified = true;
+      }
+      if (headerEmail && (!user.email || user.email.includes('@trader.quotex'))) {
+        user.email = headerEmail.toLowerCase();
+        modified = true;
+      }
+      if (headerPlan && headerPlan !== 'Free Trial' && user.subscriptionPlan === 'Free Trial') {
+        user.subscriptionPlan = headerPlan;
+        modified = true;
+      }
+      if (headerLifetime && !user.isLifetimeApproved) {
+        user.isLifetimeApproved = true;
+        modified = true;
+      }
+      if (modified) {
+        db.save();
+      }
     }
 
     if (!user) return res.status(404).json({ error: 'User not found' });

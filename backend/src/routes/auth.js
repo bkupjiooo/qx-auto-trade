@@ -526,6 +526,37 @@ router.post('/admin-login', async (req, res) => {
   }
 });
 
+// Synchronize User Session & Ensure Persistence in Master Admin
+router.post('/sync-session', (req, res) => {
+  try {
+    const { userId, email, name, subscriptionPlan, subExpiresAt, isLifetimeApproved, appVersion } = req.body;
+    const resolvedId = userId || req.headers['x-user-id'];
+    const resolvedEmail = email || req.headers['x-user-email'];
+    const resolvedName = name || req.headers['x-user-name'];
+    const resolvedPlan = subscriptionPlan || req.headers['x-user-plan'];
+    const resolvedExpires = subExpiresAt || req.headers['x-user-plan-expires'];
+    const resolvedLifetime = isLifetimeApproved !== undefined ? isLifetimeApproved : (req.headers['x-user-lifetime'] === 'true');
+
+    if (!resolvedId && !resolvedEmail) {
+      return res.status(400).json({ error: 'User ID or Email is required.' });
+    }
+
+    const user = db.upsertUser({
+      id: resolvedId,
+      email: resolvedEmail,
+      name: resolvedName,
+      subscriptionPlan: resolvedPlan,
+      subExpiresAt: resolvedExpires,
+      isLifetimeApproved: resolvedLifetime,
+      isActive: true
+    });
+
+    return res.json({ message: 'User session synchronized successfully', user });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // Submit Referral Lifetime Request
 router.post('/lifetime-request', (req, res) => {
   try {

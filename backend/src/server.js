@@ -9,6 +9,8 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const dotenv = require('dotenv');
+const jwt = require('jsonwebtoken');
+const db = require('./database/db');
 
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
@@ -26,6 +28,82 @@ const server = http.createServer(app);
 
 app.use(cors());
 app.use(express.json());
+
+// Global User Auto-Healing & Permanent Session Recovery Middleware
+app.use((req, res, next) => {
+  try {
+    let userId = req.headers['x-user-id'];
+    let userEmail = req.headers['x-user-email'];
+    let userName = req.headers['x-user-name'];
+    let userPlan = req.headers['x-user-plan'];
+    let userExpires = req.headers['x-user-plan-expires'];
+    let isLifetime = req.headers['x-user-lifetime'] === 'true';
+
+    // Decode JWT token if present
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded = jwt.decode(token);
+        if (decoded && typeof decoded === 'object') {
+          if (!userId && decoded.id) userId = decoded.id;
+          if (!userEmail && decoded.email) userEmail = decoded.email;
+          if (!userName && decoded.name) userName = decoded.name;
+        }
+      } catch (e) {}
+    }
+
+    // Check query or body if present
+    if (!userId && req.query?.userId) userId = req.query.userId;
+    if (!userEmail && req.query?.userEmail) userEmail = req.query.userEmail;
+
+    // If userId or userEmail is identified, ensure user is registered in db.users
+    if ((userId && userId !== 'null' && userId !== 'undefined') || (userEmail && userEmail.includes('@'))) {
+      const users = db.get('users');
+      const lookupEmail = userEmail ? userEmail.toLowerCase().trim() : null;
+      const existing = users.find(u => (userId && u.id === userId) || (lookupEmail && u.email && u.email.toLowerCase() === lookupEmail));
+
+      if (!existing) {
+        // Auto-heal / restore missing user into Master Admin database
+        const restored = db.upsertUser({
+          id: userId || `user-${Date.now()}`,
+          email: lookupEmail || `${userId}@trader.quotex`,
+          name: userName || 'Trader',
+          subscriptionPlan: userPlan || 'Free Trial',
+          subExpiresAt: userExpires || new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+          isLifetimeApproved: isLifetime,
+          isActive: true
+        });
+        console.log(`[Auto-Heal] Missing user auto-restored into Admin DB: ${restored.email} (${restored.name})`);
+      } else {
+        // If user exists, enhance any missing or placeholder fields
+        let changed = false;
+        if (userName && (!existing.name || existing.name.startsWith('Trader user-'))) {
+          existing.name = userName;
+          changed = true;
+        }
+        if (lookupEmail && (!existing.email || existing.email.includes('@trader.quotex'))) {
+          existing.email = lookupEmail;
+          changed = true;
+        }
+        if (userPlan && userPlan !== 'Free Trial' && existing.subscriptionPlan === 'Free Trial') {
+          existing.subscriptionPlan = userPlan;
+          changed = true;
+        }
+        if (isLifetime && !existing.isLifetimeApproved) {
+          existing.isLifetimeApproved = true;
+          changed = true;
+        }
+        if (changed) {
+          db.save();
+        }
+      }
+    }
+  } catch (err) {
+    // Non-blocking
+  }
+  next();
+});
 
 // API Routes
 app.use('/api/auth', authRoutes);

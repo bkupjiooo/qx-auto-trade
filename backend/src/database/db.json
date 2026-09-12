@@ -6,14 +6,95 @@
       "email": "admin@qxautotrade.com",
       "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
       "role": "MASTER_ADMIN",
+      "isActive": true,
       "trialStartedAt": "2026-07-29T19:04:24.670Z",
-      "subscriptionPlan": "Premium",
+      "subscriptionPlan": "Premium Plan",
       "subExpiresAt": "2099-12-31T23:59:59.000Z",
       "isLifetimeApproved": true,
       "referralUid": "REF-MASTER-001",
       "depositVerified": true,
-      "createdAt": "2026-07-29T19:04:24.671Z",
-      "isActive": true
+      "createdAt": "2026-07-29T19:04:24.671Z"
+    },
+    {
+      "id": "user-1788612470060",
+      "name": "Om",
+      "email": "omchoubey123@gmail.com",
+      "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
+      "role": "USER",
+      "isActive": true,
+      "subscriptionPlan": "Premium Plan (Lifetime)",
+      "subExpiresAt": "2099-12-31T23:59:59.000Z",
+      "planExpiresAt": "2099-12-31T23:59:59.000Z",
+      "isLifetimeApproved": true,
+      "depositVerified": true,
+      "createdAt": "2026-09-05T12:47:50.060Z"
+    },
+    {
+      "id": "user-demo-1",
+      "name": "Trader Alex",
+      "email": "alex@qxautotrade.com",
+      "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
+      "role": "USER",
+      "isActive": true,
+      "trialStartedAt": "2026-07-29T19:04:24.670Z",
+      "subscriptionPlan": "Pro Plan",
+      "subExpiresAt": "2027-01-01T00:00:00.000Z",
+      "isLifetimeApproved": false,
+      "referralUid": "REF-ALEX-882",
+      "depositVerified": true,
+      "createdAt": "2026-07-29T19:04:24.671Z"
+    },
+    {
+      "id": "user-1785352926977",
+      "name": "Sarah Trade",
+      "email": "sarah@qxautotrade.com",
+      "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
+      "role": "USER",
+      "isActive": true,
+      "subscriptionPlan": "Pro Plan",
+      "subExpiresAt": "2027-01-01T00:00:00.000Z",
+      "isLifetimeApproved": false,
+      "depositVerified": true,
+      "createdAt": "2026-08-01T10:00:00.000Z"
+    },
+    {
+      "id": "user-1",
+      "name": "Quotex Trader",
+      "email": "quotex_trader@qxbroker.com",
+      "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
+      "role": "USER",
+      "isActive": true,
+      "subscriptionPlan": "Basic Plan",
+      "subExpiresAt": "2027-01-01T00:00:00.000Z",
+      "isLifetimeApproved": false,
+      "depositVerified": true,
+      "createdAt": "2026-08-03T11:21:50.902Z"
+    },
+    {
+      "id": "user-1787424851409",
+      "name": "Demo User",
+      "email": "demo@qxautotrade.com",
+      "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
+      "role": "USER",
+      "isActive": true,
+      "subscriptionPlan": "Free Trial",
+      "subExpiresAt": "2027-01-01T00:00:00.000Z",
+      "isLifetimeApproved": false,
+      "depositVerified": false,
+      "createdAt": "2026-08-23T11:58:02.204Z"
+    },
+    {
+      "id": "user-1787485286368",
+      "name": "Test OTP",
+      "email": "otp-test@qx.com",
+      "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
+      "role": "USER",
+      "isActive": true,
+      "subscriptionPlan": "Free Trial",
+      "subExpiresAt": "2027-01-01T00:00:00.000Z",
+      "isLifetimeApproved": false,
+      "depositVerified": false,
+      "createdAt": "2026-08-23T11:41:26.368Z"
     }
   ],
   "brokerConnections": [
@@ -245,6 +326,19 @@
       "minBalanceProtection": 50
     },
     "user-1788612470060": {
+      "mode": "MTG",
+      "amountType": "FIXED",
+      "fixedAmount": 10,
+      "percentageAmount": 2,
+      "mtgMultiplier": 2.1,
+      "maxMtgLevel": 5,
+      "dailyProfitTarget": 100,
+      "dailyStopLoss": 150,
+      "maxTradesPerSession": 15,
+      "maxConsecutiveLosses": 3,
+      "minBalanceProtection": 50
+    },
+    "test-user-9999": {
       "mode": "MTG",
       "amountType": "FIXED",
       "fixedAmount": 10,
@@ -78107,7 +78201,90 @@
     "favicon": "",
     "brokerLinks": {
       "quotex": "https://broker-qx.pro/sign-up/?lid=1650958"
-    }
+    },
+    "priceBasic": 49,
+    "pricePro": 129,
+    "priceQuantum": 239,
+    "pricePremium": 450,
+    "enableUPI": true,
+    "enableBankTransfer": true,
+    "enableUSDT": true
   },
-  "planSubscriptions": []
+  "planSubscriptions": [],
+  "subscriptionPlans": [
+    {
+      "id": "plan-basic",
+      "name": "Basic Plan",
+      "price": "$49",
+      "numericPrice": 49,
+      "period": "/month",
+      "features": [
+        "All trading strategies",
+        "1 broker connection",
+        "Email support",
+        "2 currency pairs",
+        "Daily reports"
+      ],
+      "icon": "Zap",
+      "isActive": true,
+      "popular": false,
+      "cta": "Get Started"
+    },
+    {
+      "id": "plan-pro",
+      "name": "Pro Plan",
+      "price": "$129",
+      "numericPrice": 129,
+      "period": "/3 months",
+      "features": [
+        "5 trading bots",
+        "Advanced strategies",
+        "Priority support",
+        "10 currency pairs",
+        "Real-time analytics",
+        "Custom indicators"
+      ],
+      "icon": "Star",
+      "isActive": true,
+      "popular": true,
+      "cta": "Start Pro"
+    },
+    {
+      "id": "plan-quantum",
+      "name": "Quantum Plan",
+      "price": "$239",
+      "numericPrice": 239,
+      "period": "/6 months",
+      "features": [
+        "Everything in Pro",
+        "10 broker connections",
+        "Custom strategies",
+        "API access",
+        "Dedicated support"
+      ],
+      "icon": "Zap",
+      "isActive": true,
+      "popular": false,
+      "cta": "Choose Quantum"
+    },
+    {
+      "id": "plan-premium",
+      "name": "Premium Plan (Lifetime)",
+      "price": "$450",
+      "numericPrice": 450,
+      "period": "/12 months",
+      "features": [
+        "Unlimited bots",
+        "All strategies",
+        "Dedicated 24/7 support",
+        "All currency pairs",
+        "Advanced analytics",
+        "VIP community access"
+      ],
+      "icon": "Crown",
+      "isActive": true,
+      "popular": false,
+      "cta": "Go Premium"
+    }
+  ]
 }

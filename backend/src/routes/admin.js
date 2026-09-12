@@ -450,7 +450,7 @@ router.post('/add-user', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    const newUser = {
+    const newUser = db.upsertUser({
       id: `user-${Date.now()}`,
       name,
       email: email.toLowerCase(),
@@ -463,19 +463,19 @@ router.post('/add-user', async (req, res) => {
       brokerId: brokerId || '',
       telegramId: telegramId || '',
       createdAt: new Date().toISOString()
-    };
-
-    users.push(newUser);
+    });
 
     const riskSettings = db.get('riskSettings');
-    riskSettings[newUser.id] = {
-      mode: 'MTG',
-      fixedAmount: 10,
-      mtgMultiplier: 2.1,
-      maxMtgLevel: 5,
-      dailyProfitTarget: 100,
-      dailyStopLoss: 150
-    };
+    if (!riskSettings[newUser.id]) {
+      riskSettings[newUser.id] = {
+        mode: 'MTG',
+        fixedAmount: 10,
+        mtgMultiplier: 2.1,
+        maxMtgLevel: 5,
+        dailyProfitTarget: 100,
+        dailyStopLoss: 150
+      };
+    }
 
     db.get('auditLogs').unshift({
       id: `audit-${Date.now()}`,
