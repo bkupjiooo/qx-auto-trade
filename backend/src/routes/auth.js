@@ -342,8 +342,7 @@ router.post('/forgot-password', async (req, res) => {
 
     return res.json({
       message: `Password reset code sent to ${email}!`,
-      email: email.toLowerCase(),
-      demoOtp: generatedOtp
+      email: email.toLowerCase()
     });
   } catch (err) {
     return res.status(500).json({ error: 'Failed to send reset code. Please try again.' });
