@@ -598,11 +598,32 @@ router.post('/lifetime-request', (req, res) => {
     };
 
     requests.unshift(newReq);
+
+    // Also push to planSubscriptions so Master Admin immediately sees it in Subscriptions & Deposits tabs!
+    const planSubs = db.get('planSubscriptions') || [];
+    const newSub = {
+      id: `sub-free-${Date.now()}`,
+      userId: targetUserId,
+      userEmail: targetEmail,
+      planName: 'Lifetime VIP (Free Access)',
+      price: '$0 (Deposit Proof)',
+      period: 'Lifetime',
+      paymentTxId: `FREE-${referralUid || 'VIP'}-${Date.now()}`,
+      paymentProof: proofUrl || 'Deposit Proof (Broker Trader ID)',
+      status: 'PENDING',
+      type: 'free_access',
+      notes: `Trader ID: ${referralUid || 'N/A'}, Deposit: $${depositAmount || 100}`,
+      createdAt: new Date().toISOString()
+    };
+    planSubs.unshift(newSub);
+    db.set('planSubscriptions', planSubs);
+
     db.save();
 
     return res.json({
       message: 'Lifetime access verification request submitted! Master Admin will review your deposit proof.',
-      request: newReq
+      request: newReq,
+      subscription: newSub
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });

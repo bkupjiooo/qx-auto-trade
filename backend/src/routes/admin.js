@@ -384,6 +384,21 @@ router.get('/announcements', (req, res) => {
   return res.json({ announcements });
 });
 
+// Helper to sync active announcement to siteConfig
+function syncAnnouncementToSiteConfig(announcements) {
+  try {
+    const active = (announcements || []).find(a => a.isActive !== false && a.active !== false);
+    const siteConfig = db.get('siteConfig') || {};
+    if (active) {
+      siteConfig.announcementText = `${active.title}: ${active.content}`;
+      siteConfig.isAnnouncementActive = true;
+    } else {
+      siteConfig.isAnnouncementActive = false;
+    }
+    db.set('siteConfig', siteConfig);
+  } catch(e) {}
+}
+
 // Send/Create Announcement
 router.post('/announcements', (req, res) => {
   const { title, content, type, target } = req.body;
@@ -395,10 +410,12 @@ router.post('/announcements', (req, res) => {
     type: type || 'INFO',
     target: target || { homePage: true, userPage: true },
     isActive: true,
+    active: true,
     createdAt: new Date().toISOString()
   };
   announcements.unshift(newAnn);
   db.set('announcements', announcements);
+  syncAnnouncementToSiteConfig(announcements);
   db.save();
   return res.json({ message: 'Announcement published!', announcement: newAnn, announcements });
 });
@@ -414,8 +431,12 @@ router.put('/announcements/:id', (req, res) => {
   if (title !== undefined) ann.title = title;
   if (content !== undefined) ann.content = content;
   if (target !== undefined) ann.target = target;
-  if (isActive !== undefined) ann.isActive = Boolean(isActive);
+  if (isActive !== undefined) {
+    ann.isActive = Boolean(isActive);
+    ann.active = Boolean(isActive);
+  }
 
+  syncAnnouncementToSiteConfig(announcements);
   db.save();
   return res.json({ message: 'Announcement updated!', announcement: ann, announcements });
 });
@@ -430,6 +451,7 @@ router.post('/toggle-announcement-active', (req, res) => {
   const nextState = (isActive !== undefined) ? Boolean(isActive) : (active !== undefined ? Boolean(active) : !(ann.isActive || ann.active));
   ann.isActive = nextState;
   ann.active = nextState;
+  syncAnnouncementToSiteConfig(announcements);
   db.save();
   return res.json({ message: `Announcement set to ${nextState ? 'Active' : 'Inactive'}`, announcements, isActive: nextState, active: nextState });
 });
@@ -646,14 +668,44 @@ router.post('/site-config', (req, res) => {
 
 // Plan Subscriptions List & Approval / Rejection
 router.get('/plan-subscriptions', (req, res) => {
-  const subscriptions = db.get('planSubscriptions');
+  let subscriptions = db.get('planSubscriptions') || [];
+  const referralRequests = db.get('referralRequests') || [];
+
+  // Merge any referral free access requests not already present
+  let added = false;
+  referralRequests.forEach(ref => {
+    const existing = subscriptions.find(s => s.paymentTxId === `FREE-${ref.referralUid}-${ref.id}` || (s.userId === ref.userId && s.type === 'free_access'));
+    if (!existing) {
+      subscriptions.unshift({
+        id: `sub-free-${ref.id}`,
+        userId: ref.userId,
+        userEmail: ref.userEmail,
+        planName: 'Lifetime VIP (Free Access)',
+        price: '$0 (Deposit Proof)',
+        period: 'Lifetime',
+        paymentTxId: `FREE-${ref.referralUid}-${ref.id}`,
+        paymentProof: ref.proofUrl || 'Deposit Proof (Broker Trader ID)',
+        status: ref.status || 'PENDING',
+        type: 'free_access',
+        notes: `Trader ID: ${ref.referralUid || 'N/A'}, Deposit: $${ref.depositAmount || 100}`,
+        createdAt: ref.createdAt || new Date().toISOString()
+      });
+      added = true;
+    }
+  });
+
+  if (added) {
+    db.set('planSubscriptions', subscriptions);
+    db.save();
+  }
+
   return res.json({ subscriptions });
 });
 
 router.post('/approve-plan-subscription', (req, res) => {
   try {
     const { subscriptionId, adminEmail } = req.body;
-    const subscriptions = db.get('planSubscriptions');
+    const subscriptions = db.get('planSubscriptions') || [];
     const sub = subscriptions.find(s => s.id === subscriptionId);
 
     if (!sub) return res.status(404).json({ error: 'Subscription payment request not found.' });
@@ -662,20 +714,35 @@ router.post('/approve-plan-subscription', (req, res) => {
     sub.approvedAt = new Date().toISOString();
 
     // Upgrade User Plan
-    const users = db.get('users');
-    const user = users.find(u => u.id === sub.userId || u.email === sub.userEmail);
+    const users = db.get('users') || [];
+    const user = users.find(u => u.id === sub.userId || (sub.userEmail && u.email && u.email.toLowerCase() === sub.userEmail.toLowerCase()));
     if (user) {
       user.subscriptionPlan = sub.planName;
-      // Set sub expiry depending on plan duration (e.g., Basic: 1M, Pro: 3M, Quantum: 6M, Premium: 12M)
+      // Set sub expiry depending on plan duration
       let durationDays = 30;
       if (sub.planName.includes('Basic')) durationDays = 30;
       else if (sub.planName.includes('Pro')) durationDays = 90;
       else if (sub.planName.includes('Quantum')) durationDays = 180;
       else if (sub.planName.includes('Premium')) durationDays = 365;
+      else if (sub.planName.includes('Lifetime') || sub.type === 'free_access') durationDays = 36500;
+
+      if (sub.planName.includes('Lifetime') || sub.type === 'free_access') {
+        user.isLifetimeApproved = true;
+        user.depositVerified = true;
+        user.subscriptionPlan = 'Lifetime VIP';
+      }
 
       user.subExpiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString();
       user.planExpiresAt = user.subExpiresAt;
       user.isFreeTrialExpired = false;
+
+      // Also mark any matching referralRequests as APPROVED
+      const refRequests = db.get('referralRequests') || [];
+      refRequests.forEach(r => {
+        if (r.userId === sub.userId || (sub.userEmail && r.userEmail && r.userEmail.toLowerCase() === sub.userEmail.toLowerCase())) {
+          r.status = 'APPROVED';
+        }
+      });
 
       // 10% Referral Commission Credit to Referrer
       if (user.referralUid) {
@@ -723,13 +790,26 @@ router.post('/approve-plan-subscription', (req, res) => {
 router.post('/reject-plan-subscription', (req, res) => {
   try {
     const { subscriptionId, adminEmail } = req.body;
-    const subscriptions = db.get('planSubscriptions');
+    const subscriptions = db.get('planSubscriptions') || [];
     const sub = subscriptions.find(s => s.id === subscriptionId);
 
     if (!sub) return res.status(404).json({ error: 'Subscription payment request not found.' });
 
     sub.status = 'REJECTED';
     sub.rejectedAt = new Date().toISOString();
+
+    const users = db.get('users') || [];
+    const user = users.find(u => u.id === sub.userId || (sub.userEmail && u.email && u.email.toLowerCase() === sub.userEmail.toLowerCase()));
+    if (user && (sub.type === 'free_access' || sub.planName.includes('Lifetime'))) {
+      user.isLifetimeApproved = false;
+    }
+
+    const refRequests = db.get('referralRequests') || [];
+    refRequests.forEach(r => {
+      if (r.userId === sub.userId || (sub.userEmail && r.userEmail && r.userEmail.toLowerCase() === sub.userEmail.toLowerCase())) {
+        r.status = 'REJECTED';
+      }
+    });
 
     db.get('auditLogs').unshift({
       id: `audit-${Date.now()}`,

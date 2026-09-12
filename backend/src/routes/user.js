@@ -254,8 +254,27 @@ router.get('/profile/:userId', (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     const planSubs = db.get('planSubscriptions') || [];
+    const referralRequests = db.get('referralRequests') || [];
     const allWiths = db.get('commissionWithdrawals') || [];
     const refStats = calculateReferralStats(user, users, planSubs, allWiths);
+
+    // Calculate user's Free Access / Lifetime status
+    let freeAccessStatus = 'NONE';
+    if (user.isLifetimeApproved) {
+      freeAccessStatus = 'APPROVED';
+    } else {
+      const uEmail = (user.email || '').toLowerCase().trim();
+      const userFreeSubs = planSubs.filter(s => (s.userId === user.id || (s.userEmail && s.userEmail.toLowerCase().trim() === uEmail)) && (s.type === 'free_access' || (s.planName && s.planName.includes('Lifetime'))));
+      const userRefReqs = referralRequests.filter(r => r.userId === user.id || (r.userEmail && r.userEmail.toLowerCase().trim() === uEmail));
+
+      if (userFreeSubs.some(s => s.status === 'APPROVED') || userRefReqs.some(r => r.status === 'APPROVED')) {
+        freeAccessStatus = 'APPROVED';
+      } else if (userFreeSubs.some(s => s.status === 'PENDING') || userRefReqs.some(r => r.status === 'PENDING')) {
+        freeAccessStatus = 'PENDING';
+      } else if (userFreeSubs.some(s => s.status === 'REJECTED') || userRefReqs.some(r => r.status === 'REJECTED')) {
+        freeAccessStatus = 'REJECTED';
+      }
+    }
 
     return res.json({
       user: {
@@ -271,6 +290,7 @@ router.get('/profile/:userId', (req, res) => {
         trialExpiresAtMs: user.trialExpiresAtMs || (user.trialStartedAt ? new Date(user.trialStartedAt).getTime() + 3600000 : null),
         trialStartedAtMs: user.trialStartedAtMs,
         isLifetimeApproved: Boolean(user.isLifetimeApproved),
+        freeAccessStatus: freeAccessStatus,
         referralUid: user.referralUid,
         referralBalance: refStats.availableBalance,
         totalReferralEarned: refStats.totalEarned,

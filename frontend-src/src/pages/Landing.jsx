@@ -129,6 +129,8 @@ export default function Landing() {
   const [scrolled, setScrolled] = useState(false);
   const [plans, setPlans] = useState(defaultPlans);
   const [siteConfig, setSiteConfig] = useState({});
+  const [announcements, setAnnouncements] = useState([]);
+  const [announcementDismissed, setAnnouncementDismissed] = useState(false);
   const { user, logout } = useAuth();
   const location = useLocation();
 
@@ -147,8 +149,22 @@ export default function Landing() {
         })));
       }
     }).catch(() => {});
+
+    // Live sync Master Admin announcements to Landing website
+    api.getUserAnnouncements().then((d) => {
+      if (!mounted) return;
+      if (d?.announcements && Array.isArray(d.announcements)) {
+        const active = d.announcements.filter(a => a.isActive !== false && a.active !== false);
+        setAnnouncements(active);
+      }
+    }).catch(() => {});
+
     return () => { mounted = false; };
   }, []);
+
+  const activeAnnouncementText = (announcements.length > 0)
+    ? `${announcements[0].title}: ${announcements[0].content}`
+    : (siteConfig.isAnnouncementActive && siteConfig.announcementText ? siteConfig.announcementText : null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -181,9 +197,27 @@ export default function Landing() {
       {/* ─── Navbar ─── */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-dark-900/95 backdrop-blur-md shadow-lg border-b border-cyan-500/10' : 'bg-transparent'
+          scrolled ? 'bg-dark-900/95 backdrop-blur-md shadow-lg border-b border-cyan-500/10' : 'bg-dark-900/80 backdrop-blur-sm'
         }`}
       >
+        {/* Live Admin Announcement Banner */}
+        {activeAnnouncementText && !announcementDismissed && (
+          <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white px-4 py-2 text-center text-xs sm:text-sm font-medium flex items-center justify-between border-b border-cyan-400/30 shadow-md">
+            <div className="flex-1 flex items-center justify-center gap-2 overflow-hidden">
+              <span className="bg-black/30 border border-white/20 text-cyan-200 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shrink-0 animate-pulse">
+                📢 ANNOUNCEMENT
+              </span>
+              <span className="text-white truncate font-medium">{activeAnnouncementText}</span>
+            </div>
+            <button
+              onClick={() => setAnnouncementDismissed(true)}
+              className="text-cyan-200 hover:text-white p-1 rounded transition-colors ml-2 shrink-0"
+              title="Dismiss"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-2 group">
