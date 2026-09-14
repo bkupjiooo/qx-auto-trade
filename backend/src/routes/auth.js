@@ -13,14 +13,21 @@ const resetOtpStore = new Map(); // email -> { otp, expiresAt } // email -> { ot
 function getSystemSettings() {
   const sys = db.get('systemConfig') || {};
   const site = db.get('siteConfig') || {};
+  const sysControls = sys.emergencyControls || {};
+  const siteControls = site.emergencyControls || {};
+  
+  // Strictly ensure userRegistrationEnabled defaults to true
+  const regEnabled = sysControls.userRegistrationEnabled !== undefined ? Boolean(sysControls.userRegistrationEnabled) : (siteControls.userRegistrationEnabled !== undefined ? Boolean(siteControls.userRegistrationEnabled) : true);
+
   return {
     maintenanceMode: Boolean(sys.maintenanceMode || site.maintenanceMode),
     emergencyControls: {
-      userRegistrationEnabled: true,
-      userLoginEnabled: true,
-      tradingStrategiesEnabled: true,
-      ...(site.emergencyControls || {}),
-      ...(sys.emergencyControls || {})
+      userRegistrationEnabled: regEnabled,
+      userLoginEnabled: sysControls.userLoginEnabled !== false && siteControls.userLoginEnabled !== false,
+      tradingStrategiesEnabled: sysControls.tradingStrategiesEnabled !== false && siteControls.tradingStrategiesEnabled !== false,
+      ...siteControls,
+      ...sysControls,
+      userRegistrationEnabled: regEnabled
     }
   };
 }

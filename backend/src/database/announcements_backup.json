@@ -1,0 +1,18 @@
+{
+  "announcements": [
+    {
+      "id": "ann-default-welcome",
+      "title": "Welcome to Quotex Auto Trade",
+      "content": "Official automated trading platform is active. Connect your broker account to start trading!",
+      "type": "INFO",
+      "target": {
+        "homePage": true,
+        "userPage": true
+      },
+      "isActive": true,
+      "active": true,
+      "createdAt": "2026-09-01T00:00:00.000Z"
+    }
+  ],
+  "updatedAt": "2026-09-14T14:55:47.088Z"
+}

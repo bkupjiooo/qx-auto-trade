@@ -320,22 +320,54 @@ const defaultData = {
     siteName: 'Auto Trade Bot',
     siteLogo: '',
     favicon: '',
+    announcementText: 'Welcome to Quotex Auto Trade! Automated trading bot is active.',
+    isAnnouncementActive: true,
+    emergencyControls: {
+      userRegistrationEnabled: true,
+      userLoginEnabled: true,
+      tradingStrategiesEnabled: true
+    },
     updatedAt: new Date().toISOString()
   },
   systemConfig: {
     maintenanceMode: false,
     globalEmergencyStop: false,
+    emergencyControls: {
+      userRegistrationEnabled: true,
+      userLoginEnabled: true,
+      tradingStrategiesEnabled: true
+    },
     updatedAt: new Date().toISOString()
-  }
+  },
+  announcements: [
+    {
+      id: 'ann-default-welcome',
+      title: 'Welcome to Quotex Auto Trade',
+      content: 'Official automated trading platform is active. Connect your broker account to start trading!',
+      type: 'INFO',
+      target: { homePage: true, userPage: true },
+      isActive: true,
+      active: true,
+      createdAt: '2026-09-01T00:00:00.000Z'
+    }
+  ]
 };
 
 const USERS_REGISTRY_FILE = path.join(__dirname, 'users_registry.json');
 const BACKUP_FILE = path.join(__dirname, 'db_users_backup.json');
+const SITE_CONFIG_BACKUP_FILE = path.join(__dirname, 'site_config_backup.json');
+const SYSTEM_CONFIG_BACKUP_FILE = path.join(__dirname, 'system_config_backup.json');
+const ANNOUNCEMENTS_BACKUP_FILE = path.join(__dirname, 'announcements_backup.json');
+
+let mongooseInstance = null;
+let AppDataModel = null;
 
 class Database {
   constructor() {
     this.data = JSON.parse(JSON.stringify(defaultData));
+    this.mongoConnected = false;
     this.init();
+    this.initMongo();
   }
 
   // Merge multiple user arrays ensuring no user is ever lost or downgraded
@@ -433,6 +465,37 @@ class Database {
         }
       }
 
+      // 4. Read SITE_CONFIG_BACKUP_FILE if available
+      if (fs.existsSync(SITE_CONFIG_BACKUP_FILE)) {
+        try {
+          const siteBackup = JSON.parse(fs.readFileSync(SITE_CONFIG_BACKUP_FILE, 'utf8'));
+          if (siteBackup && typeof siteBackup === 'object') {
+            this.data.siteConfig = { ...defaultData.siteConfig, ...this.data.siteConfig, ...siteBackup };
+          }
+        } catch (e) {}
+      }
+
+      // 5. Read SYSTEM_CONFIG_BACKUP_FILE if available
+      if (fs.existsSync(SYSTEM_CONFIG_BACKUP_FILE)) {
+        try {
+          const sysBackup = JSON.parse(fs.readFileSync(SYSTEM_CONFIG_BACKUP_FILE, 'utf8'));
+          if (sysBackup && typeof sysBackup === 'object') {
+            this.data.systemConfig = { ...defaultData.systemConfig, ...this.data.systemConfig, ...sysBackup };
+          }
+        } catch (e) {}
+      }
+
+      // 6. Read ANNOUNCEMENTS_BACKUP_FILE if available
+      if (fs.existsSync(ANNOUNCEMENTS_BACKUP_FILE)) {
+        try {
+          const annBackup = JSON.parse(fs.readFileSync(ANNOUNCEMENTS_BACKUP_FILE, 'utf8'));
+          const list = Array.isArray(annBackup) ? annBackup : (annBackup?.announcements || []);
+          if (list.length > 0) {
+            this.data.announcements = list;
+          }
+        } catch (e) {}
+      }
+
       // Merge all users with defaultData so registered users are NEVER lost
       this.data.users = this.mergeUserLists(defaultData.users, loadedUsers, this.data.users || []);
 
@@ -440,17 +503,51 @@ class Database {
       if (!this.data.userNotifications) this.data.userNotifications = defaultData.userNotifications;
       if (!this.data.userSecurity) this.data.userSecurity = defaultData.userSecurity;
       if (!this.data.errorLogs) this.data.errorLogs = [];
-      if (!this.data.systemConfig) this.data.systemConfig = defaultData.systemConfig;
-      if (!this.data.siteConfig) this.data.siteConfig = defaultData.siteConfig;
+      if (!this.data.systemConfig) this.data.systemConfig = JSON.parse(JSON.stringify(defaultData.systemConfig));
+      if (!this.data.siteConfig) this.data.siteConfig = JSON.parse(JSON.stringify(defaultData.siteConfig));
       if (!this.data.planSubscriptions) this.data.planSubscriptions = [];
       if (!this.data.riskSettings) this.data.riskSettings = defaultData.riskSettings;
       if (!this.data.brokerConnections) this.data.brokerConnections = defaultData.brokerConnections;
       if (!this.data.strategies) this.data.strategies = defaultData.strategies;
       if (!this.data.tradeLogs) this.data.tradeLogs = defaultData.tradeLogs;
       if (!this.data.auditLogs) this.data.auditLogs = [];
+      if (!Array.isArray(this.data.announcements) || this.data.announcements.length === 0) {
+        this.data.announcements = JSON.parse(JSON.stringify(defaultData.announcements));
+      }
       if (!this.data.subscriptionPlans || this.data.subscriptionPlans.length === 0) {
         this.data.subscriptionPlans = defaultData.subscriptionPlans;
       }
+
+      // CRITICAL: GUARANTEE THAT EMERGENCY REGISTRATION IS ENABLED (ON BY DEFAULT)
+      if (!this.data.systemConfig.emergencyControls) {
+        this.data.systemConfig.emergencyControls = {
+          userRegistrationEnabled: true,
+          userLoginEnabled: true,
+          tradingStrategiesEnabled: true
+        };
+      }
+      if (this.data.systemConfig.emergencyControls.userRegistrationEnabled === undefined || this.data.systemConfig.emergencyControls.userRegistrationEnabled === null) {
+        this.data.systemConfig.emergencyControls.userRegistrationEnabled = true;
+      }
+
+      if (!this.data.siteConfig.emergencyControls) {
+        this.data.siteConfig.emergencyControls = { ...this.data.systemConfig.emergencyControls };
+      }
+      if (this.data.siteConfig.emergencyControls.userRegistrationEnabled === undefined || this.data.siteConfig.emergencyControls.userRegistrationEnabled === null) {
+        this.data.siteConfig.emergencyControls.userRegistrationEnabled = true;
+      }
+
+      // Always ensure referral links and support details have active defaults
+      if (!this.data.siteConfig.referralLink || this.data.siteConfig.referralLink.includes('official')) {
+        this.data.siteConfig.referralLink = 'https://broker-qx.pro/sign-up/?lid=1650958';
+      }
+      if (!this.data.siteConfig.telegramSupport) {
+        this.data.siteConfig.telegramSupport = 'https://t.me/Quotexautotrade_Support';
+      }
+      if (!this.data.siteConfig.supportEmail) {
+        this.data.siteConfig.supportEmail = 'support@quotexautotrade.com';
+      }
+
       if (this.data.siteConfig.priceBasic === undefined) this.data.siteConfig.priceBasic = 49;
       if (this.data.siteConfig.pricePro === undefined) this.data.siteConfig.pricePro = 129;
       if (this.data.siteConfig.priceQuantum === undefined) this.data.siteConfig.priceQuantum = 239;
@@ -460,12 +557,85 @@ class Database {
       if (this.data.siteConfig.enableUSDT === undefined) this.data.siteConfig.enableUSDT = true;
       if (!this.data.siteConfig.brokerLinks) this.data.siteConfig.brokerLinks = defaultData.siteConfig.brokerLinks;
 
-      // Save merged snapshot to disk
+      // Save merged snapshot to disk and backups
       this.save();
-      console.log(`[DB] Database initialized successfully. Total permanent users: ${this.data.users.length}`);
+      console.log(`[DB] Database initialized successfully. Total permanent users: ${this.data.users.length}, Registration Enabled: ${this.data.systemConfig.emergencyControls.userRegistrationEnabled}`);
     } catch (err) {
       console.error('[DB] Error initializing database:', err.message);
       this.data.users = this.mergeUserLists(defaultData.users, this.data.users || []);
+    }
+  }
+
+  async initMongo() {
+    const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || process.env.DATABASE_URL;
+    if (!mongoUri || (!mongoUri.startsWith('mongodb://') && !mongoUri.startsWith('mongodb+srv://'))) {
+      console.log('[DB-Mongo] No MONGODB_URI configured. Running on multi-tier local file persistence.');
+      return;
+    }
+
+    try {
+      const mongoose = require('mongoose');
+      mongooseInstance = mongoose;
+      console.log('[DB-Mongo] Connecting to MongoDB Atlas cloud database...');
+      await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 8000 });
+      this.mongoConnected = true;
+      console.log('[DB-Mongo] Connected to MongoDB Atlas successfully! Permanent cloud persistence active.');
+
+      const schema = new mongoose.Schema({
+        key: { type: String, unique: true, required: true },
+        data: { type: mongoose.Schema.Types.Mixed, required: true },
+        updatedAt: { type: Date, default: Date.now }
+      });
+      AppDataModel = mongoose.models.AppData || mongoose.model('AppData', schema);
+
+      // Load cloud state and merge
+      const cloudDoc = await AppDataModel.findOne({ key: 'qx_app_data' });
+      if (cloudDoc && cloudDoc.data) {
+        console.log('[DB-Mongo] Synced latest snapshot from MongoDB Atlas.');
+        const cloudData = cloudDoc.data;
+        if (Array.isArray(cloudData.users)) {
+          this.data.users = this.mergeUserLists(defaultData.users, this.data.users || [], cloudData.users);
+        }
+        if (cloudData.siteConfig) {
+          this.data.siteConfig = { ...defaultData.siteConfig, ...this.data.siteConfig, ...cloudData.siteConfig };
+        }
+        if (cloudData.systemConfig) {
+          this.data.systemConfig = { ...defaultData.systemConfig, ...this.data.systemConfig, ...cloudData.systemConfig };
+        }
+        if (Array.isArray(cloudData.announcements) && cloudData.announcements.length > 0) {
+          this.data.announcements = cloudData.announcements;
+        }
+        if (Array.isArray(cloudData.subscriptionPlans)) {
+          this.data.subscriptionPlans = cloudData.subscriptionPlans;
+        }
+
+        // Guarantee userRegistrationEnabled is true
+        if (!this.data.systemConfig.emergencyControls) {
+          this.data.systemConfig.emergencyControls = {
+            userRegistrationEnabled: true,
+            userLoginEnabled: true,
+            tradingStrategiesEnabled: true
+          };
+        }
+        this.save();
+      } else {
+        await this.syncToMongo();
+      }
+    } catch (err) {
+      console.error('[DB-Mongo] MongoDB connection error:', err.message);
+    }
+  }
+
+  async syncToMongo() {
+    if (!this.mongoConnected || !AppDataModel) return;
+    try {
+      await AppDataModel.findOneAndUpdate(
+        { key: 'qx_app_data' },
+        { data: this.data, updatedAt: new Date() },
+        { upsert: true, new: true }
+      );
+    } catch (err) {
+      // Non-blocking
     }
   }
 
@@ -483,14 +653,27 @@ class Database {
       }
     }
 
-    // Always keep an updated users-only registry file & backup file
+    // Always keep updated multi-file backups
     try {
       const usersJson = JSON.stringify({ users: this.data.users, updatedAt: new Date().toISOString() }, null, 2);
       fs.writeFileSync(USERS_REGISTRY_FILE, usersJson, 'utf8');
       fs.writeFileSync(BACKUP_FILE, usersJson, 'utf8');
+
+      if (this.data.siteConfig) {
+        fs.writeFileSync(SITE_CONFIG_BACKUP_FILE, JSON.stringify(this.data.siteConfig, null, 2), 'utf8');
+      }
+      if (this.data.systemConfig) {
+        fs.writeFileSync(SYSTEM_CONFIG_BACKUP_FILE, JSON.stringify(this.data.systemConfig, null, 2), 'utf8');
+      }
+      if (this.data.announcements) {
+        fs.writeFileSync(ANNOUNCEMENTS_BACKUP_FILE, JSON.stringify({ announcements: this.data.announcements, updatedAt: new Date().toISOString() }, null, 2), 'utf8');
+      }
     } catch (e) {
       // Non-fatal
     }
+
+    // Asynchronously sync to MongoDB Atlas if connected
+    this.syncToMongo().catch(() => {});
   }
 
   // Safe Upsert user method: updates or inserts without losing user details

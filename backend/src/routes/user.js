@@ -72,18 +72,30 @@ router.get('/site-config', (req, res) => {
     olympTrade: siteConfig.olympTradeLink || siteConfig.brokerLinks?.olympTrade || 'https://olymptrade.com/register',
     ...(siteConfig.brokerLinks || {})
   };
+  const sysControls = sysConfig.emergencyControls || {};
+  const siteControls = siteConfig.emergencyControls || {};
+  const regEnabled = sysControls.userRegistrationEnabled !== undefined ? Boolean(sysControls.userRegistrationEnabled) : (siteControls.userRegistrationEnabled !== undefined ? Boolean(siteControls.userRegistrationEnabled) : true);
+
+  const announcements = db.get('announcements') || [];
+  const latestAnn = announcements.find(a => a.isActive !== false && a.active !== false);
+  const announcementText = latestAnn ? `${latestAnn.title}: ${latestAnn.content}` : (siteConfig.announcementText || '');
+  const isAnnouncementActive = latestAnn ? true : Boolean(siteConfig.isAnnouncementActive);
+
   const merged = {
     ...siteConfig,
     referralLink: quotexLink,
     brokerLinks,
     maintenanceMode: Boolean(sysConfig.maintenanceMode || siteConfig.maintenanceMode),
     globalEmergencyStop: Boolean(sysConfig.globalEmergencyStop),
+    announcementText,
+    isAnnouncementActive,
     emergencyControls: {
-      userRegistrationEnabled: true,
-      userLoginEnabled: true,
-      tradingStrategiesEnabled: true,
-      ...(siteConfig.emergencyControls || {}),
-      ...(sysConfig.emergencyControls || {})
+      userRegistrationEnabled: regEnabled,
+      userLoginEnabled: sysControls.userLoginEnabled !== false && siteControls.userLoginEnabled !== false,
+      tradingStrategiesEnabled: sysControls.tradingStrategiesEnabled !== false && siteControls.tradingStrategiesEnabled !== false,
+      ...siteControls,
+      ...sysControls,
+      userRegistrationEnabled: regEnabled
     }
   };
   return res.json({ siteConfig: merged, config: merged });
