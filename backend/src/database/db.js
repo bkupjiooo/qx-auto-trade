@@ -358,6 +358,8 @@ const BACKUP_FILE = path.join(__dirname, 'db_users_backup.json');
 const SITE_CONFIG_BACKUP_FILE = path.join(__dirname, 'site_config_backup.json');
 const SYSTEM_CONFIG_BACKUP_FILE = path.join(__dirname, 'system_config_backup.json');
 const ANNOUNCEMENTS_BACKUP_FILE = path.join(__dirname, 'announcements_backup.json');
+const PLAN_SUBSCRIPTIONS_BACKUP_FILE = path.join(__dirname, 'plan_subscriptions_backup.json');
+const SUBSCRIPTION_PLANS_BACKUP_FILE = path.join(__dirname, 'subscription_plans_backup.json');
 
 let mongooseInstance = null;
 let AppDataModel = null;
@@ -499,6 +501,30 @@ class Database {
       // Merge all users with defaultData so registered users are NEVER lost
       this.data.users = this.mergeUserLists(defaultData.users, loadedUsers, this.data.users || []);
 
+      // 7. Read PLAN_SUBSCRIPTIONS_BACKUP_FILE if available
+      if (fs.existsSync(PLAN_SUBSCRIPTIONS_BACKUP_FILE)) {
+        try {
+          const subsBackup = JSON.parse(fs.readFileSync(PLAN_SUBSCRIPTIONS_BACKUP_FILE, 'utf8'));
+          if (Array.isArray(subsBackup)) {
+            this.data.planSubscriptions = subsBackup;
+          } else if (Array.isArray(subsBackup?.planSubscriptions)) {
+            this.data.planSubscriptions = subsBackup.planSubscriptions;
+          }
+        } catch (e) {}
+      }
+
+      // 8. Read SUBSCRIPTION_PLANS_BACKUP_FILE if available
+      if (fs.existsSync(SUBSCRIPTION_PLANS_BACKUP_FILE)) {
+        try {
+          const plansBackup = JSON.parse(fs.readFileSync(SUBSCRIPTION_PLANS_BACKUP_FILE, 'utf8'));
+          if (Array.isArray(plansBackup) && plansBackup.length > 0) {
+            this.data.subscriptionPlans = plansBackup;
+          } else if (Array.isArray(plansBackup?.subscriptionPlans) && plansBackup.subscriptionPlans.length > 0) {
+            this.data.subscriptionPlans = plansBackup.subscriptionPlans;
+          }
+        } catch (e) {}
+      }
+
       // Ensure critical tables exist
       if (!this.data.userNotifications) this.data.userNotifications = defaultData.userNotifications;
       if (!this.data.userSecurity) this.data.userSecurity = defaultData.userSecurity;
@@ -506,6 +532,8 @@ class Database {
       if (!this.data.systemConfig) this.data.systemConfig = JSON.parse(JSON.stringify(defaultData.systemConfig));
       if (!this.data.siteConfig) this.data.siteConfig = JSON.parse(JSON.stringify(defaultData.siteConfig));
       if (!this.data.planSubscriptions) this.data.planSubscriptions = [];
+      if (!this.data.referralRequests) this.data.referralRequests = [];
+      if (!this.data.deletedSubscriptionIds) this.data.deletedSubscriptionIds = [];
       if (!this.data.riskSettings) this.data.riskSettings = defaultData.riskSettings;
       if (!this.data.brokerConnections) this.data.brokerConnections = defaultData.brokerConnections;
       if (!this.data.strategies) this.data.strategies = defaultData.strategies;
@@ -667,6 +695,12 @@ class Database {
       }
       if (this.data.announcements) {
         fs.writeFileSync(ANNOUNCEMENTS_BACKUP_FILE, JSON.stringify({ announcements: this.data.announcements, updatedAt: new Date().toISOString() }, null, 2), 'utf8');
+      }
+      if (Array.isArray(this.data.planSubscriptions)) {
+        fs.writeFileSync(PLAN_SUBSCRIPTIONS_BACKUP_FILE, JSON.stringify(this.data.planSubscriptions, null, 2), 'utf8');
+      }
+      if (Array.isArray(this.data.subscriptionPlans)) {
+        fs.writeFileSync(SUBSCRIPTION_PLANS_BACKUP_FILE, JSON.stringify(this.data.subscriptionPlans, null, 2), 'utf8');
       }
     } catch (e) {
       // Non-fatal

@@ -670,20 +670,28 @@ router.post('/site-config', (req, res) => {
 router.get('/plan-subscriptions', (req, res) => {
   let subscriptions = db.get('planSubscriptions') || [];
   const referralRequests = db.get('referralRequests') || [];
+  const deletedIds = new Set(db.get('deletedSubscriptionIds') || []);
 
-  // Merge any referral free access requests not already present
+  // Filter out any explicitly deleted subscriptions
+  subscriptions = subscriptions.filter(s => !deletedIds.has(s.id) && !deletedIds.has(s.paymentTxId));
+
+  // Merge any referral free access requests not already present and NOT deleted
   let added = false;
   referralRequests.forEach(ref => {
-    const existing = subscriptions.find(s => s.paymentTxId === `FREE-${ref.referralUid}-${ref.id}` || (s.userId === ref.userId && s.type === 'free_access'));
+    const freeSubId = `sub-free-${ref.id}`;
+    const txId = `FREE-${ref.referralUid}-${ref.id}`;
+    if (deletedIds.has(freeSubId) || deletedIds.has(ref.id) || deletedIds.has(txId)) return;
+
+    const existing = subscriptions.find(s => s.id === freeSubId || s.paymentTxId === txId || (s.userId === ref.userId && s.type === 'free_access'));
     if (!existing) {
       subscriptions.unshift({
-        id: `sub-free-${ref.id}`,
+        id: freeSubId,
         userId: ref.userId,
         userEmail: ref.userEmail,
         planName: 'Lifetime VIP (Free Access)',
         price: '$0 (Deposit Proof)',
         period: 'Lifetime',
-        paymentTxId: `FREE-${ref.referralUid}-${ref.id}`,
+        paymentTxId: txId,
         paymentProof: ref.proofUrl || 'Deposit Proof (Broker Trader ID)',
         status: ref.status || 'PENDING',
         type: 'free_access',
@@ -936,17 +944,39 @@ router.post('/delete-strategy', (req, res) => {
 // Delete plan subscription request
 router.post('/delete-plan-subscription', (req, res) => {
   try {
-    const { subscriptionId } = req.body;
-    const subscriptions = db.get('planSubscriptions');
-    const idx = subscriptions.findIndex(s => s.id === subscriptionId);
-    if (idx === -1) return res.status(404).json({ error: 'Subscription not found.' });
-    subscriptions.splice(idx, 1);
+    const subId = req.body.subscriptionId || req.body.id;
+    if (!subId) return res.status(400).json({ error: 'Subscription ID is required.' });
+
+    let subscriptions = db.get('planSubscriptions') || [];
+    const target = subscriptions.find(s => s.id === subId);
+
+    // Remove from planSubscriptions
+    subscriptions = subscriptions.filter(s => s.id !== subId);
     db.set('planSubscriptions', subscriptions);
+
+    // Also clean up matching item from referralRequests so it NEVER resurrects!
+    let referralRequests = db.get('referralRequests') || [];
+    referralRequests = referralRequests.filter(ref => {
+      if (subId === `sub-free-${ref.id}` || subId === ref.id) return false;
+      if (target && target.paymentTxId && target.paymentTxId === `FREE-${ref.referralUid}-${ref.id}`) return false;
+      if (target && target.type === 'free_access' && target.userId === ref.userId) return false;
+      return true;
+    });
+    db.set('referralRequests', referralRequests);
+
+    // Track in deletedSubscriptionIds blacklist
+    let deletedIds = db.get('deletedSubscriptionIds') || [];
+    if (!deletedIds.includes(subId)) {
+      deletedIds.push(subId);
+      if (target?.paymentTxId) deletedIds.push(target.paymentTxId);
+      db.set('deletedSubscriptionIds', deletedIds);
+    }
+
     db.get('auditLogs').unshift({
       id: `audit-${Date.now()}`,
       action: 'PLAN_SUBSCRIPTION_DELETED',
       actorEmail: 'Master Admin',
-      details: `Deleted subscription request: ${subscriptionId}`,
+      details: `Permanently deleted subscription request: ${subId}`,
       timestamp: new Date().toISOString()
     });
     db.save();
@@ -959,22 +989,42 @@ router.post('/delete-plan-subscription', (req, res) => {
 // Bulk delete plan subscriptions
 router.post('/bulk-delete-plan-subscriptions', (req, res) => {
   try {
-    const { subscriptionIds } = req.body;
-    if (!Array.isArray(subscriptionIds) || subscriptionIds.length === 0) {
+    const ids = req.body.subscriptionIds || req.body.ids || [];
+    if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({ error: 'No subscriptions selected.' });
     }
-    const subscriptions = db.get('planSubscriptions');
-    const remaining = subscriptions.filter(s => !subscriptionIds.includes(s.id));
+    const idSet = new Set(ids);
+    let subscriptions = db.get('planSubscriptions') || [];
+    const targets = subscriptions.filter(s => idSet.has(s.id));
+    const remaining = subscriptions.filter(s => !idSet.has(s.id));
     db.set('planSubscriptions', remaining);
+
+    // Clean up referralRequests
+    let referralRequests = db.get('referralRequests') || [];
+    referralRequests = referralRequests.filter(ref => {
+      if (idSet.has(ref.id) || idSet.has(`sub-free-${ref.id}`)) return false;
+      for (const t of targets) {
+        if (t.paymentTxId === `FREE-${ref.referralUid}-${ref.id}`) return false;
+        if (t.type === 'free_access' && t.userId === ref.userId) return false;
+      }
+      return true;
+    });
+    db.set('referralRequests', referralRequests);
+
+    let deletedIds = db.get('deletedSubscriptionIds') || [];
+    ids.forEach(id => { if (!deletedIds.includes(id)) deletedIds.push(id); });
+    targets.forEach(t => { if (t.paymentTxId && !deletedIds.includes(t.paymentTxId)) deletedIds.push(t.paymentTxId); });
+    db.set('deletedSubscriptionIds', deletedIds);
+
     db.get('auditLogs').unshift({
       id: `audit-${Date.now()}`,
       action: 'PLAN_SUBSCRIPTIONS_BULK_DELETED',
       actorEmail: 'Master Admin',
-      details: `Bulk deleted ${subscriptionIds.length} subscription requests`,
+      details: `Bulk deleted ${ids.length} subscription requests`,
       timestamp: new Date().toISOString()
     });
     db.save();
-    return res.json({ message: `${subscriptionIds.length} subscriptions deleted!`, subscriptions: remaining });
+    return res.json({ message: `${ids.length} subscriptions deleted!`, subscriptions: remaining });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -983,9 +1033,14 @@ router.post('/bulk-delete-plan-subscriptions', (req, res) => {
 // Clear fake and test plan subscriptions
 router.post('/clear-test-plan-subscriptions', (req, res) => {
   try {
-    const subscriptions = db.get('planSubscriptions') || [];
+    let subscriptions = db.get('planSubscriptions') || [];
     const remaining = subscriptions.filter(s => s.paymentTxId !== 'TX-PENDING' && s.userEmail !== 'user@qxautotrade.com');
     db.set('planSubscriptions', remaining);
+
+    let referralRequests = db.get('referralRequests') || [];
+    referralRequests = referralRequests.filter(r => r.userEmail !== 'user@qxautotrade.com' && r.userEmail !== 'alex@qxautotrade.com');
+    db.set('referralRequests', referralRequests);
+
     db.save();
     return res.json({ message: 'Purged fake and test subscription requests.', subscriptions: remaining });
   } catch (err) {
@@ -1167,9 +1222,11 @@ router.post('/plans/update', (req, res) => {
 // Delete plan
 router.post('/plans/delete', (req, res) => {
   try {
-    const { planId } = req.body;
-    const plans = db.get('subscriptionPlans') || [];
-    const idx = plans.findIndex(p => p.id === planId);
+    const targetPlanId = req.body?.planId || req.body?.id;
+    if (!targetPlanId) return res.status(400).json({ error: 'Plan ID is required.' });
+
+    let plans = db.get('subscriptionPlans') || [];
+    const idx = plans.findIndex(p => p.id === targetPlanId);
 
     if (idx === -1) return res.status(404).json({ error: 'Plan not found.' });
 
