@@ -19,87 +19,6 @@ const defaultData = {
       referralUid: 'REF-MASTER-001',
       depositVerified: true,
       createdAt: '2026-07-29T19:04:24.671Z'
-    },
-    {
-      id: 'user-1788612470060',
-      name: 'Om',
-      email: 'omchoubey123@gmail.com',
-      passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1',
-      role: 'USER',
-      isActive: true,
-      subscriptionPlan: 'Premium Plan (Lifetime)',
-      subExpiresAt: '2099-12-31T23:59:59.000Z',
-      planExpiresAt: '2099-12-31T23:59:59.000Z',
-      isLifetimeApproved: true,
-      depositVerified: true,
-      createdAt: '2026-09-05T12:47:50.060Z'
-    },
-    {
-      id: 'user-demo-1',
-      name: 'Trader Alex',
-      email: 'alex@qxautotrade.com',
-      passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1', // password: password123
-      role: 'USER',
-      isActive: true,
-      trialStartedAt: '2026-07-29T19:04:24.670Z',
-      subscriptionPlan: 'Pro Plan',
-      subExpiresAt: '2027-01-01T00:00:00.000Z',
-      isLifetimeApproved: false,
-      referralUid: 'REF-ALEX-882',
-      depositVerified: true,
-      createdAt: '2026-07-29T19:04:24.671Z'
-    },
-    {
-      id: 'user-1785352926977',
-      name: 'Sarah Trade',
-      email: 'sarah@qxautotrade.com',
-      passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1',
-      role: 'USER',
-      isActive: true,
-      subscriptionPlan: 'Pro Plan',
-      subExpiresAt: '2027-01-01T00:00:00.000Z',
-      isLifetimeApproved: false,
-      depositVerified: true,
-      createdAt: '2026-08-01T10:00:00.000Z'
-    },
-    {
-      id: 'user-1',
-      name: 'Quotex Trader',
-      email: 'quotex_trader@qxbroker.com',
-      passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1',
-      role: 'USER',
-      isActive: true,
-      subscriptionPlan: 'Basic Plan',
-      subExpiresAt: '2027-01-01T00:00:00.000Z',
-      isLifetimeApproved: false,
-      depositVerified: true,
-      createdAt: '2026-08-03T11:21:50.902Z'
-    },
-    {
-      id: 'user-1787424851409',
-      name: 'Demo User',
-      email: 'demo@qxautotrade.com',
-      passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1',
-      role: 'USER',
-      isActive: true,
-      subscriptionPlan: 'Free Trial',
-      subExpiresAt: '2027-01-01T00:00:00.000Z',
-      isLifetimeApproved: false,
-      depositVerified: false,
-      createdAt: '2026-08-23T11:58:02.204Z'
-    },
-    {
-      id: 'user-1787485286368',
-      name: 'Test OTP',
-      email: 'otp-test@qx.com',
-      passwordHash: '$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1',
-      role: 'USER',
-      isActive: true,
-      subscriptionPlan: 'Free Trial',
-      subExpiresAt: '2027-01-01T00:00:00.000Z',
-      isLifetimeApproved: false,
-      depositVerified: false,
-      createdAt: '2026-08-23T11:41:26.368Z'
     }
   ],
   brokerConnections: [
@@ -387,20 +306,20 @@ class Database {
           userMap.set(key, { ...u });
           if (u.id) userMap.set(u.id, userMap.get(key));
         } else {
-          // Merge smartly: preserve real names, paid plans, active status
-          const isExistingPaid = existing.subscriptionPlan && existing.subscriptionPlan !== 'Free Trial';
-          const isIncomingPaid = u.subscriptionPlan && u.subscriptionPlan !== 'Free Trial';
-          const plan = isExistingPaid ? existing.subscriptionPlan : (isIncomingPaid ? u.subscriptionPlan : (existing.subscriptionPlan || u.subscriptionPlan || 'Free Trial'));
-          const isLifetime = Boolean(existing.isLifetimeApproved || u.isLifetimeApproved);
-
+          // If existing is already loaded (from primary DB / higher priority), existing takes precedence!
+          // We only enrich fields that are genuinely missing in existing.
           const merged = {
-            ...existing,
             ...u,
-            name: (u.name && !u.name.startsWith('Trader user-')) ? u.name : (existing.name || u.name || 'Trader'),
-            email: (u.email && !u.email.includes('@trader.quotex')) ? u.email.toLowerCase() : (existing.email || u.email),
-            subscriptionPlan: plan,
-            isLifetimeApproved: isLifetime,
-            isActive: existing.isActive !== undefined ? existing.isActive : (u.isActive !== undefined ? u.isActive : true),
+            ...existing,
+            name: (existing.name && !existing.name.startsWith('Trader user-')) ? existing.name : (u.name || existing.name || 'Trader'),
+            email: (existing.email && !existing.email.includes('@trader.quotex')) ? existing.email.toLowerCase() : (u.email ? u.email.toLowerCase() : existing.email),
+            subscriptionPlan: existing.subscriptionPlan !== undefined ? existing.subscriptionPlan : (u.subscriptionPlan || 'Free Trial'),
+            plan: existing.plan !== undefined ? existing.plan : (existing.subscriptionPlan || u.plan || u.subscriptionPlan || 'Free Trial'),
+            isLifetimeApproved: existing.isLifetimeApproved !== undefined ? Boolean(existing.isLifetimeApproved) : Boolean(u.isLifetimeApproved),
+            isActive: existing.isActive !== undefined ? Boolean(existing.isActive) : (u.isActive !== undefined ? Boolean(u.isActive) : true),
+            isFreeTrialExpired: existing.isFreeTrialExpired !== undefined ? Boolean(existing.isFreeTrialExpired) : Boolean(u.isFreeTrialExpired),
+            subExpiresAt: existing.subExpiresAt || u.subExpiresAt || '',
+            planExpiresAt: existing.planExpiresAt || existing.subExpiresAt || u.planExpiresAt || u.subExpiresAt || '',
             passwordHash: existing.passwordHash || u.passwordHash || defaultData.users[0].passwordHash,
             createdAt: existing.createdAt || u.createdAt || new Date().toISOString()
           };
@@ -431,7 +350,7 @@ class Database {
 
       let loadedUsers = [];
 
-      // 1. Read primary DB_FILE if available
+      // 1. Read primary DB_FILE if available (HIGHEST PRIORITY)
       if (fs.existsSync(DB_FILE)) {
         try {
           const fileContent = fs.readFileSync(DB_FILE, 'utf8');
@@ -467,39 +386,39 @@ class Database {
         }
       }
 
-      // 4. Read SITE_CONFIG_BACKUP_FILE if available
+      // 4. Read SITE_CONFIG_BACKUP_FILE if available (preserve db.json's siteConfig if loaded)
+      let siteBackup = null;
       if (fs.existsSync(SITE_CONFIG_BACKUP_FILE)) {
         try {
-          const siteBackup = JSON.parse(fs.readFileSync(SITE_CONFIG_BACKUP_FILE, 'utf8'));
-          if (siteBackup && typeof siteBackup === 'object') {
-            this.data.siteConfig = { ...defaultData.siteConfig, ...this.data.siteConfig, ...siteBackup };
-          }
+          siteBackup = JSON.parse(fs.readFileSync(SITE_CONFIG_BACKUP_FILE, 'utf8'));
         } catch (e) {}
       }
+      this.data.siteConfig = { ...defaultData.siteConfig, ...(siteBackup || {}), ...(this.data.siteConfig || {}) };
 
       // 5. Read SYSTEM_CONFIG_BACKUP_FILE if available
+      let sysBackup = null;
       if (fs.existsSync(SYSTEM_CONFIG_BACKUP_FILE)) {
         try {
-          const sysBackup = JSON.parse(fs.readFileSync(SYSTEM_CONFIG_BACKUP_FILE, 'utf8'));
-          if (sysBackup && typeof sysBackup === 'object') {
-            this.data.systemConfig = { ...defaultData.systemConfig, ...this.data.systemConfig, ...sysBackup };
-          }
+          sysBackup = JSON.parse(fs.readFileSync(SYSTEM_CONFIG_BACKUP_FILE, 'utf8'));
         } catch (e) {}
       }
+      this.data.systemConfig = { ...defaultData.systemConfig, ...(sysBackup || {}), ...(this.data.systemConfig || {}) };
 
       // 6. Read ANNOUNCEMENTS_BACKUP_FILE if available
-      if (fs.existsSync(ANNOUNCEMENTS_BACKUP_FILE)) {
-        try {
-          const annBackup = JSON.parse(fs.readFileSync(ANNOUNCEMENTS_BACKUP_FILE, 'utf8'));
-          const list = Array.isArray(annBackup) ? annBackup : (annBackup?.announcements || []);
-          if (list.length > 0) {
-            this.data.announcements = list;
-          }
-        } catch (e) {}
+      if (!Array.isArray(this.data.announcements) || this.data.announcements.length === 0) {
+        if (fs.existsSync(ANNOUNCEMENTS_BACKUP_FILE)) {
+          try {
+            const annBackup = JSON.parse(fs.readFileSync(ANNOUNCEMENTS_BACKUP_FILE, 'utf8'));
+            const list = Array.isArray(annBackup) ? annBackup : (annBackup?.announcements || []);
+            if (list.length > 0) {
+              this.data.announcements = list;
+            }
+          } catch (e) {}
+        }
       }
 
-      // Merge all users with defaultData so registered users are NEVER lost
-      this.data.users = this.mergeUserLists(defaultData.users, loadedUsers, this.data.users || []);
+      // Merge all users: loadedUsers from DB_FILE has FIRST priority, defaultData.users last!
+      this.data.users = this.mergeUserLists(loadedUsers, this.data.users || [], defaultData.users);
 
       // 7. Read PLAN_SUBSCRIPTIONS_BACKUP_FILE if available
       if (fs.existsSync(PLAN_SUBSCRIPTIONS_BACKUP_FILE)) {
@@ -546,7 +465,7 @@ class Database {
         this.data.subscriptionPlans = defaultData.subscriptionPlans;
       }
 
-      // CRITICAL: GUARANTEE THAT EMERGENCY REGISTRATION IS ENABLED (ON BY DEFAULT)
+      // Emergency controls: preserve whatever state the admin saved!
       if (!this.data.systemConfig.emergencyControls) {
         this.data.systemConfig.emergencyControls = {
           userRegistrationEnabled: true,
@@ -554,19 +473,13 @@ class Database {
           tradingStrategiesEnabled: true
         };
       }
-      if (this.data.systemConfig.emergencyControls.userRegistrationEnabled === undefined || this.data.systemConfig.emergencyControls.userRegistrationEnabled === null) {
-        this.data.systemConfig.emergencyControls.userRegistrationEnabled = true;
-      }
 
       if (!this.data.siteConfig.emergencyControls) {
         this.data.siteConfig.emergencyControls = { ...this.data.systemConfig.emergencyControls };
       }
-      if (this.data.siteConfig.emergencyControls.userRegistrationEnabled === undefined || this.data.siteConfig.emergencyControls.userRegistrationEnabled === null) {
-        this.data.siteConfig.emergencyControls.userRegistrationEnabled = true;
-      }
 
-      // Always ensure referral links and support details have active defaults
-      if (!this.data.siteConfig.referralLink || this.data.siteConfig.referralLink.includes('official')) {
+      // Referral link & support fallbacks: only if missing/empty
+      if (!this.data.siteConfig.referralLink) {
         this.data.siteConfig.referralLink = 'https://broker-qx.pro/sign-up/?lid=1650958';
       }
       if (!this.data.siteConfig.telegramSupport) {
@@ -587,10 +500,10 @@ class Database {
 
       // Save merged snapshot to disk and backups
       this.save();
-      console.log(`[DB] Database initialized successfully. Total permanent users: ${this.data.users.length}, Registration Enabled: ${this.data.systemConfig.emergencyControls.userRegistrationEnabled}`);
+      console.log(`[DB] Database initialized successfully. Total permanent users: ${this.data.users.length}`);
     } catch (err) {
       console.error('[DB] Error initializing database:', err.message);
-      this.data.users = this.mergeUserLists(defaultData.users, this.data.users || []);
+      this.data.users = this.mergeUserLists(this.data.users || [], defaultData.users);
     }
   }
 
@@ -622,7 +535,7 @@ class Database {
         console.log('[DB-Mongo] Synced latest snapshot from MongoDB Atlas.');
         const cloudData = cloudDoc.data;
         if (Array.isArray(cloudData.users)) {
-          this.data.users = this.mergeUserLists(defaultData.users, this.data.users || [], cloudData.users);
+          this.data.users = this.mergeUserLists(cloudData.users, this.data.users || [], defaultData.users);
         }
         if (cloudData.siteConfig) {
           this.data.siteConfig = { ...defaultData.siteConfig, ...this.data.siteConfig, ...cloudData.siteConfig };
@@ -637,14 +550,6 @@ class Database {
           this.data.subscriptionPlans = cloudData.subscriptionPlans;
         }
 
-        // Guarantee userRegistrationEnabled is true
-        if (!this.data.systemConfig.emergencyControls) {
-          this.data.systemConfig.emergencyControls = {
-            userRegistrationEnabled: true,
-            userLoginEnabled: true,
-            tradingStrategiesEnabled: true
-          };
-        }
         this.save();
       } else {
         await this.syncToMongo();
@@ -711,7 +616,7 @@ class Database {
   }
 
   // Safe Upsert user method: updates or inserts without losing user details
-  upsertUser(userData) {
+  upsertUser(userData, fromAdmin = false) {
     if (!userData) return null;
     const users = this.get('users');
     const lookupId = userData.id;
@@ -720,35 +625,50 @@ class Database {
     let index = users.findIndex(u => (lookupId && u.id === lookupId) || (lookupEmail && u.email && u.email.toLowerCase() === lookupEmail));
 
     if (index >= 0) {
-      // User exists: update without downgrading plan or losing real email
+      // User exists: admin input is authoritative. Client requests NEVER overwrite plan or lifetime status!
       const existing = users[index];
-      const isExistingPaid = existing.subscriptionPlan && existing.subscriptionPlan !== 'Free Trial';
-      const isIncomingPaid = userData.subscriptionPlan && userData.subscriptionPlan !== 'Free Trial';
-      const plan = isExistingPaid ? existing.subscriptionPlan : (isIncomingPaid ? userData.subscriptionPlan : existing.subscriptionPlan);
+      
+      const plan = fromAdmin
+        ? (userData.subscriptionPlan || userData.plan || existing.subscriptionPlan || 'Free Trial')
+        : (existing.subscriptionPlan || existing.plan || userData.subscriptionPlan || 'Free Trial');
+
+      const isLifetime = fromAdmin
+        ? (userData.isLifetimeApproved !== undefined ? Boolean(userData.isLifetimeApproved) : Boolean(existing.isLifetimeApproved))
+        : Boolean(existing.isLifetimeApproved);
+
+      const isActive = fromAdmin
+        ? (userData.isActive !== undefined ? Boolean(userData.isActive) : (existing.isActive !== undefined ? Boolean(existing.isActive) : true))
+        : (existing.isActive !== undefined ? Boolean(existing.isActive) : true);
 
       users[index] = {
         ...existing,
         ...userData,
         name: (userData.name && !userData.name.startsWith('Trader user-')) ? userData.name : existing.name,
         email: (userData.email && !userData.email.includes('@trader.quotex')) ? userData.email.toLowerCase() : existing.email,
-        subscriptionPlan: plan || 'Free Trial',
-        isLifetimeApproved: Boolean(existing.isLifetimeApproved || userData.isLifetimeApproved),
-        isActive: userData.isActive !== undefined ? userData.isActive : (existing.isActive !== undefined ? existing.isActive : true)
+        subscriptionPlan: plan,
+        plan: plan,
+        isLifetimeApproved: isLifetime,
+        isActive: isActive,
+        subExpiresAt: fromAdmin && userData.subExpiresAt ? userData.subExpiresAt : (existing.subExpiresAt || userData.subExpiresAt || ''),
+        planExpiresAt: fromAdmin && (userData.planExpiresAt || userData.subExpiresAt) ? (userData.planExpiresAt || userData.subExpiresAt) : (existing.planExpiresAt || existing.subExpiresAt || userData.subExpiresAt || '')
       };
       this.save();
       return users[index];
     } else {
       // User does not exist: create user
       const nowMs = Date.now();
+      const plan = userData.subscriptionPlan || userData.plan || 'Free Trial';
       const newUser = {
         id: userData.id || `user-${nowMs}`,
         name: userData.name || 'Trader',
         email: (userData.email && !userData.email.includes('@trader.quotex')) ? userData.email.toLowerCase() : `${userData.id || nowMs}@trader.quotex`,
         role: userData.role || 'USER',
-        subscriptionPlan: userData.subscriptionPlan || 'Free Trial',
+        subscriptionPlan: plan,
+        plan: plan,
         subExpiresAt: userData.subExpiresAt || new Date(nowMs + 60 * 60 * 1000).toISOString(),
+        planExpiresAt: userData.planExpiresAt || userData.subExpiresAt || new Date(nowMs + 60 * 60 * 1000).toISOString(),
         isLifetimeApproved: Boolean(userData.isLifetimeApproved),
-        isActive: userData.isActive !== undefined ? userData.isActive : true,
+        isActive: userData.isActive !== undefined ? Boolean(userData.isActive) : true,
         createdAt: userData.createdAt || new Date(nowMs).toISOString()
       };
       users.unshift(newUser);

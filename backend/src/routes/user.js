@@ -187,25 +187,56 @@ router.post('/sync-profile', (req, res) => {
     const resolvedId = userId || req.headers['x-user-id'];
     const resolvedEmail = email || req.headers['x-user-email'];
     const resolvedName = name || req.headers['x-user-name'];
-    const resolvedPlan = subscriptionPlan || req.headers['x-user-plan'];
-    const resolvedExpires = subExpiresAt || req.headers['x-user-plan-expires'];
-    const resolvedLifetime = isLifetimeApproved !== undefined ? isLifetimeApproved : (req.headers['x-user-lifetime'] === 'true');
 
     if (!resolvedId && !resolvedEmail) {
       return res.status(400).json({ error: 'User ID or Email is required for sync.' });
     }
 
-    const user = db.upsertUser({
-      id: resolvedId,
-      email: resolvedEmail,
-      name: resolvedName,
-      subscriptionPlan: resolvedPlan,
-      subExpiresAt: resolvedExpires,
-      isLifetimeApproved: resolvedLifetime,
-      isActive: isActive !== undefined ? isActive : true
-    });
+    const users = db.get('users') || [];
+    const lookupEmail = resolvedEmail ? resolvedEmail.toLowerCase().trim() : null;
+    let user = users.find(u => (resolvedId && u.id === resolvedId) || (lookupEmail && u.email && u.email.toLowerCase() === lookupEmail));
 
-    return res.json({ message: 'User profile synchronized successfully', user });
+    if (!user) {
+      user = db.upsertUser({
+        id: resolvedId,
+        email: resolvedEmail,
+        name: resolvedName,
+        subscriptionPlan: subscriptionPlan || 'Free Trial',
+        subExpiresAt: subExpiresAt || new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        isLifetimeApproved: Boolean(isLifetimeApproved),
+        isActive: isActive !== undefined ? Boolean(isActive) : true
+      }, false);
+    } else {
+      // Existing user: Admin's database plan is authoritative!
+      let changed = false;
+      if (resolvedName && (!user.name || user.name.startsWith('Trader user-'))) {
+        user.name = resolvedName;
+        changed = true;
+      }
+      if (lookupEmail && (!user.email || user.email.includes('@trader.quotex'))) {
+        user.email = lookupEmail;
+        changed = true;
+      }
+      if (changed) {
+        db.save();
+      }
+    }
+
+    return res.json({
+      message: 'User profile synchronized successfully',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        subscriptionPlan: user.subscriptionPlan || 'Free Trial',
+        plan: user.subscriptionPlan || 'Free Trial',
+        subExpiresAt: user.subExpiresAt || '',
+        planExpiresAt: user.planExpiresAt || user.subExpiresAt || '',
+        isLifetimeApproved: Boolean(user.isLifetimeApproved),
+        isActive: user.isActive !== false,
+        isFreeTrialExpired: Boolean(user.isFreeTrialExpired)
+      }
+    });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -238,7 +269,7 @@ router.get('/profile/:userId', (req, res) => {
         isLifetimeApproved: headerLifetime,
         isActive: true,
         createdAt: new Date().toISOString()
-      });
+      }, false);
     } else if (user) {
       // Enrich user details from client headers if missing
       let modified = false;
@@ -248,14 +279,6 @@ router.get('/profile/:userId', (req, res) => {
       }
       if (headerEmail && (!user.email || user.email.includes('@trader.quotex'))) {
         user.email = headerEmail.toLowerCase();
-        modified = true;
-      }
-      if (headerPlan && headerPlan !== 'Free Trial' && user.subscriptionPlan === 'Free Trial') {
-        user.subscriptionPlan = headerPlan;
-        modified = true;
-      }
-      if (headerLifetime && !user.isLifetimeApproved) {
-        user.isLifetimeApproved = true;
         modified = true;
       }
       if (modified) {
@@ -274,6 +297,9 @@ router.get('/profile/:userId', (req, res) => {
     let freeAccessStatus = 'NONE';
     if (user.isLifetimeApproved) {
       freeAccessStatus = 'APPROVED';
+    } else if (user.subscriptionPlan === 'Free Trial' || (user.subscriptionPlan && user.subscriptionPlan.toLowerCase() === 'free trial')) {
+      // If admin explicitly set user to Free Trial, freeAccessStatus is NONE
+      freeAccessStatus = 'NONE';
     } else {
       const uEmail = (user.email || '').toLowerCase().trim();
       const userFreeSubs = planSubs.filter(s => (s.userId === user.id || (s.userEmail && s.userEmail.toLowerCase().trim() === uEmail)) && (s.type === 'free_access' || (s.planName && s.planName.includes('Lifetime'))));

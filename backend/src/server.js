@@ -86,14 +86,6 @@ app.use((req, res, next) => {
           existing.email = lookupEmail;
           changed = true;
         }
-        if (userPlan && userPlan !== 'Free Trial' && existing.subscriptionPlan === 'Free Trial') {
-          existing.subscriptionPlan = userPlan;
-          changed = true;
-        }
-        if (isLifetime && !existing.isLifetimeApproved) {
-          existing.isLifetimeApproved = true;
-          changed = true;
-        }
         if (changed) {
           db.save();
         }

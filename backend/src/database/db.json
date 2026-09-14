@@ -13,7 +13,10 @@
       "isLifetimeApproved": true,
       "referralUid": "REF-MASTER-001",
       "depositVerified": true,
-      "createdAt": "2026-07-29T19:04:24.671Z"
+      "createdAt": "2026-07-29T19:04:24.671Z",
+      "plan": "Premium Plan",
+      "isFreeTrialExpired": false,
+      "planExpiresAt": "2099-12-31T23:59:59.000Z"
     },
     {
       "id": "user-1788612470060",
@@ -22,12 +25,14 @@
       "passwordHash": "$2a$10$w8T06o3Y0H1KjJ0z4l2a2.0A/Wc9hFq7y1D9e8g7f6e5d4c3b2a1",
       "role": "USER",
       "isActive": true,
-      "subscriptionPlan": "Premium Plan (Lifetime)",
+      "subscriptionPlan": "Lifetime VIP",
       "subExpiresAt": "2099-12-31T23:59:59.000Z",
       "planExpiresAt": "2099-12-31T23:59:59.000Z",
       "isLifetimeApproved": true,
       "depositVerified": true,
-      "createdAt": "2026-09-05T12:47:50.060Z"
+      "createdAt": "2026-09-05T12:47:50.060Z",
+      "plan": "Lifetime VIP",
+      "isFreeTrialExpired": false
     },
     {
       "id": "user-demo-1",
@@ -42,7 +47,10 @@
       "isLifetimeApproved": false,
       "referralUid": "REF-ALEX-882",
       "depositVerified": true,
-      "createdAt": "2026-07-29T19:04:24.671Z"
+      "createdAt": "2026-07-29T19:04:24.671Z",
+      "plan": "Pro Plan",
+      "isFreeTrialExpired": false,
+      "planExpiresAt": "2027-01-01T00:00:00.000Z"
     },
     {
       "id": "user-1785352926977",
@@ -55,7 +63,10 @@
       "subExpiresAt": "2027-01-01T00:00:00.000Z",
       "isLifetimeApproved": false,
       "depositVerified": true,
-      "createdAt": "2026-08-01T10:00:00.000Z"
+      "createdAt": "2026-08-01T10:00:00.000Z",
+      "plan": "Pro Plan",
+      "isFreeTrialExpired": false,
+      "planExpiresAt": "2027-01-01T00:00:00.000Z"
     },
     {
       "id": "user-1",
@@ -68,7 +79,10 @@
       "subExpiresAt": "2027-01-01T00:00:00.000Z",
       "isLifetimeApproved": false,
       "depositVerified": true,
-      "createdAt": "2026-08-03T11:21:50.902Z"
+      "createdAt": "2026-08-03T11:21:50.902Z",
+      "plan": "Basic Plan",
+      "isFreeTrialExpired": false,
+      "planExpiresAt": "2027-01-01T00:00:00.000Z"
     },
     {
       "id": "user-1787424851409",
@@ -81,7 +95,10 @@
       "subExpiresAt": "2027-01-01T00:00:00.000Z",
       "isLifetimeApproved": false,
       "depositVerified": false,
-      "createdAt": "2026-08-23T11:58:02.204Z"
+      "createdAt": "2026-08-23T11:58:02.204Z",
+      "plan": "Free Trial",
+      "isFreeTrialExpired": false,
+      "planExpiresAt": "2027-01-01T00:00:00.000Z"
     },
     {
       "id": "user-1787485286368",
@@ -94,7 +111,10 @@
       "subExpiresAt": "2027-01-01T00:00:00.000Z",
       "isLifetimeApproved": false,
       "depositVerified": false,
-      "createdAt": "2026-08-23T11:41:26.368Z"
+      "createdAt": "2026-08-23T11:41:26.368Z",
+      "plan": "Free Trial",
+      "isFreeTrialExpired": false,
+      "planExpiresAt": "2027-01-01T00:00:00.000Z"
     }
   ],
   "brokerConnections": [
@@ -78158,7 +78178,7 @@
     "maintenanceMode": false,
     "globalEmergencyStop": false,
     "emergencyControls": {
-      "userRegistrationEnabled": true,
+      "userRegistrationEnabled": false,
       "userLoginEnabled": true,
       "tradingStrategiesEnabled": true
     },
@@ -78189,7 +78209,7 @@
     "instagramLink": "https://instagram.com/quotexautotrade",
     "youtubeLink": "https://youtube.com/c/quotexautotrade",
     "youtubeEmbedCode": "",
-    "referralLink": "https://broker-qx.pro/sign-up/?lid=1650958",
+    "referralLink": "https://custom-link.com/ref123",
     "referralDepositAmount": 250,
     "priceBasic": 49,
     "pricePro": 129,
